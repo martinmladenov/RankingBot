@@ -1,1 +1,2 @@
 discord
+psycopg2-binary

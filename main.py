@@ -1,6 +1,7 @@
 from discord.ext import commands
 # import datetime
 import os
+import psycopg2
 
 bot = commands.Bot(command_prefix='.')
 
@@ -29,5 +30,69 @@ bot = commands.Bot(command_prefix='.')
 #                                    f'minutes {int(seconds % 60)} seconds**')
 #
 #     await bot.process_commands(message)
+
+
+@bot.command()
+async def setrank(ctx, rank_number):
+    user = ctx.message.author
+
+    try:
+        db_exec('insert into ranks (user_id, username, rank) values (%s, %s, %s)',
+                (user.id, user.name, int(rank_number)))
+        await ctx.send(user.mention + ' Rank set.')
+    except:
+        await ctx.send(user.mention + ' An error occurred while setting your rank.'
+                                      ' If you have already set a rank, try clearing it using `.clearrank`')
+        raise
+
+
+@bot.command()
+async def clearrank(ctx):
+    user = ctx.message.author
+
+    try:
+        db_exec('delete from ranks where user_id = %s', (str(user.id),))
+        await ctx.send(user.mention + ' Rank cleared.')
+    except:
+        await ctx.send(user.mention + ' An error occurred while clearing your rank.')
+        raise
+
+
+@bot.command()
+async def ranks(ctx):
+    rows = db_fetchall('select username, rank from ranks order by rank asc')
+
+    await ctx.send('**Top ranks:**\n'
+                   '```' +
+                   '\n'.join(f'{x[1]} - {x[0]}' for x in rows) +
+                   '```')
+
+    pass
+
+
+def db_exec(command, params):
+    conn = psycopg2.connect(os.environ['DATABASE_URL'], sslmode='require')
+
+    conn.autocommit = True
+    cursor = conn.cursor()
+    cursor.execute(command, params)
+
+    cursor.close()
+    conn.close()
+
+
+def db_fetchall(command):
+    conn = psycopg2.connect(os.environ['DATABASE_URL'], sslmode='require')
+
+    cursor = conn.cursor()
+    cursor.execute(command)
+
+    rows = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return rows
+
 
 bot.run(os.environ['DISCORD_SECRET'])
