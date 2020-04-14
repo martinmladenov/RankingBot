@@ -9,7 +9,8 @@ client = discord.Client()
 async def on_message(message):
     content = message.content.lower()
 
-    if ('when' in content or 'where' in content) and ('rank' in content or 'result' in content or 'score' in content):
+    if ('when' in content or 'where' in content or 'time' in content) and\
+            ('rank' in content or 'result' in content or 'score' in content):
         print(message.channel.name + ' | ' + message.author.name + ': ' + message.content)
         print('sending!')
 
