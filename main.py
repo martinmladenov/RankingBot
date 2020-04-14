@@ -1,11 +1,11 @@
-import discord
+from discord.ext import commands
 import datetime
 import os
 
-client = discord.Client()
+bot = commands.Bot(command_prefix='.')
 
 
-@client.event
+@bot.event
 async def on_message(message):
     content = message.content.lower()
 
@@ -13,7 +13,7 @@ async def on_message(message):
         print(message.channel.name + ' | ' + message.author.name + ': ' + message.content)
         print('sending!')
 
-        if message.author == client.user:
+        if message.author == bot.user:
             return
 
         now = datetime.datetime.now(tz=datetime.timezone.utc)
@@ -28,5 +28,6 @@ async def on_message(message):
                                    f'Time remaining: **{int(seconds / 3600)} hours {int(seconds / 60 % 60)} '
                                    f'minutes {int(seconds % 60)} seconds**')
 
+    await bot.process_commands(message)
 
-client.run(os.environ['DISCORD_SECRET'])
+bot.run(os.environ['DISCORD_SECRET'])
