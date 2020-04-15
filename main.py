@@ -62,10 +62,16 @@ async def clearrank(ctx):
 async def ranks(ctx):
     rows = db_fetchall('select username, rank from ranks order by rank asc')
 
+    all_ranks = '\n'.join(f'{x[1]} - {x[0]}' for x in rows)
+
+    if not all_ranks:
+        all_ranks = 'None'
+
     await ctx.send('**Top ranks:**\n'
-                   '```' +
-                   '\n'.join(f'{x[1]} - {x[0]}' for x in rows) +
-                   '```')
+                   '```'
+                   + all_ranks +
+                   '```'
+                   'To set your rank, type `.setrank <rank>`')
 
     pass
 
