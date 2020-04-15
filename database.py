@@ -13,11 +13,11 @@ def db_exec(command, params):
     conn.close()
 
 
-def db_fetchall(command):
+def db_fetchall(command, params=None):
     conn = psycopg2.connect(os.environ['DATABASE_URL'], sslmode='require')
 
     cursor = conn.cursor()
-    cursor.execute(command)
+    cursor.execute(command, params)
 
     rows = cursor.fetchall()
 
