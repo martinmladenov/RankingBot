@@ -10,7 +10,9 @@ class RanksCommand(commands.Cog):
     async def ranks(self, ctx):
         rows = db_fetchall('SELECT username, rank FROM ranks ORDER BY rank ASC')
 
-        all_ranks = '\n'.join(f'{x[1]} - {x[0]}' for x in rows)
+        all_ranks = '\n'.join(
+            ((' ' * (4 - len(str(x[1])))) + str(x[1]) + '  ' + x[0])
+            for x in rows)
 
         if not all_ranks:
             all_ranks = 'None'
