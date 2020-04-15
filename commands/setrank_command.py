@@ -10,6 +10,9 @@ class SetrankCommand(commands.Cog):
     async def setrank(self, ctx, rank_number: int):
         user = ctx.message.author
 
+        if rank_number <= 0 or rank_number >= 10000:
+            raise commands.UserInputError
+
         try:
             db_exec('INSERT INTO ranks (user_id, username, rank) VALUES (%s, %s, %s)',
                     (user.id, user.name, rank_number))
