@@ -1,10 +1,10 @@
+from commands import rank_commands
+
 from discord.ext import commands
 # import datetime
 import os
-from database import *
 
 bot = commands.Bot(command_prefix='.')
-
 
 # @bot.event
 # async def on_message(message):
@@ -31,49 +31,6 @@ bot = commands.Bot(command_prefix='.')
 #
 #     await bot.process_commands(message)
 
-
-@bot.command()
-async def setrank(ctx, rank_number):
-    user = ctx.message.author
-
-    try:
-        db_exec('insert into ranks (user_id, username, rank) values (%s, %s, %s)',
-                (user.id, user.name, int(rank_number)))
-        await ctx.send(user.mention + ' Rank set.')
-    except:
-        await ctx.send(user.mention + ' An error occurred while setting your rank.'
-                                      ' If you have already set a rank, try clearing it using `.clearrank`')
-        raise
-
-
-@bot.command()
-async def clearrank(ctx):
-    user = ctx.message.author
-
-    try:
-        db_exec('delete from ranks where user_id = %s', (str(user.id),))
-        await ctx.send(user.mention + ' Rank cleared.')
-    except:
-        await ctx.send(user.mention + ' An error occurred while clearing your rank.')
-        raise
-
-
-@bot.command()
-async def ranks(ctx):
-    rows = db_fetchall('select username, rank from ranks order by rank asc')
-
-    all_ranks = '\n'.join(f'{x[1]} - {x[0]}' for x in rows)
-
-    if not all_ranks:
-        all_ranks = 'None'
-
-    await ctx.send('**Top ranks:**\n'
-                   '```'
-                   + all_ranks +
-                   '```'
-                   'To set your rank, type `.setrank <rank>`')
-
-    pass
-
+bot.add_cog(rank_commands.RankCommands(bot))
 
 bot.run(os.environ['DISCORD_SECRET'])
