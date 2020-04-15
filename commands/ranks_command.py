@@ -8,7 +8,7 @@ class RanksCommand(commands.Cog):
 
     @commands.command()
     async def ranks(self, ctx):
-        rows = db_fetchall('select username, rank from ranks order by rank asc')
+        rows = db_fetchall('SELECT username, rank FROM ranks ORDER BY rank ASC')
 
         all_ranks = '\n'.join(f'{x[1]} - {x[0]}' for x in rows)
 

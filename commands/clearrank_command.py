@@ -11,7 +11,7 @@ class ClearrankCommand(commands.Cog):
         user = ctx.message.author
 
         try:
-            db_exec('delete from ranks where user_id = %s', (str(user.id),))
+            db_exec('DELETE FROM ranks WHERE user_id = %s', (str(user.id),))
             await ctx.send(user.mention + ' Rank cleared.')
         except:
             await ctx.send(user.mention + ' An error occurred while clearing your rank.')

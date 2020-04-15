@@ -11,7 +11,7 @@ class SetrankCommand(commands.Cog):
         user = ctx.message.author
 
         try:
-            db_exec('insert into ranks (user_id, username, rank) values (%s, %s, %s)',
+            db_exec('INSERT INTO ranks (user_id, username, rank) VALUES (%s, %s, %s)',
                     (user.id, user.name, rank_number))
             await ctx.send(user.mention + ' Rank set.')
         except:
