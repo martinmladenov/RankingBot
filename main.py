@@ -33,4 +33,10 @@ bot = commands.Bot(command_prefix='.')
 
 bot.add_cog(rank_commands.RankCommands(bot))
 
+
+@bot.event
+async def on_ready():
+    print('Logged in as ' + bot.user.name)
+
+
 bot.run(os.environ['DISCORD_SECRET'])
