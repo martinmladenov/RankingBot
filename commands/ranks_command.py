@@ -3,8 +3,9 @@ from database import db_fetchall
 
 
 class RanksCommand(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot, programmes):
         self.bot = bot
+        self.programmes = programmes
 
     @commands.command()
     async def ranks(self, ctx):
@@ -25,7 +26,7 @@ class RanksCommand(commands.Cog):
                        + all_ranks +
                        '_Please note: This bot is purely for fun, the ranking numbers do not'
                        ' represent performance at university_\n'
-                       'To set your rank, type `.setrank <rank>`')
+                       f'To set your rank, type `.setrank <rank> <{"/".join(self.programmes)}>`')
 
     @ranks.error
     async def info_error(self, ctx, error):
