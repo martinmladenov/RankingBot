@@ -1,7 +1,7 @@
 from discord.ext import commands
 # import datetime
 import os
-import psycopg2
+from database import *
 
 bot = commands.Bot(command_prefix='.')
 
@@ -74,31 +74,6 @@ async def ranks(ctx):
                    'To set your rank, type `.setrank <rank>`')
 
     pass
-
-
-def db_exec(command, params):
-    conn = psycopg2.connect(os.environ['DATABASE_URL'], sslmode='require')
-
-    conn.autocommit = True
-    cursor = conn.cursor()
-    cursor.execute(command, params)
-
-    cursor.close()
-    conn.close()
-
-
-def db_fetchall(command):
-    conn = psycopg2.connect(os.environ['DATABASE_URL'], sslmode='require')
-
-    cursor = conn.cursor()
-    cursor.execute(command)
-
-    rows = cursor.fetchall()
-
-    cursor.close()
-    conn.close()
-
-    return rows
 
 
 bot.run(os.environ['DISCORD_SECRET'])
