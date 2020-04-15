@@ -19,6 +19,8 @@ class RanksCommand(commands.Cog):
                        '```'
                        + all_ranks +
                        '```'
+                       '_Please note: This bot is purely for fun, the ranking numbers do not'
+                       ' represent performance at university_\n'
                        'To set your rank, type `.setrank <rank>`')
 
     @ranks.error
