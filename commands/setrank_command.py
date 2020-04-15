@@ -17,4 +17,10 @@ class SetrankCommand(commands.Cog):
         except:
             await ctx.send(user.mention + ' Unable to set rank.'
                                           ' If you have already set a rank, try clearing it using `.clearrank`')
-            raise
+            # raise
+
+    @setrank.error
+    async def info_error(self, ctx, error):
+        if isinstance(error, commands.UserInputError):
+            user = ctx.message.author
+            await ctx.send(user.mention + ' Invalid arguments. Usage: `.setrank <rank>`')

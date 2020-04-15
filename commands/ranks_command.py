@@ -20,3 +20,9 @@ class RanksCommand(commands.Cog):
                        + all_ranks +
                        '```'
                        'To set your rank, type `.setrank <rank>`')
+
+    @ranks.error
+    async def info_error(self, ctx, error):
+        if isinstance(error, commands.UserInputError):
+            user = ctx.message.author
+            await ctx.send(user.mention + ' Invalid arguments. Usage: `.ranks`')

@@ -16,3 +16,9 @@ class ClearrankCommand(commands.Cog):
         except:
             await ctx.send(user.mention + ' An error occurred while clearing your rank.')
             raise
+
+    @clearrank.error
+    async def info_error(self, ctx, error):
+        if isinstance(error, commands.UserInputError):
+            user = ctx.message.author
+            await ctx.send(user.mention + ' Invalid arguments. Usage: `.clearrank`')
