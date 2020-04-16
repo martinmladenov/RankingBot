@@ -1,6 +1,7 @@
 from commands import clearrank_command, ranks_command, setrank_command, help_command
 
 from discord.ext import commands
+import discord
 import os
 
 bot = commands.Bot(command_prefix='.', help_command=None)
@@ -16,6 +17,7 @@ bot.add_cog(help_command.HelpCommand(bot, selection_programmes))
 @bot.event
 async def on_ready():
     print('Logged in as ' + bot.user.name)
+    await bot.change_presence(activity=(discord.Game('.help')))
 
 
 bot.run(os.environ['DISCORD_SECRET'])
