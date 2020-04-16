@@ -27,7 +27,8 @@ class RanksCommand(commands.Cog):
 
         embed.add_field(name='_Please note: This bot is purely for fun, the ranking numbers do not'
                              ' represent performance at university_',
-                        value=f'To set your rank, type `.setrank <rank> <{"/".join(self.programmes)}>`',
+                        value=f'To view rank commands, type `.help`\n'
+                              f'To set your rank, type `.setrank <rank> <{"/".join(self.programmes)}>`',
                         inline=False)
 
         await ctx.send(embed=embed)
