@@ -10,7 +10,7 @@ class RanksCommand(commands.Cog):
 
     @commands.command()
     async def ranks(self, ctx):
-        rows = db_fetchall('SELECT user_id, rank, programme FROM ranks ORDER BY rank ASC')
+        rows = db_fetchall('SELECT username, rank, programme FROM ranks ORDER BY rank ASC')
 
         curr_programmes = set(map(lambda x: x[2], rows))
         grouped_ranks = [(p, [row for row in rows if row[2] == p]) for p in curr_programmes]
@@ -21,7 +21,7 @@ class RanksCommand(commands.Cog):
 
         for group in grouped_ranks:
             embed.add_field(name=f'**{group[0]}**',
-                            value=('\n'.join(('`' + (' ' * (3 - len(str(x[1])))) + str(x[1]) + '`  ' + f'<@{x[0]}>')
+                            value=('\n'.join(('`' + (' ' * (3 - len(str(x[1])))) + str(x[1]) + f' {x[0]}`')
                                              for x in group[1])),
                             inline=True)
 
