@@ -3,7 +3,7 @@ from commands import clearrank_command, ranks_command, setrank_command
 from discord.ext import commands
 import os
 
-bot = commands.Bot(command_prefix='.')
+bot = commands.Bot(command_prefix='.', help_command=None)
 
 selection_programmes = ['tud-cse', 'tud-ae', 'tud-nb', 'tue-cse']
 
