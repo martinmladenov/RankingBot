@@ -17,18 +17,37 @@ class RanksCommand(commands.Cog):
 
         grouped_ranks.sort(key=lambda g: len(g[1]), reverse=True)
 
-        embed = discord.Embed(title="Top ranks", color=0x36bee6)
+        is_bot_channel = 'bot' in ctx.message.channel.name
+
+        group_truncated = {}
+
+        if not is_bot_channel:
+            for i in range(len(grouped_ranks)):
+                group_name = grouped_ranks[i][0]
+                truncated_list = grouped_ranks[i][1][:10]
+                group_truncated[group_name] = len(grouped_ranks[i][1]) - 10
+                grouped_ranks[i] = (group_name, truncated_list)
+
+        embed = discord.Embed(title="Ranking numbers", color=0x36bee6)
 
         for group in grouped_ranks:
             embed.add_field(name=f'**{group[0]}**',
                             value=('\n'.join(('`' + (' ' * (3 - len(str(x[1])))) + str(x[1]) + f' {x[0]}`')
-                                             for x in group[1])),
+                                             for x in group[1])) +
+                                  (f'\n**_+ {group_truncated[group[0]]} more..._**'
+                                   if not is_bot_channel and group_truncated[group[0]] > 0 else ''),
                             inline=True)
+
+        if any(x > 0 for x in group_truncated.values()):
+            embed.add_field(name='**_List is truncated_**',
+                            value='**To view the full list, please type this command in a bot channel, such as '
+                                  '<#556533405794172939>**\n',
+                            inline=False)
 
         embed.add_field(name='_Please note: This bot is purely for fun, the ranking numbers do not'
                              ' represent performance at university_',
                         value=f'To view rank commands, type `.helprank`\n'
-                              f'To set your rank, type `.setrank <rank> <{"/".join(self.programmes)}>`',
+                              f'To set your ranking number, type `.setrank <rank> <{"/".join(self.programmes)}>`',
                         inline=False)
 
         await ctx.send(embed=embed)
@@ -38,3 +57,4 @@ class RanksCommand(commands.Cog):
         if isinstance(error, commands.UserInputError):
             user = ctx.message.author
             await ctx.send(user.mention + ' Invalid arguments. Usage: `.ranks`')
+        raise error
