@@ -12,6 +12,6 @@ class HelprankCommand(commands.Cog):
             '**Commands:**\n'
             f'`.setrank <rank> <{"/".join(self.programmes)}>` Sets your rank for the specified programme\n'
             f'`.ranks` Displays all ranks\n'
-            f'`.clearrank` Clears your rank for all programmes\n'
+            f'`.clearrank <all/{"/".join(self.programmes)}>` Clears your rank for all programmes\n'
             f'`.helprank` Displays this message\n'
         )

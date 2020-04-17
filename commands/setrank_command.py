@@ -20,7 +20,8 @@ class SetrankCommand(commands.Cog):
             await ctx.send(user.mention + ' Rank set.')
         except:
             await ctx.send(user.mention + ' Unable to set rank.'
-                                          ' If you have already set a rank, try clearing it using `.clearrank`')
+                                          ' If you have already set a rank, try clearing it using '
+                                          f'`.clearrank {programme}`')
             # raise
 
     @setrank.error
