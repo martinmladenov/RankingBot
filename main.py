@@ -1,4 +1,4 @@
-from commands import clearrank_command, ranks_command, setrank_command, helprank_command
+from commands import clearrank_command, ranks_command, setrank_command, helprank_command, setofferdate_command
 
 from discord.ext import commands
 import discord
@@ -12,6 +12,7 @@ bot.add_cog(clearrank_command.ClearrankCommand(bot, selection_programmes))
 bot.add_cog(ranks_command.RanksCommand(bot, selection_programmes))
 bot.add_cog(setrank_command.SetrankCommand(bot, selection_programmes))
 bot.add_cog(helprank_command.HelprankCommand(bot, selection_programmes))
+bot.add_cog(setofferdate_command.SetofferdateCommand(bot, selection_programmes))
 
 
 @bot.event
