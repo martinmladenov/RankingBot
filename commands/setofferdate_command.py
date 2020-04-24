@@ -1,6 +1,6 @@
 from discord.ext import commands
 from database import db_exec, db_fetchall
-import utils
+from utils.offer_date_util import parse_offer_date
 
 
 class SetofferdateCommand(commands.Cog):
@@ -15,7 +15,7 @@ class SetofferdateCommand(commands.Cog):
         if programme not in self.programmes:
             raise commands.UserInputError
 
-        offer_date = utils.parse_offer_date(day, month)
+        offer_date = parse_offer_date(day, month)
 
         try:
             row = db_fetchall('SELECT rank FROM ranks WHERE user_id = %s AND programme = %s', (str(user.id), programme))
