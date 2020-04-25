@@ -1,12 +1,12 @@
 from discord.ext import commands
 import discord
 from database import db_fetchall
+from utils import programmes_util
 
 
 class RanksCommand(commands.Cog):
-    def __init__(self, bot, programmes):
+    def __init__(self, bot):
         self.bot = bot
-        self.programmes = programmes
 
     @commands.command()
     async def ranks(self, ctx):
@@ -47,7 +47,7 @@ class RanksCommand(commands.Cog):
         embed.add_field(name='_Please note: This bot is purely for fun, the ranking numbers do not'
                              ' represent performance at university_',
                         value=f'To view rank commands, type `.helprank`\n'
-                              f'To set your ranking number, type `.setrank <rank> <{"/".join(self.programmes)}>`',
+                              f'To set your ranking number, type `.setrank <rank> <{programmes_util.get_ids_string()}>`',
                         inline=False)
 
         await ctx.send(embed=embed)

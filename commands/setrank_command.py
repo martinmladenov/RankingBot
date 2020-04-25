@@ -1,17 +1,17 @@
 from discord.ext import commands
 from database import db_exec
+from utils import programmes_util
 
 
 class SetrankCommand(commands.Cog):
-    def __init__(self, bot, programmes):
+    def __init__(self, bot):
         self.bot = bot
-        self.programmes = programmes
 
     @commands.command()
     async def setrank(self, ctx, rank_number: int, programme: str):
         user = ctx.message.author
 
-        if rank_number <= 0 or rank_number >= 10000 or programme not in self.programmes:
+        if rank_number <= 0 or rank_number >= 10000 or programme not in programmes_util.programmes:
             raise commands.UserInputError
 
         try:
@@ -28,4 +28,4 @@ class SetrankCommand(commands.Cog):
     async def info_error(self, ctx, error):
         if isinstance(error, commands.UserInputError):
             user = ctx.message.author
-            await ctx.send(user.mention + f' Invalid arguments. Usage: `.setrank <rank> <{"/".join(self.programmes)}>`')
+            await ctx.send(user.mention + f' Invalid arguments. Usage: `.setrank <rank> <{programmes_util.get_ids_string()}>`')

@@ -1,11 +1,11 @@
 from discord.ext import commands
 from database import db_exec
+from utils import programmes_util
 
 
 class ClearrankCommand(commands.Cog):
-    def __init__(self, bot, programmes):
+    def __init__(self, bot):
         self.bot = bot
-        self.programmes = programmes
 
     @commands.command()
     async def clearrank(self, ctx, programme: str):
@@ -13,7 +13,7 @@ class ClearrankCommand(commands.Cog):
 
         if programme == 'all':
             clear_all = True
-        elif programme in self.programmes:
+        elif programme in programmes_util.programmes:
             clear_all = False
         else:
             raise commands.UserInputError
@@ -34,4 +34,4 @@ class ClearrankCommand(commands.Cog):
     async def info_error(self, ctx, error):
         if isinstance(error, commands.UserInputError):
             user = ctx.message.author
-            await ctx.send(user.mention + f' Invalid arguments. Usage: `.clearrank <all/{"/".join(self.programmes)}>`')
+            await ctx.send(user.mention + f' Invalid arguments. Usage: `.clearrank <all/{programmes_util.get_ids_string()}>`')
