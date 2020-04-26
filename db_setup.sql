@@ -8,3 +8,10 @@ create table ranks
     offer_date DATE,
     UNIQUE (user_id, programme)
 );
+
+create table user_data
+(
+    id         serial primary key unique,
+    user_id    varchar(50) unique not null,
+    is_private boolean            not null default false
+);
