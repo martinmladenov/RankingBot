@@ -10,7 +10,10 @@ class RanksCommand(commands.Cog):
 
     @commands.command()
     async def ranks(self, ctx):
-        rows = db_fetchall('SELECT username, rank, programme FROM ranks ORDER BY rank ASC')
+        rows = db_fetchall('SELECT username, rank, programme FROM ranks '
+                           'LEFT JOIN user_data ON ranks.user_id = user_data.user_id '
+                           'WHERE is_private IS NULL OR is_private = FALSE '
+                           'ORDER BY rank ASC')
 
         curr_programmes = set(map(lambda x: x[2], rows))
         grouped_ranks = [(p, [row for row in rows if row[2] == p]) for p in curr_programmes]
