@@ -16,4 +16,5 @@ class HelprankCommand(commands.Cog):
             f'`.helprank` Displays this message\n'
             f'`.setofferdate <day> <month> <{programmes_util.get_ids_string()}>` Sets the date you\'ve received an offer '
             'on Studielink to help other applicants predict when they might receive one\n'
+            f'`.privaterank` Toggles whether your rank is displayed on `.ranks`\n'
         )
