@@ -20,7 +20,7 @@ class RanksCommand(commands.Cog):
 
         grouped_ranks.sort(key=lambda g: len(g[1]), reverse=True)
 
-        is_bot_channel = 'bot' in ctx.message.channel.name
+        is_bot_channel = not ctx.guild or 'bot' in ctx.message.channel.name
 
         group_truncated = {}
 
