@@ -15,8 +15,9 @@ class SetrankCommand(commands.Cog):
             raise commands.UserInputError
 
         try:
-            db_exec('INSERT INTO ranks (user_id, username, rank, programme) VALUES (%s, %s, %s, %s)',
-                    (user.id, user.name, rank_number, programme))
+            db_exec('INSERT INTO ranks (user_id, username, rank, programme, offer_date) VALUES (%s, %s, %s, %s, %s)',
+                    (user.id, user.name, rank_number, programme,
+                     '2020-04-15' if rank_number <= programmes_util.programmes[programme].places else None))
             await ctx.send(user.mention + ' Rank set.')
         except:
             await ctx.send(user.mention + ' Unable to set rank.'
@@ -28,4 +29,5 @@ class SetrankCommand(commands.Cog):
     async def info_error(self, ctx, error):
         if isinstance(error, commands.UserInputError):
             user = ctx.message.author
-            await ctx.send(user.mention + f' Invalid arguments. Usage: `.setrank <rank> <{programmes_util.get_ids_string()}>`')
+            await ctx.send(
+                user.mention + f' Invalid arguments. Usage: `.setrank <rank> <{programmes_util.get_ids_string()}>`')
