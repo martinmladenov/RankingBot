@@ -6,9 +6,9 @@ class Programme:
 
 
 programmes = {
-    'tud-cse': Programme('tud-cse', 'TU Delft Computer Science and Engineering', 500),
-    'tud-ae': Programme('tud-ae', 'TU Delft Aerospace Engineering', 440),
-    'tue-cse': Programme('tue-cse', 'TU Eindhoven Computer Science and Engineering', 325),
+    'tud-cse': Programme('tud-cse', '<:TUD:555817896203255824> TU Delft Computer Science and Engineering', 500),
+    'tud-ae': Programme('tud-ae', '<:TUD:555817896203255824> TU Delft Aerospace Engineering', 440),
+    'tue-cse': Programme('tue-cse', '<:TuE:562730919815807003> TU Eindhoven Computer Science and Engineering', 325),
 }
 
 
