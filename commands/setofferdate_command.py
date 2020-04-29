@@ -25,6 +25,11 @@ class SetofferdateCommand(commands.Cog):
                                               f'`.setrank <rank> <{programmes_util.get_ids_string()}>`')
                 return
 
+            if row[0][0] <= programmes_util.programmes[programme].places:
+                await ctx.send(user.mention + ' There\'s no need to set the offer date as your rank is within the '
+                                              'programme limit.')
+                return
+
             db_exec('UPDATE ranks SET offer_date = %s WHERE user_id = %s AND programme = %s',
                     (offer_date, str(user.id), programme))
             await ctx.send(user.mention + ' Offer date set. Thank you.')
