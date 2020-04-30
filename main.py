@@ -1,5 +1,5 @@
 from commands import clearrank_command, ranks_command, setrank_command, helprank_command, setofferdate_command, \
-    privaterank_command
+    toggleprivaterank_command
 
 from discord.ext import commands
 import discord
@@ -12,7 +12,7 @@ bot.add_cog(ranks_command.RanksCommand(bot))
 bot.add_cog(setrank_command.SetrankCommand(bot))
 bot.add_cog(helprank_command.HelprankCommand(bot))
 bot.add_cog(setofferdate_command.SetofferdateCommand(bot))
-bot.add_cog(privaterank_command.PrivaterankCommand(bot))
+bot.add_cog(toggleprivaterank_command.ToggleprivaterankCommand(bot))
 
 
 @bot.event

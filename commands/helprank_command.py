@@ -15,6 +15,6 @@ class HelprankCommand(commands.Cog):
             f'`.clearrank <all/{programmes_util.get_ids_string()}>` Clears your rank for the specified programme\n'
             f'`.setofferdate <day> <month> <{programmes_util.get_ids_string()}>` Sets the date you\'ve received'
             f' an offer on Studielink to help other applicants predict when they might receive one\n'
-            f'`.privaterank` Toggles whether your rank is displayed on `.ranks`\n'
+            f'`.toggleprivaterank` Toggles whether your rank is displayed on `.ranks`\n'
             f'`.helprank` Displays this message\n'
         )

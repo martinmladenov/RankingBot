@@ -1,14 +1,13 @@
 from discord.ext import commands
 from database import db_exec, db_fetchall
-from utils import programmes_util
 
 
-class PrivaterankCommand(commands.Cog):
+class ToggleprivaterankCommand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command()
-    async def privaterank(self, ctx):
+    async def toggleprivaterank(self, ctx):
         user = ctx.message.author
 
         try:
@@ -29,8 +28,8 @@ class PrivaterankCommand(commands.Cog):
         except:
             await ctx.send(user.mention + ' An error occurred while executing the command')
 
-    @privaterank.error
+    @toggleprivaterank.error
     async def info_error(self, ctx, error):
         if isinstance(error, commands.UserInputError):
             user = ctx.message.author
-            await ctx.send(user.mention + f' Invalid arguments. Usage: `.privaterank`')
+            await ctx.send(user.mention + f' Invalid arguments. Usage: `.toggleprivaterank`')
