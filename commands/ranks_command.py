@@ -34,7 +34,8 @@ class RanksCommand(commands.Cog):
         embed = discord.Embed(title="Ranking numbers", color=0x36bee6)
 
         for group in grouped_ranks:
-            embed.add_field(name=f'**{programmes_util.programmes[group[0]].display_name}**',
+            programme = programmes_util.programmes[group[0]]
+            embed.add_field(name=f'**{programme.icon} {programme.uni_name} {programme.display_name}**',
                             value=('\n'.join(('`' + (' ' * (3 - len(str(x[1])))) + str(x[1]) + f' {x[0]}`')
                                              for x in group[1])) +
                                   (f'\n**_+ {group_truncated[group[0]]} more..._**'
