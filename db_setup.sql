@@ -13,5 +13,8 @@ create table user_data
 (
     id         serial primary key unique,
     user_id    varchar(50) unique not null,
-    is_private boolean            not null default false
+    is_private boolean            not null default false,
+    dm_programme varchar(15),
+    dm_status int,
+    dm_last_sent timestamp
 );
