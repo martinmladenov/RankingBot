@@ -1,5 +1,5 @@
 import discord
-from enum import IntEnum
+from enum import IntEnum, Enum
 from utils import programmes_util, offer_date_util
 from database import db_fetchall, db_exec
 from datetime import datetime, date
@@ -115,3 +115,26 @@ class DmStatus(IntEnum):
     AWAITING_PROGRAMME = 0
     AWAITING_RANK = 1
     AWAITING_DATE = 2
+
+
+class University(Enum):
+    TUD = 0,
+    TUE = 1
+
+
+def get_member_programme(member: discord.Member, uni: University):
+    cse_role = 'Computer Science and Engineering'
+    ae_role = 'Aerospace Engineering'
+
+    roles = list(map(lambda x: x.name, member.roles))
+
+    if uni == University.TUD:
+        if ae_role in roles:
+            return 'tud-ae'
+        if cse_role in roles:
+            return 'tud-cse'
+    if uni == University.TUE:
+        if cse_role in roles:
+            return 'tue-cse'
+
+    return None
