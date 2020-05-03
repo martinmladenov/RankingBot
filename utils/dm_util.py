@@ -85,10 +85,11 @@ async def handle_awaiting_rank(message: discord.Message, dm_programme: str):
                                            f'and reply with `{message.content}` again.')
                 return False
 
-            db_exec('DELETE FROM ranks WHERE user_id = %s AND programme = %s', (str(message.author.id), dm_programme))
-
-        db_exec('INSERT INTO ranks (user_id, username, rank, programme, offer_date) VALUES (%s, %s, %s, %s, %s)',
-                (message.author.id, message.author.name, parsed_rank, dm_programme, parsed_date))
+            db_exec('UPDATE ranks SET offer_date = %s WHERE user_id = %s AND programme = %s',
+                    (parsed_date, str(message.author.id), dm_programme))
+        else:
+            db_exec('INSERT INTO ranks (user_id, username, rank, programme, offer_date) VALUES (%s, %s, %s, %s, %s)',
+                    (message.author.id, message.author.name, parsed_rank, dm_programme, parsed_date))
 
         db_exec('UPDATE user_data SET is_private = TRUE, dm_programme = NULL, dm_status = NULL '
                 'WHERE user_id = %s', (str(message.author.id),))
