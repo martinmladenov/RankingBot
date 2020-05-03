@@ -1,7 +1,13 @@
 import discord
 from discord.ext import commands
-from database import db_fetchall
+from datetime import datetime
+from database import db_fetchall, db_exec
 from utils import dm_util
+
+
+def save_received_dm(user_id: str, content: str, success):
+    db_exec('INSERT INTO received_dms (user_id, message, success, timestamp) VALUES (%s, %s, %s, %s)',
+            (user_id, content, success, datetime.utcnow()))
 
 
 class DmHandler(commands.Cog):
@@ -19,10 +25,14 @@ class DmHandler(commands.Cog):
                                     (str(user_id),))
 
         if not user_data_row or user_data_row[0][1] is None:
+            save_received_dm(user_id, message.content, None)
             return
 
         dm_status = user_data_row[0][1]
         dm_programme = user_data_row[0][2]
 
+        result = False
         if dm_status == dm_util.DmStatus.AWAITING_RANK:
-            await dm_util.handle_awaiting_rank(message, dm_programme)
+            result = await dm_util.handle_awaiting_rank(message, dm_programme)
+
+        save_received_dm(user_id, message.content, result)
