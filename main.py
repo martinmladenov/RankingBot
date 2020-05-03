@@ -1,5 +1,5 @@
 from commands import clearrank_command, ranks_command, setrank_command, helprank_command, setofferdate_command, \
-    toggleprivaterank_command
+    toggleprivaterank_command, sendaccepteddm_command
 
 from handlers import dm_handler
 
@@ -15,6 +15,7 @@ bot.add_cog(setrank_command.SetrankCommand(bot))
 bot.add_cog(helprank_command.HelprankCommand(bot))
 bot.add_cog(setofferdate_command.SetofferdateCommand(bot))
 bot.add_cog(toggleprivaterank_command.ToggleprivaterankCommand(bot))
+bot.add_cog(sendaccepteddm_command.SendaccepteddmCommand(bot))
 
 bot.add_cog(dm_handler.DmHandler(bot))
 
