@@ -18,3 +18,12 @@ create table user_data
     dm_status int,
     dm_last_sent timestamp
 );
+
+create table received_dms
+(
+    id        serial primary key,
+    user_id   varchar(50) not null,
+    message   varchar(400),
+    success   boolean,
+    timestamp timestamp
+);
