@@ -6,7 +6,7 @@ from datetime import datetime, date
 import re
 
 
-async def send_programme_rank_dm(member: discord.Member, programme: programmes_util.Programme):
+async def send_programme_rank_dm(member: discord.Member, programme: programmes_util.Programme, send_messages: bool):
     programme_id = programme.id
     user_id = member.id
 
@@ -21,6 +21,9 @@ async def send_programme_rank_dm(member: discord.Member, programme: programmes_u
     if user_data_row and user_data_row[0][1] is not None:
         print(f'skipping {member.name}: dm_status = {user_data_row[0][1]}')
         return False
+
+    if not send_messages:
+        return True
 
     message = '**Hi %s!**\n' \
               'On the **3TU** server, you have chosen a role indicating you have been accepted to the ' \

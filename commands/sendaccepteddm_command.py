@@ -8,7 +8,7 @@ class SendaccepteddmCommand(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def sendaccepteddm(self, ctx, uni_name: str):
+    async def sendaccepteddm(self, ctx, uni_name: str, dry_run: str = None):
 
         if ctx.message.author.id != 403569083402158090 or not ctx.guild:
             await ctx.send(ctx.message.author.mention + ' You don\'t have permission to execute this command')
@@ -16,6 +16,16 @@ class SendaccepteddmCommand(commands.Cog):
 
         if uni_name not in dm_util.University.__members__:
             raise commands.UserInputError
+
+        send_messages = True
+
+        if dry_run is not None:
+            if dry_run == 'dry-run':
+                send_messages = False
+                await ctx.send(ctx.message.author.mention + f' dry run: not sending DMs')
+                print('Dry run')
+            else:
+                raise commands.UserInputError
 
         university = dm_util.University[uni_name]
 
@@ -57,21 +67,22 @@ class SendaccepteddmCommand(commands.Cog):
                 continue
 
             try:
-                result = await dm_util.send_programme_rank_dm(member, programmes_util.programmes[programme_id])
+                result = await dm_util.send_programme_rank_dm(
+                    member, programmes_util.programmes[programme_id], send_messages)
 
                 if result:
                     success += 1
             except Exception as e:
                 print(f'an error occurred while sending message to {member.name}: {str(e)}')
 
-        await ctx.send(ctx.message.author.mention + f' Done sending DMs, {len(users) - success}/{len(users)} skipped')
+        await ctx.send(ctx.message.author.mention + f' Done sending DMs, {len(users) - success} skipped')
         print('Done sending DMs')
 
     @sendaccepteddm.error
     async def info_error(self, ctx, error):
         user = ctx.message.author
         if isinstance(error, commands.UserInputError):
-            await ctx.send(user.mention + ' Invalid arguments. Usage: `.sendaccepteddm <uni>`')
+            await ctx.send(user.mention + ' Invalid arguments. Usage: `.sendaccepteddm <uni> [dry-run]`')
         else:
             await ctx.send(user.mention + ' An unexpected error occurred')
             raise
