@@ -1,8 +1,8 @@
 create table ranks
 (
     id         serial primary key,
-    user_id    varchar(50) not null,
-    username   varchar(50) not null,
+    user_id    varchar(50),
+    username   varchar(50),
     rank       int         not null,
     programme  varchar(15) not null,
     offer_date DATE,
