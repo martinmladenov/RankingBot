@@ -68,13 +68,19 @@ async def handle_awaiting_rank(message: discord.Message, dm_programme: str):
         parsed_rank = int(match.group(1))
         parsed_date = offer_date_util.parse_offer_date(match.group(2), match.group(3))
 
-        if parsed_rank <= 0 or parsed_rank >= 10000 \
-                or parsed_rank <= programmes_util.programmes[dm_programme].places and parsed_date != date(2020, 4, 15):
+        if parsed_rank <= 0 or parsed_rank >= 10000:
             await message.channel.send('Sorry, something seems wrong with the data you provided. '
-                                       'Please check your ranking number and date and use '
-                                       'the format `<rank> <day> <month>`.\n'
+                                       'Please check your ranking number and date. '
+                                       'Use the format `<rank> <day> <month>`.\n'
                                        '_For example, if your ranking number is 100 and you\'ve received an offer on '
                                        '15 April, type `100 15 April`._')
+            return False
+
+        if parsed_rank <= programmes_util.programmes[dm_programme].places and parsed_date != date(2020, 4, 15):
+            await message.channel.send('Sorry, the ranking number you provided is within the programme limit '
+                                       'but the offer date is different from 15 April, when everyone with such '
+                                       'ranking numbers received their offers. Please check your ranking '
+                                       'number and date and try again.')
             return False
 
         rank_row = db_fetchall('SELECT rank FROM ranks WHERE user_id = %s AND programme = %s',
