@@ -12,6 +12,7 @@ class HelprankCommand(commands.Cog):
             '**Commands:**\n'
             f'`.setrank <rank> <{programmes_util.get_ids_string()}>` Sets your rank for the specified programme\n'
             f'`.ranks` Displays all ranks\n'
+            f'`.offers` Shows the last known ranks which have received an offer\n'
             f'`.clearrank <all/{programmes_util.get_ids_string()}>` Clears your rank for the specified programme\n'
             f'`.setofferdate <day> <month> <{programmes_util.get_ids_string()}>` Sets the date you\'ve received'
             f' an offer on Studielink to help other applicants predict when they might receive one\n'
