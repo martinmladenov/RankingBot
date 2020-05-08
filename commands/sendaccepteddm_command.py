@@ -14,6 +14,12 @@ class SendaccepteddmCommand(commands.Cog):
             await ctx.send(ctx.message.author.mention + ' You don\'t have permission to execute this command')
             return
 
+        if uni_name == 'all':
+            for uni in ('TUD', 'TUE'):
+                await ctx.send(ctx.message.author.mention + f' Processing {uni}')
+                await self.sendaccepteddm(ctx, uni, dry_run)
+            return
+
         if uni_name not in dm_util.University.__members__:
             raise commands.UserInputError
 
@@ -82,7 +88,7 @@ class SendaccepteddmCommand(commands.Cog):
     async def info_error(self, ctx, error):
         user = ctx.message.author
         if isinstance(error, commands.UserInputError):
-            await ctx.send(user.mention + ' Invalid arguments. Usage: `.sendaccepteddm <uni> [dry-run]`')
+            await ctx.send(user.mention + ' Invalid arguments. Usage: `.sendaccepteddm <all/TUD/TUE> [dry-run]`')
         else:
             await ctx.send(user.mention + ' An unexpected error occurred')
             raise
