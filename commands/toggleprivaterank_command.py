@@ -14,7 +14,8 @@ class ToggleprivaterankCommand(commands.Cog):
             row = db_fetchall('SELECT is_private FROM user_data WHERE user_id = %s', (str(user.id),))
 
             if not row:
-                db_exec('INSERT INTO user_data (user_id, is_private) VALUES (%s, %s)', (str(user.id), True))
+                db_exec('INSERT INTO user_data (user_id, username, is_private) VALUES (%s, %s, %s)',
+                        (str(user.id), user.name, True))
                 await ctx.send(user.mention + ' Your rank is now hidden from `.ranks`')
                 return
 

@@ -49,8 +49,9 @@ async def send_programme_rank_dm(member: discord.Member, programme: programmes_u
         return False
 
     if not user_data_row:
-        db_exec('INSERT INTO user_data (user_id, dm_programme, dm_status, dm_last_sent) VALUES (%s, %s, %s, %s)',
-                (str(user_id), programme_id, DmStatus.AWAITING_RANK, datetime.utcnow()))
+        db_exec('INSERT INTO user_data (user_id, username, dm_programme, dm_status, dm_last_sent) '
+                'VALUES (%s, %s, %s, %s, %s)',
+                (str(user_id), member.name, programme_id, DmStatus.AWAITING_RANK, datetime.utcnow()))
     else:
         db_exec('UPDATE user_data SET dm_programme = %s, dm_status = %s, dm_last_sent = %s WHERE user_id = %s',
                 (programme_id, DmStatus.AWAITING_RANK, datetime.utcnow(), str(user_id)))
@@ -97,8 +98,8 @@ async def handle_awaiting_rank(message: discord.Message, dm_programme: str):
             db_exec('UPDATE ranks SET offer_date = %s WHERE user_id = %s AND programme = %s',
                     (parsed_date, str(message.author.id), dm_programme))
         else:
-            db_exec('INSERT INTO ranks (user_id, username, rank, programme, offer_date) VALUES (%s, %s, %s, %s, %s)',
-                    (message.author.id, message.author.name, parsed_rank, dm_programme, parsed_date))
+            db_exec('INSERT INTO ranks (user_id, rank, programme, offer_date) VALUES (%s, %s, %s, %s)',
+                    (message.author.id, parsed_rank, dm_programme, parsed_date))
 
         db_exec('UPDATE user_data SET is_private = TRUE, dm_programme = NULL, dm_status = NULL '
                 'WHERE user_id = %s', (str(message.author.id),))

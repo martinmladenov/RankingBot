@@ -11,7 +11,7 @@ class RanksCommand(commands.Cog):
     @commands.command()
     async def ranks(self, ctx):
         rows = db_fetchall('SELECT username, rank, programme FROM ranks '
-                           'LEFT JOIN user_data ON ranks.user_id = user_data.user_id '
+                           'JOIN user_data ON ranks.user_id = user_data.user_id '
                            'WHERE (is_private IS NULL OR is_private = FALSE) AND username IS NOT NULL '
                            'ORDER BY rank ASC')
 

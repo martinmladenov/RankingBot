@@ -1,5 +1,5 @@
 from discord.ext import commands
-from database import db_exec
+from database import db_exec, db_fetchall
 from utils import programmes_util
 
 
@@ -15,8 +15,14 @@ class SetrankCommand(commands.Cog):
             raise commands.UserInputError
 
         try:
-            db_exec('INSERT INTO ranks (user_id, username, rank, programme, offer_date) VALUES (%s, %s, %s, %s, %s)',
-                    (user.id, user.name, rank_number, programme,
+            user_data_row = db_fetchall('SELECT user_id FROM user_data WHERE user_id = %s', (str(user.id),))
+
+            if not user_data_row:
+                db_exec('INSERT INTO user_data (user_id, username) VALUES (%s, %s)',
+                        (str(user.id), user.name))
+
+            db_exec('INSERT INTO ranks (user_id, rank, programme, offer_date) VALUES (%s, %s, %s, %s)',
+                    (user.id, rank_number, programme,
                      '2020-04-15' if rank_number <= programmes_util.programmes[programme].places else None))
             await ctx.send(user.mention + ' Rank set.')
         except:
