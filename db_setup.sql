@@ -2,7 +2,6 @@ create table ranks
 (
     id         serial primary key,
     user_id    varchar(50),
-    username   varchar(50),
     rank       int         not null,
     programme  varchar(15) not null,
     offer_date DATE,
@@ -13,6 +12,7 @@ create table user_data
 (
     id         serial primary key unique,
     user_id    varchar(50) unique not null,
+    username   varchar(50)        not null,
     is_private boolean            not null default false,
     dm_programme varchar(15),
     dm_status int,
