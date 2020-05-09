@@ -32,7 +32,7 @@ class OffersCommand(commands.Cog):
 
         embed.add_field(name='_This data has been provided by server members. Ranking numbers have been rounded to '
                              'the nearest multiple of 5 to help protect their privacy._',
-                        value='To view rank commands, type `.helprank`\n'
+                        value='To view all commands, type `.help`\n'
                               'To add the date you\'ve received an offer, type '
                               f'`.setofferdate <day> <month> <{programmes_util.get_ids_string()}>`',
                         inline=False)

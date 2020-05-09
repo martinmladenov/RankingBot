@@ -50,7 +50,7 @@ class RanksCommand(commands.Cog):
 
         embed.add_field(name='_Please note: This bot is purely for fun, the ranking numbers do not'
                              ' represent performance at university_',
-                        value=f'To view rank commands, type `.helprank`\n'
+                        value=f'To view all commands, type `.help`\n'
                               f'To set your ranking number, type `.setrank <rank> <{programmes_util.get_ids_string()}>`',
                         inline=False)
 

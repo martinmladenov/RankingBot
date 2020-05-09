@@ -2,12 +2,12 @@ from discord.ext import commands
 from utils import programmes_util
 
 
-class HelprankCommand(commands.Cog):
+class HelpCommand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command()
-    async def helprank(self, ctx):
+    async def help(self, ctx):
         await ctx.send(
             '**Commands:**\n'
             f'`.setrank <rank> <{programmes_util.get_ids_string()}>` Sets your rank for the specified programme\n'
@@ -19,5 +19,5 @@ class HelprankCommand(commands.Cog):
             f'`.toggleprivaterank` Toggles whether your rank is displayed on `.ranks`\n'
             f'`.addmanualdate <{programmes_util.get_ids_string()}> <rank> <day> <month>` Manually adds a ranking'
             f' number and a date without associating them with a user\n'
-            f'`.helprank` Displays this message\n'
+            f'`.help` Displays this message\n'
         )
