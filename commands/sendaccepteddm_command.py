@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from utils import dm_util, programmes_util
+import constants
 
 
 class SendaccepteddmCommand(commands.Cog):
@@ -10,7 +11,7 @@ class SendaccepteddmCommand(commands.Cog):
     @commands.command()
     async def sendaccepteddm(self, ctx, uni_name: str, dry_run: str = None):
 
-        if ctx.message.author.id != 403569083402158090 or not ctx.guild:
+        if ctx.message.author.id != constants.administrator_user_id or not ctx.guild:
             await ctx.send(ctx.message.author.mention + ' You don\'t have permission to execute this command')
             return
 
@@ -35,8 +36,8 @@ class SendaccepteddmCommand(commands.Cog):
 
         university = dm_util.University[uni_name]
 
-        channel_id = 539780235411980294
-        message_id = 699757067702894855
+        channel_id = constants.accepted_channel_id
+        message_id = constants.accepted_message_id
 
         channel = self.bot.get_channel(channel_id)
         message = await channel.fetch_message(message_id)
