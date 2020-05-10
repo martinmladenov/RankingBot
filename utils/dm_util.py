@@ -6,20 +6,21 @@ from datetime import datetime, date
 import re
 
 
-async def send_programme_rank_dm(member: discord.Member, programme: programmes_util.Programme, send_messages: bool):
+async def send_programme_rank_dm(member: discord.Member, programme: programmes_util.Programme, send_messages: bool,
+                                 results):
     programme_id = programme.id
     user_id = member.id
 
     rank_row = db_fetchall('SELECT rank FROM ranks WHERE user_id = %s AND programme = %s', (str(user_id), programme_id))
 
     if rank_row:
-        print(f'skipping {member.name}: rank already set')
+        results['rank-already-set'].append(member)
         return False
 
     user_data_row = db_fetchall('SELECT user_id, dm_status FROM user_data WHERE user_id = %s', (str(user_id),))
 
     if user_data_row and user_data_row[0][1] is not None:
-        print(f'skipping {member.name}: dm_status = {user_data_row[0][1]}')
+        results['dm-status-not-null'].append(member)
         return False
 
     if not send_messages:
@@ -46,6 +47,7 @@ async def send_programme_rank_dm(member: discord.Member, programme: programmes_u
         await dm_channel.send(message)
     except Exception as e:
         print(f'failed to send message to {member.name}: {str(e)}')
+        results['cannot-send-dm'].append(member)
         return False
 
     if not user_data_row:

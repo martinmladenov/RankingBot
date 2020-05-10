@@ -30,7 +30,6 @@ class SendaccepteddmCommand(commands.Cog):
             if dry_run == 'dry-run':
                 send_messages = False
                 await ctx.send(ctx.message.author.mention + f' dry run: not sending DMs')
-                print('Dry run')
             else:
                 raise commands.UserInputError
 
@@ -58,32 +57,53 @@ class SendaccepteddmCommand(commands.Cog):
         users = await reaction.users().flatten()
 
         await ctx.send(ctx.message.author.mention + f' Sending DMs to {len(users)} users...')
-        print("Sending DMs")
 
-        success = 0
+        results = {
+            'success': [],
+            'not-server-member': [],
+            'unhandled-exception': [],
+            'unknown-programme': [],
+            'rank-already-set': [],
+            'dm-status-not-null': [],
+            'cannot-send-dm': [],
+        }
 
         for member in users:
             if not isinstance(member, discord.Member):
-                print(f'skipping {member.name}: not server member')
+                results['not-server-member'].append(member)
                 continue
 
             programme_id = dm_util.get_member_programme(member, university)
 
             if not programme_id:
-                print(f'skipping {member.name}: unknown programme')
+                results['unknown-programme'].append(member)
                 continue
 
             try:
                 result = await dm_util.send_programme_rank_dm(
-                    member, programmes_util.programmes[programme_id], send_messages)
+                    member, programmes_util.programmes[programme_id], send_messages, results)
 
                 if result:
-                    success += 1
+                    results['success'].append(member)
             except Exception as e:
                 print(f'an error occurred while sending message to {member.name}: {str(e)}')
+                results['unhandled-exception'].append(member)
 
-        await ctx.send(ctx.message.author.mention + f' Done sending DMs, {len(users) - success} skipped')
-        print('Done sending DMs')
+        await ctx.send(ctx.message.author.mention + f' Done sending DMs, '
+                                                    f'{len(users) - len(results["success"])} skipped')
+
+        results_embed = discord.Embed(title=f".sendaccepteddm results: {uni_name}", color=0x36bee6)
+
+        for result in results.keys():
+            user_string = '\n'.join(f'`{u.name}{(f" ({u.id})") if result == "not-server-member" else ""}`'
+                                    for u in results[result]) if results[result] else '_None_'
+            results_embed.add_field(name=result, value=user_string, inline=True)
+
+        if dry_run:
+            results_embed.set_footer(text='dry run: not sending DMs')
+
+        dm_channel = await ctx.message.author.create_dm()
+        await dm_channel.send(embed=results_embed)
 
     @sendaccepteddm.error
     async def info_error(self, ctx, error):
