@@ -27,3 +27,10 @@ create table received_dms
     success   boolean,
     timestamp timestamp
 );
+
+create table excluded_programmes
+(
+    id        serial primary key,
+    user_id   varchar(50) not null,
+    programme varchar(15) not null
+)
