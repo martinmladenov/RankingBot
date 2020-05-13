@@ -141,13 +141,17 @@ def get_member_programme(member: discord.Member, uni: University):
 
     roles = list(map(lambda x: x.name, member.roles))
 
+    excluded_programmes_rows = db_fetchall('SELECT programme FROM excluded_programmes WHERE user_id = %s',
+                                           (str(member.id),))
+    excluded_programmes = list(map(lambda x: x[0], excluded_programmes_rows))
+
     if uni == University.TUD:
-        if ae_role in roles:
+        if ae_role in roles and 'tud-ae' not in excluded_programmes:
             return 'tud-ae'
-        if cse_role in roles:
+        if cse_role in roles and 'tud-cse' not in excluded_programmes:
             return 'tud-cse'
     if uni == University.TUE:
-        if cse_role in roles:
+        if cse_role in roles and 'tue-cse' not in excluded_programmes:
             return 'tue-cse'
 
     return None
