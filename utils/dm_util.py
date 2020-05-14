@@ -26,9 +26,9 @@ async def send_programme_rank_dm(member: discord.Member, programme: programmes_u
     if not send_messages:
         return True
 
-    message = '**Hi %s!**\n' \
+    message = '**Hi {0}!**\n' \
               'On the **3TU** server, you have chosen a role indicating you have been accepted to the ' \
-              '**%s** programme at %s **%s**. Congratulations!\n' \
+              '**{1}** programme at {2} **{3}**. Congratulations!\n' \
               'We\'d appreciate it a lot if you\'d like to help other applicants determine when they might receive ' \
               'an offer by providing us with your **ranking number** and **the date you\'ve received your offer ' \
               'on Studielink**. If you want to participate in this research, please reply to this message in the ' \
@@ -39,8 +39,10 @@ async def send_programme_rank_dm(member: discord.Member, programme: programmes_u
               '_Note: If you don\'t want to share your ranking number or the date, feel free to round them ' \
               'up or down. Additionally, if you provide any information here, your username won\'t be shown ' \
               'alongside it on the statistics visible to all server members. If you want it to be displayed, ' \
-              'you can type `.toggleprivaterank` on any channel on the server._' \
-              % (member.name, programme.display_name, programme.icon, programme.uni_name)
+              'you can type `.toggleprivaterank` on any channel on the server._\n' \
+              'If you haven\'t applied for the **{1}** programme at **{3}** but have the server role ' \
+              'for a different reason, please type `wrong`.' \
+        .format(member.name, programme.display_name, programme.icon, programme.uni_name)
 
     try:
         dm_channel = await member.create_dm()
@@ -63,6 +65,14 @@ async def send_programme_rank_dm(member: discord.Member, programme: programmes_u
 
 async def handle_awaiting_rank(message: discord.Message, dm_programme: str):
     try:
+        if message.content.lower() == 'wrong':
+            db_exec('INSERT INTO excluded_programmes (user_id, programme) VALUES (%s, %s)',
+                    (str(message.author.id), dm_programme))
+            db_exec('UPDATE user_data SET dm_programme = NULL, dm_status = NULL '
+                    'WHERE user_id = %s', (str(message.author.id),))
+            await message.channel.send('Noted. Sorry for bothering you!')
+            return True
+
         match = re.search(r'^(\d+)[^A-Za-z0-9]+(\d+)[^A-Za-z0-9]+([A-Za-z0-9]+)$', message.content)
 
         if match is None:
