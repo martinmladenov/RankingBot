@@ -69,7 +69,7 @@ class SendreminderdmCommand(commands.Cog):
         results_embed = discord.Embed(title=f".sendreminderdm results", color=0x36bee6)
 
         for result in results.keys():
-            user_string = '\n'.join(f'`{u}`\n' for u in results[result]) if results[result] else '_None_'
+            user_string = '\n'.join(f'`{u}`' for u in results[result]) if results[result] else '_None_'
             results_embed.add_field(name=result, value=user_string, inline=True)
 
         if dry_run:
