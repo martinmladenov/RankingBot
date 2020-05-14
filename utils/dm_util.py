@@ -63,6 +63,33 @@ async def send_programme_rank_dm(member: discord.Member, programme: programmes_u
     return True
 
 
+async def send_programme_rank_reminder_dm(user: discord.User, programme: programmes_util.Programme):
+    user_id = user.id
+
+    message = '**Hello {0}!**\n' \
+              'We\'d be very grateful if you could provide us with your **ranking number** and ' \
+              '**the date you\'ve received your offer on Studielink** for the **{1}** programme at {2} **{3}**. ' \
+              'This information is very helpful to other applicants who have not received an offer yet.\n' \
+              'If you want to help, please reply to this message in the following format: `<rank> <day> <month>`.\n' \
+              '_For example, if your ranking number is 100 and you\'ve received an offer on 15 April, ' \
+              'please reply `100 15 April`._\n' \
+              '**Thanks a lot!**\n' \
+              'If you haven\'t applied for the **{1}** programme at **{3}**, please type `wrong`.' \
+        .format(user.name, programme.display_name, programme.icon, programme.uni_name)
+
+    try:
+        dm_channel = await user.create_dm()
+        await dm_channel.send(message)
+    except Exception as e:
+        print(f'failed to send message to {user.name}: {str(e)}')
+        return False
+
+    db_exec('UPDATE user_data SET dm_last_sent = %s WHERE user_id = %s',
+            (datetime.utcnow(), str(user_id)))
+
+    return True
+
+
 async def handle_awaiting_rank(message: discord.Message, dm_programme: str):
     try:
         if message.content.lower() == 'wrong':
