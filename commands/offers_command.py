@@ -28,7 +28,7 @@ class OffersCommand(commands.Cog):
             date_str = offer_date_util.format_offer_date(offer[2])
             is_private = offer[3] is True
 
-            embed.add_field(name=f'**{programme.icon} {programme.uni_name} {programme.display_name}**',
+            embed.add_field(name=f'**{programme.icon} {programme.uni_name}\n{programme.display_name.ljust(33, " ")}**',
                             value=f'**{(("≈" + str(round_rank(rank))) if is_private else str(rank))}** on {date_str}',
                             inline=True)
 

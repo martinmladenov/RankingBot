@@ -35,7 +35,7 @@ class RanksCommand(commands.Cog):
 
         for group in grouped_ranks:
             programme = programmes_util.programmes[group[0]]
-            embed.add_field(name=f'**{programme.icon} {programme.uni_name} {programme.display_name}**',
+            embed.add_field(name=f'**{programme.icon} {programme.uni_name}\n{programme.display_name.ljust(33, " ")}**',
                             value=('\n'.join(('`' + (' ' * (3 - len(str(x[1])))) + str(x[1]) + f' {x[0]}`')
                                              for x in group[1])) +
                                   (f'\n**_+ {group_truncated[group[0]]} more..._**'
