@@ -11,7 +11,8 @@ async def send_programme_rank_dm(member: discord.Member, programme: programmes_u
     programme_id = programme.id
     user_id = member.id
 
-    rank_row = db_fetchall('SELECT rank FROM ranks WHERE user_id = %s AND programme = %s', (str(user_id), programme_id))
+    rank_row = db_fetchall('SELECT rank FROM ranks WHERE user_id = %s AND programme = %s AND offer_date IS NOT NULL',
+                           (str(user_id), programme_id))
 
     if rank_row:
         results['rank-already-set'].append(member)
