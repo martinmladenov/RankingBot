@@ -33,7 +33,10 @@ class SetrankCommand(commands.Cog):
 
     @setrank.error
     async def info_error(self, ctx, error):
+        user = ctx.message.author
         if isinstance(error, commands.UserInputError):
-            user = ctx.message.author
             await ctx.send(
                 user.mention + f' Invalid arguments. Usage: `.setrank <rank> <{programmes_util.get_ids_string()}>`')
+        else:
+            await ctx.send(user.mention + ' An unexpected error occurred')
+            raise

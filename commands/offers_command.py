@@ -44,10 +44,13 @@ class OffersCommand(commands.Cog):
 
     @offers.error
     async def info_error(self, ctx, error):
+        user = ctx.message.author
         if isinstance(error, commands.UserInputError):
-            user = ctx.message.author
             await ctx.send(user.mention + ' Invalid arguments. Usage: `.offers`')
-        raise error
+        else:
+            await ctx.send(user.mention + ' An unexpected error occurred')
+            raise
+
 
 
 def round_rank(number, base=5):

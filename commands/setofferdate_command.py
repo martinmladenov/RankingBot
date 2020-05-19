@@ -38,8 +38,11 @@ class SetofferdateCommand(commands.Cog):
 
     @setofferdate.error
     async def info_error(self, ctx, error):
+        user = ctx.message.author
         if isinstance(error, commands.UserInputError) \
                 or isinstance(error, commands.CommandInvokeError) and isinstance(error.original, ValueError):
-            user = ctx.message.author
             await ctx.send(user.mention + f' Invalid arguments. Usage: `.setofferdate <day> <month> '
                                           f'<{programmes_util.get_ids_string()}>`')
+        else:
+            await ctx.send(user.mention + ' An unexpected error occurred')
+            raise

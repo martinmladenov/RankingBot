@@ -31,6 +31,9 @@ class ToggleprivaterankCommand(commands.Cog):
 
     @toggleprivaterank.error
     async def info_error(self, ctx, error):
+        user = ctx.message.author
         if isinstance(error, commands.UserInputError):
-            user = ctx.message.author
             await ctx.send(user.mention + f' Invalid arguments. Usage: `.toggleprivaterank`')
+        else:
+            await ctx.send(user.mention + ' An unexpected error occurred')
+            raise

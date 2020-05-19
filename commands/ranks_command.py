@@ -58,7 +58,9 @@ class RanksCommand(commands.Cog):
 
     @ranks.error
     async def info_error(self, ctx, error):
+        user = ctx.message.author
         if isinstance(error, commands.UserInputError):
-            user = ctx.message.author
             await ctx.send(user.mention + ' Invalid arguments. Usage: `.ranks`')
-        raise error
+        else:
+            await ctx.send(user.mention + ' An unexpected error occurred')
+            raise

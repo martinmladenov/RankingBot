@@ -32,6 +32,9 @@ class ClearrankCommand(commands.Cog):
 
     @clearrank.error
     async def info_error(self, ctx, error):
+        user = ctx.message.author
         if isinstance(error, commands.UserInputError):
-            user = ctx.message.author
             await ctx.send(user.mention + f' Invalid arguments. Usage: `.clearrank <all/{programmes_util.get_ids_string()}>`')
+        else:
+            await ctx.send(user.mention + ' An unexpected error occurred')
+            raise
