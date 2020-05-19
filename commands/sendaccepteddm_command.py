@@ -95,9 +95,24 @@ class SendaccepteddmCommand(commands.Cog):
         results_embed = discord.Embed(title=f".sendaccepteddm results: {uni_name}", color=0x36bee6)
 
         for result in results.keys():
-            user_string = '\n'.join(f'`{u.name}{(f" ({u.id})") if result == "not-server-member" else ""}`'
-                                    for u in results[result]) if results[result] else '_None_'
-            results_embed.add_field(name=result, value=user_string, inline=True)
+            users = list(map(lambda u: f'`{u.name}{f" ({u.id})" if result == "not-server-member" else ""}`',
+                             results[result]))
+
+            i = 0
+            start = 0
+            curr_length = 0
+            curr_field = 1
+            while i < len(users):
+                curr_length += len(users[i])
+                i += 1
+                if curr_length > 850 or i == len(users):
+                    field_name = result
+                    if curr_field > 1:
+                        field_name += f'-{curr_field}'
+                    results_embed.add_field(name=field_name, value=('\n'.join(users[start:i])), inline=True)
+                    start = i
+                    curr_length = 0
+                    curr_field += 1
 
         if dry_run:
             results_embed.set_footer(text='dry run: not sending DMs')
