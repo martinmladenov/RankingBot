@@ -43,3 +43,7 @@ class AddmanualdateCommand(commands.Cog):
         else:
             await ctx.send(user.mention + ' An unexpected error occurred')
             raise
+
+
+def setup(bot):
+    bot.add_cog(AddmanualdateCommand(bot))

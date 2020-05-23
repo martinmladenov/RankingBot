@@ -52,6 +52,9 @@ class OffersCommand(commands.Cog):
             raise
 
 
-
 def round_rank(number, base=5):
     return base * round(number / base)
+
+
+def setup(bot):
+    bot.add_cog(OffersCommand(bot))

@@ -36,3 +36,7 @@ class DmHandler(commands.Cog):
             result = await dm_util.handle_awaiting_rank(message, dm_programme)
 
         save_received_dm(user_id, message.content, result)
+
+
+def setup(bot):
+    bot.add_cog(DmHandler(bot))

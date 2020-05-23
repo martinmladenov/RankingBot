@@ -21,3 +21,7 @@ class HelpCommand(commands.Cog):
             f' number and a date without associating them with a user\n'
             f'`.help` Displays this message\n'
         )
+
+
+def setup(bot):
+    bot.add_cog(HelpCommand(bot))
