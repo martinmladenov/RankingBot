@@ -101,7 +101,8 @@ async def handle_awaiting_rank(message: discord.Message, dm_programme: str):
             await message.channel.send('Noted. Sorry for bothering you!')
             return True
 
-        match = re.search(r'^(\d+)[^A-Za-z0-9]+(\d+)[^A-Za-z0-9]+([A-Za-z0-9]+)$', message.content)
+        match = re.search(r'^[^A-Za-z0-9]*(\d+)[^A-Za-z0-9]+(\d+)[^A-Za-z0-9]+([A-Za-z0-9]+)[^A-Za-z0-9]*$',
+                          message.content)
 
         if match is None:
             raise ValueError
