@@ -32,9 +32,12 @@ class OffersCommand(commands.Cog):
                             value=f'**{(("≈" + str(round_rank(rank))) if is_private else str(rank))}** on {date_str}',
                             inline=True)
 
-        embed.add_field(name='_This data has been provided by server members. Some ranking numbers (as indicated '
-                             'by **≈** in front of them) have been rounded to the nearest multiple of 5 '
-                             'to help protect users\' privacy._',
+        any_rounded = any(map(lambda x: x[3] is True, rows))
+
+        embed.add_field(name='_This data has been provided by server members.' +
+                             (' Some ranking numbers (as indicated '
+                              'by **≈** in front of them) have been rounded to the nearest multiple of 5 '
+                              'to help protect users\' privacy._' if any_rounded else '_'),
                         value='To view all commands, type `.help`\n'
                               'To add the date you\'ve received an offer, type '
                               f'`.setofferdate <day> <month> <{programmes_util.get_ids_string()}>`',
