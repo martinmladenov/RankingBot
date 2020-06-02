@@ -1,2 +1,3 @@
 discord
 psycopg2-binary
+matplotlib

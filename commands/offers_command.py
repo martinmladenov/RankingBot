@@ -1,7 +1,7 @@
 from discord.ext import commands
 import discord
 from database import db_fetchall
-from utils import programmes_util, offer_date_util
+from utils import programmes_util, offer_date_util, offer_plot_util
 
 
 class OffersCommand(commands.Cog):
@@ -9,7 +9,15 @@ class OffersCommand(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def offers(self, ctx):
+    async def offers(self, ctx, programme_id: str = None):
+        if programme_id is not None:
+            if programme_id not in programmes_util.programmes:
+                raise commands.UserInputError
+
+            await self.send_graph(ctx, programmes_util.programmes[programme_id])
+
+            return
+
         rows = db_fetchall('select r.programme, r.rank, d.offer_date, ud.is_private '
                            'from (select programme, max(rank) as rank from ranks '
                            'where ranks.offer_date is not null '
@@ -29,7 +37,8 @@ class OffersCommand(commands.Cog):
             is_private = offer[3] is True
 
             embed.add_field(name=f'**{programme.icon} {programme.uni_name}\n{programme.display_name.ljust(33, " ")}**',
-                            value=f'**{(("≈" + str(round_rank(rank))) if is_private else str(rank))}** on {date_str}',
+                            value=f'**{(("≈" + str(offer_plot_util.round_rank(rank))) if is_private else str(rank))}**'
+                                  f' on {date_str}',
                             inline=True)
 
         any_rounded = any(map(lambda x: x[3] is True, rows))
@@ -49,14 +58,16 @@ class OffersCommand(commands.Cog):
     async def info_error(self, ctx, error):
         user = ctx.message.author
         if isinstance(error, commands.UserInputError):
-            await ctx.send(user.mention + ' Invalid arguments. Usage: `.offers`')
+            await ctx.send(user.mention + f' Invalid arguments. Usage: `.offers [{programmes_util.get_ids_string()}]`')
         else:
             await ctx.send(user.mention + ' An unexpected error occurred')
             raise
 
-
-def round_rank(number, base=5):
-    return base * round(number / base)
+    @staticmethod
+    async def send_graph(ctx, programme: programmes_util.Programme):
+        offer_plot_util.generate_graph(programme)
+        image = discord.File(offer_plot_util.filename)
+        await ctx.send(file=image)
 
 
 def setup(bot):
