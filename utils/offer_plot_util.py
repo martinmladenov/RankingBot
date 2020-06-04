@@ -24,6 +24,9 @@ def generate_graph(programme: programmes_util.Programme):
         x_values.append(datetime.utcnow().date())
         y_values.append(rows[len(rows) - 1][0])
 
+    fill_between_end = programme.places - (y_values[len(y_values) - 1] - programme.places) / 15
+    bottom_limit = fill_between_end - (y_values[len(y_values) - 1] - fill_between_end) / 40
+
     bg_color = '#36393F'
 
     plt.rcParams['ytick.color'] = 'w'
@@ -46,8 +49,9 @@ def generate_graph(programme: programmes_util.Programme):
     plt.grid(color='#444444', linestyle='--')
 
     plt.step(x_values, y_values, where='post')
-    plt.fill_between(x_values, y_values, y2=programme.places, step="post", alpha=0.35)
+    plt.fill_between(x_values, y_values, y2=fill_between_end, step="post", alpha=0.35)
     plt.title(f'{programme.uni_name} {programme.display_name}', color='w')
+    ax.set_ylim(bottom=bottom_limit)
 
     plt.savefig(filename, facecolor=bg_color)
     plt.close()
