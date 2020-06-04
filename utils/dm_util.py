@@ -75,7 +75,8 @@ async def send_programme_rank_reminder_dm(user: discord.User, programme: program
               '_For example, if your ranking number is 100 and you\'ve received an offer on 15 April, ' \
               'please reply `100 15 April`._\n' \
               '**Thanks a lot!**\n' \
-              'If you haven\'t applied for the **{1}** programme at **{3}**, please type `wrong`.' \
+              'If you haven\'t applied for the **{1}** programme at **{3}**, please type `wrong`.\n' \
+              'If you don\'t want to receive any more messages from the bot, type `stop`.' \
         .format(user.name, programme.display_name, programme.icon, programme.uni_name)
 
     try:
@@ -93,7 +94,7 @@ async def send_programme_rank_reminder_dm(user: discord.User, programme: program
 
 async def handle_awaiting_rank(message: discord.Message, dm_programme: str):
     try:
-        if message.content.lower() == 'wrong':
+        if message.content.lower() in ['wrong', 'stop']:
             db_exec('INSERT INTO excluded_programmes (user_id, programme) VALUES (%s, %s)',
                     (str(message.author.id), dm_programme))
             db_exec('UPDATE user_data SET dm_programme = NULL, dm_status = NULL '
