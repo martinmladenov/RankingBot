@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from matplotlib import pyplot as plt, dates as mdates
+from matplotlib import pyplot as plt, dates as mdates, RcParams
 from utils import programmes_util
 from database import db_fetchall
 
@@ -24,16 +24,29 @@ def generate_graph(programme: programmes_util.Programme):
         x_values.append(datetime.utcnow().date())
         y_values.append(rows[len(rows) - 1][0])
 
+    bg_color = '#36393F'
+
+    plt.rcParams['ytick.color'] = 'w'
+    plt.rcParams['xtick.color'] = 'w'
+    plt.rcParams['axes.edgecolor'] = 'w'
+
     ax = plt.gca()
     formatter = mdates.DateFormatter("%d %b")
     ax.xaxis.set_major_formatter(formatter)
     locator = mdates.WeekdayLocator(byweekday=mdates.WEDNESDAY)
     ax.xaxis.set_major_locator(locator)
 
+    plt.setp(ax.spines.values(), visible=False)
+    ax.set_facecolor(bg_color)
+
+    ax.set_axisbelow(True)
+    plt.grid(color='#444444', linestyle='--')
+
     plt.step(x_values, y_values, where='post')
-    plt.fill_between(x_values, y_values, y2=programme.places, step="post", alpha=0.6)
-    plt.title(f'{programme.uni_name} {programme.display_name}')
-    plt.savefig(filename)
+    plt.fill_between(x_values, y_values, y2=programme.places, step="post", alpha=0.35)
+    plt.title(f'{programme.uni_name} {programme.display_name}', color='w')
+
+    plt.savefig(filename, facecolor=bg_color)
     plt.close()
 
 
