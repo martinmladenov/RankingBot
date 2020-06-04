@@ -29,12 +29,15 @@ def generate_graph(programme: programmes_util.Programme):
     plt.rcParams['ytick.color'] = 'w'
     plt.rcParams['xtick.color'] = 'w'
     plt.rcParams['axes.edgecolor'] = 'w'
+    plt.rcParams['axes.labelcolor'] = '#767676'
 
     ax = plt.gca()
     formatter = mdates.DateFormatter("%d %b")
     ax.xaxis.set_major_formatter(formatter)
     locator = mdates.WeekdayLocator(byweekday=mdates.WEDNESDAY)
     ax.xaxis.set_major_locator(locator)
+    ax.set_xlabel('Offer date')
+    ax.set_ylabel('Ranking number')
 
     plt.setp(ax.spines.values(), visible=False)
     ax.set_facecolor(bg_color)
