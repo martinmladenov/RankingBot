@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from matplotlib import pyplot as plt, dates as mdates, RcParams
+from matplotlib import pyplot as plt, dates as mdates
 from utils import programmes_util
 from database import db_fetchall
 
@@ -10,16 +10,35 @@ def generate_graph(programme: programmes_util.Programme):
     rows = db_fetchall('SELECT rank, is_private, offer_date FROM ranks '
                        'LEFT JOIN user_data ON ranks.user_id = user_data.user_id '
                        'WHERE programme = %s AND rank > %s AND offer_date IS NOT NULL '
-                       'AND (is_private IS NULL OR is_private = FALSE) '
                        'ORDER BY offer_date, rank', (programme.id, programme.places))
 
     x_values = [date(2020, 4, 15)]
     y_values = [programme.places]
 
     if rows:
-        for row in rows:
-            x_values.append(row[2])
-            y_values.append(row[0])
+        for i in range(len(rows)):
+            row = rows[i]
+            rank = row[0]
+            is_private = row[1]
+            offer_date = row[2]
+
+            # Round rank if it's private
+            if is_private:
+                rank = round_rank(rank)
+
+                # make sure it's not lower than the previous rank
+                if i > 0 and rank < y_values[i - 1]:
+                    rank = y_values[i - 1]
+
+                # make sure it's not higher than the next public rank
+                for j in range(i, len(rows)):
+                    if not rows[j][1]:
+                        if rank > rows[j][0]:
+                            rank = rows[j][0]
+                        break
+
+            x_values.append(offer_date)
+            y_values.append(rank)
 
         x_values.append(datetime.utcnow().date())
         y_values.append(rows[len(rows) - 1][0])
