@@ -7,10 +7,13 @@ filename = 'offers.png'
 
 
 def generate_graph(programme: programmes_util.Programme):
-    rows = db_fetchall('SELECT rank, is_private, offer_date FROM ranks '
-                       'LEFT JOIN user_data ON ranks.user_id = user_data.user_id '
+    rows = db_fetchall('SELECT m.rank, ud.is_private, m.offer_date FROM '
+                       '(SELECT MAX(rank) as rank, offer_date, programme FROM ranks '
                        'WHERE programme = %s AND rank > %s AND offer_date IS NOT NULL '
-                       'ORDER BY offer_date, rank', (programme.id, programme.places))
+                       'GROUP BY offer_date, programme) AS m '
+                       'JOIN ranks r ON m.rank = r.rank AND m.offer_date = r.offer_date AND m.programme = r.programme '
+                       'LEFT JOIN user_data ud on r.user_id = ud.user_id '
+                       'ORDER BY m.offer_date', (programme.id, programme.places))
 
     x_values = [date(2020, 4, 15)]
     y_values = [programme.places]
