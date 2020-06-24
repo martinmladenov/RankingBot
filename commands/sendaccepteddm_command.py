@@ -92,6 +92,9 @@ class SendaccepteddmCommand(commands.Cog):
         await ctx.send(ctx.message.author.mention + f' Done sending DMs, '
                                                     f'{len(users) - len(results["success"])} skipped')
 
+        if not results['success']:
+            return
+
         results_embed = discord.Embed(title=f".sendaccepteddm results: {uni_name}", color=0x36bee6)
 
         for result in results.keys():

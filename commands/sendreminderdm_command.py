@@ -66,6 +66,9 @@ class SendreminderdmCommand(commands.Cog):
         await ctx.send(ctx.message.author.mention + f' Done sending DMs, '
                                                     f'{len(user_data_rows) - len(results["success"])} skipped')
 
+        if not results['success']:
+            return
+
         results_embed = discord.Embed(title=f".sendreminderdm results", color=0x36bee6)
 
         for result in results.keys():
