@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 from utils import dm_util, programmes_util
 import constants
-from database import db_fetchall
 from datetime import datetime, timedelta
 
 
@@ -28,9 +27,10 @@ class SendreminderdmCommand(commands.Cog):
 
         date = datetime.utcnow() - timedelta(days=age_days)
 
-        user_data_rows = db_fetchall('SELECT user_id, dm_programme, username FROM user_data '
-                                     'WHERE dm_status = %s  '
-                                     'AND dm_last_sent <= timestamp %s', (dm_util.DmStatus.AWAITING_RANK, date))
+        user_data_rows = await self.bot.db_conn.fetch('SELECT user_id, dm_programme, username FROM user_data '
+                                                      'WHERE dm_status = $1 '
+                                                      'AND dm_last_sent <= $2',
+                                                      dm_util.DmStatus.AWAITING_RANK, date)
 
         await ctx.send(ctx.message.author.mention + f' Sending DMs to {len(user_data_rows)} users...')
 
@@ -56,7 +56,7 @@ class SendreminderdmCommand(commands.Cog):
                 result = True
                 if send_messages:
                     result = await dm_util.send_programme_rank_reminder_dm(
-                        user, programmes_util.programmes[programme_id])
+                        user, programmes_util.programmes[programme_id], self.bot.db_conn)
 
                 results['success' if result else 'cannot-send-dm'].append(f'{username}: {programme_id}')
             except Exception as e:

@@ -1,26 +1,26 @@
 import discord
 from enum import IntEnum, Enum
 from utils import programmes_util, offer_date_util
-from database import db_fetchall, db_exec
 from datetime import datetime, date
 import re
 
 
 async def send_programme_rank_dm(member: discord.Member, programme: programmes_util.Programme, send_messages: bool,
-                                 results):
+                                 results, db_conn):
     programme_id = programme.id
     user_id = member.id
 
-    rank_row = db_fetchall('SELECT rank FROM ranks WHERE user_id = %s AND programme = %s AND offer_date IS NOT NULL',
-                           (str(user_id), programme_id))
+    rank_row = await db_conn.fetchrow(
+        'SELECT rank FROM ranks WHERE user_id = $1 AND programme = $2 AND offer_date IS NOT NULL',
+        str(user_id), programme_id)
 
     if rank_row:
         results['rank-already-set'].append(member)
         return False
 
-    user_data_row = db_fetchall('SELECT user_id, dm_status FROM user_data WHERE user_id = %s', (str(user_id),))
+    user_data_row = await db_conn.fetchrow('SELECT user_id, dm_status FROM user_data WHERE user_id = $1', str(user_id))
 
-    if user_data_row and user_data_row[0][1] is not None:
+    if user_data_row and user_data_row[1] is not None:
         results['dm-status-not-null'].append(member)
         return False
 
@@ -54,17 +54,18 @@ async def send_programme_rank_dm(member: discord.Member, programme: programmes_u
         return False
 
     if not user_data_row:
-        db_exec('INSERT INTO user_data (user_id, username, dm_programme, dm_status, dm_last_sent) '
-                'VALUES (%s, %s, %s, %s, %s)',
-                (str(user_id), member.name, programme_id, DmStatus.AWAITING_RANK, datetime.utcnow()))
+        await db_conn.execute('INSERT INTO user_data (user_id, username, dm_programme, dm_status, dm_last_sent) '
+                              'VALUES ($1, $2, $3, $4, $5)',
+                              str(user_id), member.name, programme_id, DmStatus.AWAITING_RANK, datetime.utcnow())
     else:
-        db_exec('UPDATE user_data SET dm_programme = %s, dm_status = %s, dm_last_sent = %s WHERE user_id = %s',
-                (programme_id, DmStatus.AWAITING_RANK, datetime.utcnow(), str(user_id)))
+        await db_conn.execute(
+            'UPDATE user_data SET dm_programme = $1, dm_status = $2, dm_last_sent = $3 WHERE user_id = $4',
+            programme_id, DmStatus.AWAITING_RANK, datetime.utcnow(), str(user_id))
 
     return True
 
 
-async def send_programme_rank_reminder_dm(user: discord.User, programme: programmes_util.Programme):
+async def send_programme_rank_reminder_dm(user: discord.User, programme: programmes_util.Programme, db_conn):
     user_id = user.id
 
     message = '**Hello {0}!**\n' \
@@ -86,19 +87,19 @@ async def send_programme_rank_reminder_dm(user: discord.User, programme: program
         print(f'failed to send message to {user.name}: {str(e)}')
         return False
 
-    db_exec('UPDATE user_data SET dm_last_sent = %s WHERE user_id = %s',
-            (datetime.utcnow(), str(user_id)))
+    await db_conn.execute('UPDATE user_data SET dm_last_sent = $1 WHERE user_id = $2',
+                          datetime.utcnow(), str(user_id))
 
     return True
 
 
-async def handle_awaiting_rank(message: discord.Message, dm_programme: str):
+async def handle_awaiting_rank(message: discord.Message, dm_programme: str, db_conn):
     try:
         if message.content.lower() in ['wrong', 'stop']:
-            db_exec('INSERT INTO excluded_programmes (user_id, programme) VALUES (%s, %s)',
-                    (str(message.author.id), dm_programme))
-            db_exec('UPDATE user_data SET dm_programme = NULL, dm_status = NULL '
-                    'WHERE user_id = %s', (str(message.author.id),))
+            await db_conn.execute('INSERT INTO excluded_programmes (user_id, programme) VALUES ($1, $2)',
+                                  str(message.author.id), dm_programme)
+            await db_conn.execute('UPDATE user_data SET dm_programme = NULL, dm_status = NULL '
+                                  'WHERE user_id = $1', str(message.author.id))
             await message.channel.send('Noted. Sorry for bothering you!')
             return True
 
@@ -126,25 +127,25 @@ async def handle_awaiting_rank(message: discord.Message, dm_programme: str):
                                        'number and date and try again.')
             return False
 
-        rank_row = db_fetchall('SELECT rank FROM ranks WHERE user_id = %s AND programme = %s',
-                               (str(message.author.id), dm_programme))
+        rank = await db_conn.fetchval('SELECT rank FROM ranks WHERE user_id = $1 AND programme = $2',
+                                      str(message.author.id), dm_programme)
 
-        if rank_row:
-            if rank_row[0][0] != parsed_rank:
+        if rank:
+            if rank != parsed_rank:
                 await message.channel.send(f'It seems that you\'ve already set your ranking number '
-                                           f'to **{rank_row[0][0]}**. '
+                                           f'to **{rank}**. '
                                            f'If that\'s incorrect, please type `.clearrank {dm_programme}`'
                                            f'and reply with `{message.content}` again.')
                 return False
 
-            db_exec('UPDATE ranks SET offer_date = %s WHERE user_id = %s AND programme = %s',
-                    (parsed_date, str(message.author.id), dm_programme))
+            await db_conn.execute('UPDATE ranks SET offer_date = $1 WHERE user_id = $2 AND programme = $3',
+                                  parsed_date, str(message.author.id), dm_programme)
         else:
-            db_exec('INSERT INTO ranks (user_id, rank, programme, offer_date) VALUES (%s, %s, %s, %s)',
-                    (message.author.id, parsed_rank, dm_programme, parsed_date))
+            await db_conn.execute('INSERT INTO ranks (user_id, rank, programme, offer_date) VALUES ($1, $2, $3, $4)',
+                                  message.author.id, parsed_rank, dm_programme, parsed_date)
 
-        db_exec('UPDATE user_data SET is_private = TRUE, dm_programme = NULL, dm_status = NULL '
-                'WHERE user_id = %s', (str(message.author.id),))
+        await db_conn.execute('UPDATE user_data SET is_private = TRUE, dm_programme = NULL, dm_status = NULL '
+                              'WHERE user_id = $1', str(message.author.id))
 
         await message.channel.send('**Thank you for the information!**\n'
                                    'We will do our best to put it to good use and help other applicants determine when '
@@ -175,7 +176,7 @@ class University(Enum):
     TUE = 1
 
 
-def get_member_programme(member: discord.Member, uni: University):
+async def get_member_programme(member: discord.Member, uni: University, db_conn):
     cse_role = 'Computer Science and Engineering'
     ae_role = 'Aerospace Engineering'
 
@@ -184,8 +185,8 @@ def get_member_programme(member: discord.Member, uni: University):
     if any(map(lambda x: 'students' in x.lower() and x != 'IB Students', roles)):
         return None
 
-    excluded_programmes_rows = db_fetchall('SELECT programme FROM excluded_programmes WHERE user_id = %s',
-                                           (str(member.id),))
+    excluded_programmes_rows = await db_conn.fetch('SELECT programme FROM excluded_programmes WHERE user_id = $1',
+                                                   str(member.id))
     excluded_programmes = list(map(lambda x: x[0], excluded_programmes_rows))
 
     if uni == University.TUD:

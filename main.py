@@ -1,5 +1,6 @@
 from os import listdir
 from os.path import isfile, join
+import asyncpg
 
 from discord.ext import commands
 import discord
@@ -23,6 +24,11 @@ if __name__ == '__main__':
 async def on_ready():
     print('Logged in as ' + bot.user.name)
     await bot.change_presence(activity=(discord.Game('.help | .ranks')))
+    await set_up_db()
+
+
+async def set_up_db():
+    bot.db_conn = await asyncpg.create_pool(dsn=os.environ['DATABASE_URL'] + '?sslmode=require')
 
 
 bot.run(os.environ['DISCORD_SECRET'])

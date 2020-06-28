@@ -1,5 +1,4 @@
 from discord.ext import commands
-from database import db_exec
 from utils import programmes_util
 
 
@@ -21,9 +20,10 @@ class ClearrankCommand(commands.Cog):
         try:
 
             if clear_all:
-                db_exec('DELETE FROM ranks WHERE user_id = %s', (str(user.id),))
+                await self.bot.db_conn.execute('DELETE FROM ranks WHERE user_id = $1', str(user.id))
             else:
-                db_exec('DELETE FROM ranks WHERE user_id = %s AND programme = %s', (str(user.id), programme))
+                await self.bot.db_conn.execute('DELETE FROM ranks WHERE user_id = $1 AND programme = $2',
+                                               str(user.id), programme)
 
             await ctx.send(user.mention + ' Rank cleared.')
         except:
@@ -34,7 +34,8 @@ class ClearrankCommand(commands.Cog):
     async def info_error(self, ctx, error):
         user = ctx.message.author
         if isinstance(error, commands.UserInputError):
-            await ctx.send(user.mention + f' Invalid arguments. Usage: `.clearrank <all/{programmes_util.get_ids_string()}>`')
+            await ctx.send(
+                user.mention + f' Invalid arguments. Usage: `.clearrank <all/{programmes_util.get_ids_string()}>`')
         else:
             await ctx.send(user.mention + ' An unexpected error occurred')
             raise

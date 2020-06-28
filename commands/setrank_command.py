@@ -1,6 +1,6 @@
 from discord.ext import commands
-from database import db_exec, db_fetchall
 from utils import programmes_util
+from datetime import date
 
 
 class SetrankCommand(commands.Cog):
@@ -15,17 +15,19 @@ class SetrankCommand(commands.Cog):
             raise commands.UserInputError
 
         try:
-            user_data_row = db_fetchall('SELECT user_id FROM user_data WHERE user_id = %s', (str(user.id),))
+            user_data_row = await self.bot.db_conn.fetchrow('SELECT user_id FROM user_data WHERE user_id = $1',
+                                                            str(user.id))
 
             if not user_data_row:
-                db_exec('INSERT INTO user_data (user_id, username) VALUES (%s, %s)',
-                        (str(user.id), user.name))
+                await self.bot.db_conn.execute('INSERT INTO user_data (user_id, username) VALUES ($1, $2)',
+                                               str(user.id), user.name)
 
-            db_exec('INSERT INTO ranks (user_id, rank, programme, offer_date) VALUES (%s, %s, %s, %s)',
-                    (user.id, rank_number, programme,
-                     '2020-04-15' if rank_number <= programmes_util.programmes[programme].places else None))
+            await self.bot.db_conn.execute(
+                'INSERT INTO ranks (user_id, rank, programme, offer_date) VALUES ($1, $2, $3, $4)',
+                str(user.id), rank_number, programme,
+                date(2020, 4, 15) if rank_number <= programmes_util.programmes[programme].places else None)
             await ctx.send(user.mention + ' Rank set.')
-        except:
+        except Exception:
             await ctx.send(user.mention + ' Unable to set rank.'
                                           ' If you have already set a rank, try clearing it using '
                                           f'`.clearrank {programme}`')

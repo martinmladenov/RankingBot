@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
 import constants
-from database import db_fetchall, db_exec
 
 
 class UpdateusernamesCommand(commands.Cog):
@@ -24,7 +23,7 @@ class UpdateusernamesCommand(commands.Cog):
             else:
                 raise commands.UserInputError
 
-        user_data_rows = db_fetchall('SELECT user_id, username FROM user_data')
+        user_data_rows = await self.bot.db_conn.fetch('SELECT user_id, username FROM user_data')
 
         guild_members = dict(map(lambda x: (str(x.id), x.name), ctx.guild.members))
 
@@ -49,7 +48,8 @@ class UpdateusernamesCommand(commands.Cog):
                 continue
 
             if save_changes:
-                db_exec('UPDATE user_data SET username = %s WHERE user_id = %s', (actual_username, user_id))
+                await self.bot.db_conn.execute('UPDATE user_data SET username = $1 WHERE user_id = $2', actual_username,
+                                               user_id)
 
             results['success'].append(f'{stored_username} → {actual_username}')
 

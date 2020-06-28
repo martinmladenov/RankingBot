@@ -1,5 +1,4 @@
 from discord.ext import commands
-from database import db_exec, db_fetchall
 
 
 class ToggleprivaterankCommand(commands.Cog):
@@ -11,19 +10,22 @@ class ToggleprivaterankCommand(commands.Cog):
         user = ctx.message.author
 
         try:
-            row = db_fetchall('SELECT is_private FROM user_data WHERE user_id = %s', (str(user.id),))
+            row = await self.bot.db_conn.fetchrow('SELECT is_private FROM user_data WHERE user_id = $1', str(user.id))
 
             if not row:
-                db_exec('INSERT INTO user_data (user_id, username, is_private) VALUES (%s, %s, %s)',
-                        (str(user.id), user.name, True))
+                await self.bot.db_conn.execute(
+                    'INSERT INTO user_data (user_id, username, is_private) VALUES ($1, $2, $3)',
+                    str(user.id), user.name, True)
                 await ctx.send(user.mention + ' Your rank is now hidden from `.ranks`')
                 return
 
-            if not row[0][0]:
-                db_exec('UPDATE user_data SET is_private = %s WHERE user_id = %s', (True, str(user.id)))
+            if not row[0]:
+                await self.bot.db_conn.execute('UPDATE user_data SET is_private = $1 WHERE user_id = $2', True,
+                                               str(user.id))
                 await ctx.send(user.mention + ' Your rank is now hidden from `.ranks`')
             else:
-                db_exec('UPDATE user_data SET is_private = %s WHERE user_id = %s', (False, str(user.id)))
+                await self.bot.db_conn.execute('UPDATE user_data SET is_private = $1 WHERE user_id = $2', False,
+                                               str(user.id))
                 await ctx.send(user.mention + ' Your rank is no longer hidden from `.ranks`')
 
         except:

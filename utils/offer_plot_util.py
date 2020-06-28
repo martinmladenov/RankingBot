@@ -1,19 +1,19 @@
 from datetime import date, datetime
 from matplotlib import pyplot as plt, dates as mdates
 from utils import programmes_util
-from database import db_fetchall
 
 filename = 'offers.png'
 
 
-def generate_graph(programme: programmes_util.Programme):
-    rows = db_fetchall('SELECT m.rank, ud.is_private, m.offer_date FROM '
-                       '(SELECT MAX(rank) as rank, offer_date, programme FROM ranks '
-                       'WHERE programme = %s AND rank > %s AND offer_date IS NOT NULL '
-                       'GROUP BY offer_date, programme) AS m '
-                       'JOIN ranks r ON m.rank = r.rank AND m.offer_date = r.offer_date AND m.programme = r.programme '
-                       'LEFT JOIN user_data ud on r.user_id = ud.user_id '
-                       'ORDER BY m.offer_date', (programme.id, programme.places))
+async def generate_graph(programme: programmes_util.Programme, db_conn):
+    rows = await db_conn.fetch(
+        'SELECT m.rank, ud.is_private, m.offer_date FROM '
+        '(SELECT MAX(rank) as rank, offer_date, programme FROM ranks '
+        'WHERE programme = $1 AND rank > $2 AND offer_date IS NOT NULL '
+        'GROUP BY offer_date, programme) AS m '
+        'JOIN ranks r ON m.rank = r.rank AND m.offer_date = r.offer_date AND m.programme = r.programme '
+        'LEFT JOIN user_data ud on r.user_id = ud.user_id '
+        'ORDER BY m.offer_date', programme.id, programme.places)
 
     x_values = [date(2020, 4, 15)]
     y_values = [programme.places]

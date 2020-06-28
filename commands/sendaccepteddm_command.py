@@ -73,7 +73,7 @@ class SendaccepteddmCommand(commands.Cog):
                 results['not-server-member'].append(member)
                 continue
 
-            programme_id = dm_util.get_member_programme(member, university)
+            programme_id = await dm_util.get_member_programme(member, university, self.bot.db_conn)
 
             if not programme_id:
                 results['unknown-programme'].append(member)
@@ -81,7 +81,7 @@ class SendaccepteddmCommand(commands.Cog):
 
             try:
                 result = await dm_util.send_programme_rank_dm(
-                    member, programmes_util.programmes[programme_id], send_messages, results)
+                    member, programmes_util.programmes[programme_id], send_messages, results, self.bot.db_conn)
 
                 if result:
                     results['success'].append(member)

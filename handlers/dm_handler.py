@@ -1,13 +1,7 @@
 import discord
 from discord.ext import commands
 from datetime import datetime
-from database import db_fetchall, db_exec
 from utils import dm_util
-
-
-def save_received_dm(user_id: str, content: str, success):
-    db_exec('INSERT INTO received_dms (user_id, message, success, timestamp) VALUES (%s, %s, %s, %s)',
-            (user_id, content, success, datetime.utcnow()))
 
 
 class DmHandler(commands.Cog):
@@ -21,21 +15,26 @@ class DmHandler(commands.Cog):
 
         user_id = message.author.id
 
-        user_data_row = db_fetchall('SELECT user_id, dm_status, dm_programme FROM user_data WHERE user_id = %s',
-                                    (str(user_id),))
+        user_data_row = await self.bot.db_conn.fetchrow('SELECT user_id, dm_status, dm_programme FROM user_data '
+                                                        'WHERE user_id = $1', str(user_id))
 
-        if not user_data_row or user_data_row[0][1] is None:
-            save_received_dm(user_id, message.content, None)
+        if not user_data_row or user_data_row[1] is None:
+            await self.save_received_dm(user_id, message.content, None)
             return
 
-        dm_status = user_data_row[0][1]
-        dm_programme = user_data_row[0][2]
+        dm_status = user_data_row[1]
+        dm_programme = user_data_row[2]
 
         result = False
         if dm_status == dm_util.DmStatus.AWAITING_RANK:
-            result = await dm_util.handle_awaiting_rank(message, dm_programme)
+            result = await dm_util.handle_awaiting_rank(message, dm_programme, self.bot.db_conn)
 
-        save_received_dm(user_id, message.content, result)
+        await self.save_received_dm(user_id, message.content, result)
+
+    async def save_received_dm(self, user_id: str, content: str, success):
+        await self.bot.db_conn.execute(
+            'INSERT INTO received_dms (user_id, message, success, timestamp) VALUES ($1, $2, $3, $4)',
+            user_id, content, success, datetime.utcnow())
 
 
 def setup(bot):

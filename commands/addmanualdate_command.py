@@ -1,5 +1,4 @@
 from discord.ext import commands
-from database import db_exec
 from utils import programmes_util, offer_date_util
 
 
@@ -26,8 +25,8 @@ class AddmanualdateCommand(commands.Cog):
         offer_date = offer_date_util.parse_offer_date(day, month)
 
         try:
-            db_exec('INSERT INTO ranks (rank, programme, offer_date) VALUES (%s, %s, %s)',
-                    (rank_number, programme, offer_date))
+            await self.bot.db_conn.execute('INSERT INTO ranks (rank, programme, offer_date) VALUES ($1, $2, $3)',
+                                           rank_number, programme, offer_date)
             await ctx.send(user.mention + ' Rank and offer date added.')
         except:
             await ctx.send(user.mention + ' Unable to add offer date.')
