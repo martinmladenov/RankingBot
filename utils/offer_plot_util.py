@@ -44,7 +44,7 @@ async def generate_graph(programme: programmes_util.Programme, db_conn):
             y_values.append(rank)
 
         x_values.append(datetime.utcnow().date())
-        y_values.append(rows[len(rows) - 1][0])
+        y_values.append(y_values[len(y_values) - 1])
 
     fill_between_end = programme.places - (y_values[len(y_values) - 1] - programme.places) / 15
     bottom_limit = fill_between_end - (y_values[len(y_values) - 1] - fill_between_end) / 40
