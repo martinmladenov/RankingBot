@@ -13,10 +13,10 @@ class DmHandler(commands.Cog):
         if message.author.bot or message.channel.type != discord.ChannelType.private or message.content.startswith('.'):
             return
 
-        user_id = message.author.id
+        user_id = str(message.author.id)
 
         user_data_row = await self.bot.db_conn.fetchrow('SELECT user_id, dm_status, dm_programme FROM user_data '
-                                                        'WHERE user_id = $1', str(user_id))
+                                                        'WHERE user_id = $1', user_id)
 
         if not user_data_row or user_data_row[1] is None:
             await self.save_received_dm(user_id, message.content, None)

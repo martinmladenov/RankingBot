@@ -142,7 +142,7 @@ async def handle_awaiting_rank(message: discord.Message, dm_programme: str, db_c
                                   parsed_date, str(message.author.id), dm_programme)
         else:
             await db_conn.execute('INSERT INTO ranks (user_id, rank, programme, offer_date) VALUES ($1, $2, $3, $4)',
-                                  message.author.id, parsed_rank, dm_programme, parsed_date)
+                                  str(message.author.id), parsed_rank, dm_programme, parsed_date)
 
         await db_conn.execute('UPDATE user_data SET is_private = TRUE, dm_programme = NULL, dm_status = NULL '
                               'WHERE user_id = $1', str(message.author.id))
@@ -161,6 +161,7 @@ async def handle_awaiting_rank(message: discord.Message, dm_programme: str, db_c
                                    '100 and you\'ve received an offer on 15 April, type `100 15 April`._')
     except:
         await message.channel.send('Sorry, an unexpected error occurred while processing your response.')
+        raise
 
     return False
 
