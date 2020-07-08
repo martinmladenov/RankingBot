@@ -1,5 +1,6 @@
 from discord.ext import commands
 from utils import programmes_util
+from services import ranks_service
 
 
 class ClearrankCommand(commands.Cog):
@@ -10,25 +11,21 @@ class ClearrankCommand(commands.Cog):
     async def clearrank(self, ctx, programme: str):
         user = ctx.message.author
 
-        if programme == 'all':
-            clear_all = True
-        elif programme in programmes_util.programmes:
-            clear_all = False
-        else:
+        if programme is None:
             raise commands.UserInputError
 
-        try:
+        if programme == 'all':
+            programme = None
 
-            if clear_all:
-                await self.bot.db_conn.execute('DELETE FROM ranks WHERE user_id = $1', str(user.id))
-            else:
-                await self.bot.db_conn.execute('DELETE FROM ranks WHERE user_id = $1 AND programme = $2',
-                                               str(user.id), programme)
+        async with self.bot.db_conn.acquire() as connection:
+            ranks = ranks_service.RanksService(connection)
 
-            await ctx.send(user.mention + ' Rank cleared.')
-        except:
-            await ctx.send(user.mention + ' An error occurred while clearing your rank.')
-            raise
+            try:
+                await ranks.delete_rank(str(user.id), programme)
+            except ValueError:
+                raise commands.UserInputError
+
+        await ctx.send(user.mention + ' Rank cleared.')
 
     @clearrank.error
     async def info_error(self, ctx, error):
