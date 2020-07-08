@@ -1,6 +1,6 @@
 from datetime import date
 from utils import programmes_util
-from services.errors.invalid_operation_error import InvalidOperationError
+from services.errors.entry_already_exists_error import EntryAlreadyExistsError
 
 
 class RanksService:
@@ -14,7 +14,7 @@ class RanksService:
         curr_rank = await self.db_conn.fetchrow('SELECT rank FROM ranks WHERE user_id = $1 AND programme = $2',
                                                 user_id, programme)
         if curr_rank is not None:
-            raise InvalidOperationError
+            raise EntryAlreadyExistsError
 
         if offer_date is None and rank <= programmes_util.programmes[programme].places:
             offer_date = date(2020, 4, 15)

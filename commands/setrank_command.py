@@ -1,7 +1,7 @@
 from discord.ext import commands
 
 from services import ranks_service, user_data_service
-from services.errors.invalid_operation_error import InvalidOperationError
+from services.errors.entry_already_exists_error import EntryAlreadyExistsError
 from utils import programmes_util
 
 
@@ -26,7 +26,7 @@ class SetrankCommand(commands.Cog):
                     await ranks.add_rank(user_id, rank_number, programme)
                 except ValueError:
                     raise commands.UserInputError
-                except InvalidOperationError:
+                except EntryAlreadyExistsError:
                     await ctx.send(user.mention + ' You have already set your ranking number. To set a different one, '
                                                   f'clear it using `.clearrank {programme}` and try setting it again.')
                     await tr.rollback()

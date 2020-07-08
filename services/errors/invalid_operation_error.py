@@ -1,2 +1,0 @@
-class InvalidOperationError(RuntimeError):
-    pass
