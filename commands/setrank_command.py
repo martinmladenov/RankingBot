@@ -23,7 +23,7 @@ class SetrankCommand(commands.Cog):
 
             try:
                 try:
-                    await ranks.add_rank(user_id, rank_number, programme)
+                    await ranks.add_rank(rank_number, programme, user_id)
                 except ValueError:
                     raise commands.UserInputError
                 except EntryAlreadyExistsError:

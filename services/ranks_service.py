@@ -7,14 +7,15 @@ class RanksService:
     def __init__(self, db_conn):
         self.db_conn = db_conn
 
-    async def add_rank(self, user_id: str, rank: int, programme: str, offer_date: date = None):
+    async def add_rank(self, rank: int, programme: str, user_id: str = None, offer_date: date = None):
         if rank <= 0 or rank >= 10000 or programme not in programmes_util.programmes:
             raise ValueError
 
-        curr_rank = await self.db_conn.fetchrow('SELECT rank FROM ranks WHERE user_id = $1 AND programme = $2',
-                                                user_id, programme)
-        if curr_rank is not None:
-            raise EntryAlreadyExistsError
+        if user_id is not None:
+            curr_rank = await self.db_conn.fetchrow('SELECT rank FROM ranks WHERE user_id = $1 AND programme = $2',
+                                                    user_id, programme)
+            if curr_rank is not None:
+                raise EntryAlreadyExistsError
 
         if offer_date is None and rank <= programmes_util.programmes[programme].places:
             offer_date = date(2020, 4, 15)
