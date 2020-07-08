@@ -1,6 +1,7 @@
 from datetime import date
 from utils import programmes_util
 from services.errors.entry_already_exists_error import EntryAlreadyExistsError
+from services.errors.date_incorrect_error import DateIncorrectError
 
 
 class RanksService:
@@ -17,8 +18,11 @@ class RanksService:
             if curr_rank is not None:
                 raise EntryAlreadyExistsError
 
-        if offer_date is None and rank <= programmes_util.programmes[programme].places:
-            offer_date = date(2020, 4, 15)
+        if rank <= programmes_util.programmes[programme].places:
+            if offer_date is None:
+                offer_date = date(2020, 4, 15)
+            else:
+                raise DateIncorrectError
 
         await self.db_conn.execute(
             'INSERT INTO ranks (user_id, rank, programme, offer_date) VALUES ($1, $2, $3, $4)',

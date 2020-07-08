@@ -1,6 +1,7 @@
 from discord.ext import commands
 from utils import programmes_util, offer_date_util
 from services import ranks_service
+from services.errors.date_incorrect_error import DateIncorrectError
 
 
 class AddmanualdateCommand(commands.Cog):
@@ -27,14 +28,15 @@ class AddmanualdateCommand(commands.Cog):
                 await ranks.add_rank(rank_number, programme, offer_date=offer_date)
 
                 if rank_number <= programmes_util.programmes[programme].places:
-                    await ctx.send(user.mention + ' There\'s no need to set this offer date as this rank is '
-                                                  'within the programme limit.')
-                    await tr.rollback()
-                    return
+                    raise DateIncorrectError
 
                 await tr.commit()
                 await ctx.send(user.mention + ' Rank and offer date added.')
 
+            except DateIncorrectError:
+                await tr.rollback()
+                await ctx.send(user.mention + ' There\'s no need to set this offer date as this rank is '
+                                              'within the programme limit.')
             except:
                 await tr.rollback()
                 raise
