@@ -1,4 +1,5 @@
 from discord.ext import commands
+from services import user_data_service
 
 
 class ToggleprivaterankCommand(commands.Cog):
@@ -8,28 +9,20 @@ class ToggleprivaterankCommand(commands.Cog):
     @commands.command()
     async def toggleprivaterank(self, ctx):
         user = ctx.message.author
+        user_id = str(user.id)
 
-        try:
-            row = await self.bot.db_conn.fetchrow('SELECT is_private FROM user_data WHERE user_id = $1', str(user.id))
+        async with self.bot.db_conn.acquire() as connection:
+            users = user_data_service.UserDataService(connection)
 
-            if not row:
-                await self.bot.db_conn.execute(
-                    'INSERT INTO user_data (user_id, username, is_private) VALUES ($1, $2, $3)',
-                    str(user.id), user.name, True)
-                await ctx.send(user.mention + ' Your rank is now hidden from `.ranks`')
+            is_private = await users.get_is_private(user_id)
+
+            if is_private is None:
+                await ctx.send(user.mention + ' You haven\'t set your ranking number yet.')
                 return
 
-            if not row[0]:
-                await self.bot.db_conn.execute('UPDATE user_data SET is_private = $1 WHERE user_id = $2', True,
-                                               str(user.id))
-                await ctx.send(user.mention + ' Your rank is now hidden from `.ranks`')
-            else:
-                await self.bot.db_conn.execute('UPDATE user_data SET is_private = $1 WHERE user_id = $2', False,
-                                               str(user.id))
-                await ctx.send(user.mention + ' Your rank is no longer hidden from `.ranks`')
+            await users.set_is_private(user_id, not is_private)
 
-        except:
-            await ctx.send(user.mention + ' An error occurred while executing the command')
+            await ctx.send(user.mention + f' Your rank is {"no longer" if is_private else "now"} hidden from `.ranks`')
 
     @toggleprivaterank.error
     async def info_error(self, ctx, error):
