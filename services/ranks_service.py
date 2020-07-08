@@ -2,6 +2,7 @@ from datetime import date
 from utils import programmes_util
 from services.errors.entry_already_exists_error import EntryAlreadyExistsError
 from services.errors.date_incorrect_error import DateIncorrectError
+from services.errors.entry_not_found_error import EntryNotFoundError
 
 
 class RanksService:
@@ -36,3 +37,19 @@ class RanksService:
                 raise ValueError
             await self.db_conn.execute('DELETE FROM ranks WHERE user_id = $1 AND programme = $2',
                                        user_id, programme)
+
+    async def set_offer_date(self, user_id: str, programme: str, offer_date: date):
+        if programme not in programmes_util.programmes:
+            raise ValueError
+
+        rank = await self.db_conn.fetchval('SELECT rank FROM ranks WHERE user_id = $1 AND programme = $2',
+                                           user_id, programme)
+
+        if not rank:
+            raise EntryNotFoundError
+
+        if rank <= programmes_util.programmes[programme].places:
+            raise DateIncorrectError
+
+        await self.db_conn.execute('UPDATE ranks SET offer_date = $1 WHERE user_id = $2 AND programme = $3',
+                                   offer_date, user_id, programme)
