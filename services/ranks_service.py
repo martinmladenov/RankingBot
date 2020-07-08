@@ -22,3 +22,12 @@ class RanksService:
         await self.db_conn.execute(
             'INSERT INTO ranks (user_id, rank, programme, offer_date) VALUES ($1, $2, $3, $4)',
             user_id, rank, programme, offer_date)
+
+    async def delete_rank(self, user_id: str, programme: str):
+        if programme is None:
+            await self.db_conn.execute('DELETE FROM ranks WHERE user_id = $1', user_id)
+        else:
+            if programme not in programmes_util.programmes:
+                raise ValueError
+            await self.db_conn.execute('DELETE FROM ranks WHERE user_id = $1 AND programme = $2',
+                                       user_id, programme)
