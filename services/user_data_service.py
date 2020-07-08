@@ -12,3 +12,12 @@ class UserDataService:
                                    user_id, username)
 
         return True
+
+    async def get_is_private(self, user_id: str) -> bool:
+        is_private = await self.db_conn.fetchval('SELECT is_private FROM user_data WHERE user_id = $1',
+                                                 user_id)
+        return is_private
+
+    async def set_is_private(self, user_id: str, is_private: bool):
+        await self.db_conn.execute('UPDATE user_data SET is_private = $1 WHERE user_id = $2',
+                                   is_private, user_id)
