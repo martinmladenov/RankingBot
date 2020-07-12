@@ -75,6 +75,10 @@ async def generate_graph(programme: programmes_util.Programme, db_conn):
     plt.title(f'{programme.uni_name} {programme.display_name}', color='w')
     ax.set_ylim(bottom=bottom_limit)
 
+    # only show every second week
+    for label in ax.get_xaxis().get_ticklabels()[1::2]:
+        label.set_visible(False)
+
     plt.savefig(filename, facecolor=bg_color)
     plt.close()
 
