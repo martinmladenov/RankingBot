@@ -1,6 +1,7 @@
 from discord.ext import commands
 import discord
 from utils import programmes_util
+from services import ranks_service
 
 
 class RanksCommand(commands.Cog):
@@ -9,15 +10,9 @@ class RanksCommand(commands.Cog):
 
     @commands.command()
     async def ranks(self, ctx):
-        rows = await self.bot.db_conn.fetch('SELECT username, rank, programme FROM ranks '
-                                            'JOIN user_data ON ranks.user_id = user_data.user_id '
-                                            'WHERE (is_private IS NULL OR is_private = FALSE) AND username IS NOT NULL '
-                                            'ORDER BY rank ASC')
-
-        curr_programmes = set(map(lambda x: x[2], rows))
-        grouped_ranks = [(p, [row for row in rows if row[2] == p]) for p in curr_programmes]
-
-        grouped_ranks.sort(key=lambda g: len(g[1]), reverse=True)
+        async with self.bot.db_conn.acquire() as connection:
+            ranks = ranks_service.RanksService(connection)
+            grouped_ranks = await ranks.get_top_ranks()
 
         is_bot_channel = not ctx.guild or 'bot' in ctx.message.channel.name
 
