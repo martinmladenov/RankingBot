@@ -53,3 +53,16 @@ class RanksService:
 
         await self.db_conn.execute('UPDATE ranks SET offer_date = $1 WHERE user_id = $2 AND programme = $3',
                                    offer_date, user_id, programme)
+
+    async def get_top_ranks(self):
+        rows = await self.db_conn.fetch('SELECT username, rank, programme FROM ranks '
+                                        'JOIN user_data ON ranks.user_id = user_data.user_id '
+                                        'WHERE (is_private IS NULL OR is_private = FALSE) AND username IS NOT NULL '
+                                        'ORDER BY rank ASC')
+
+        curr_programmes = set(map(lambda x: x[2], rows))
+        grouped_ranks = [(p, [row for row in rows if row[2] == p]) for p in curr_programmes]
+
+        grouped_ranks.sort(key=lambda g: len(g[1]), reverse=True)
+
+        return grouped_ranks
