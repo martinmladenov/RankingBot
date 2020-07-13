@@ -25,3 +25,7 @@ class UserDataService:
     async def get_all_users(self):
         users = await self.db_conn.fetch('SELECT user_id, username FROM user_data')
         return users
+
+    async def set_username(self, user_id: str, new_username: str):
+        await self.db_conn.execute('UPDATE user_data SET username = $1 WHERE user_id = $2',
+                                   new_username, user_id)
