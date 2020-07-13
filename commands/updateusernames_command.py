@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import constants
+from services import user_data_service
 
 
 class UpdateusernamesCommand(commands.Cog):
@@ -23,35 +24,36 @@ class UpdateusernamesCommand(commands.Cog):
             else:
                 raise commands.UserInputError
 
-        user_data_rows = await self.bot.db_conn.fetch('SELECT user_id, username FROM user_data')
+        async with self.bot.db_conn.acquire() as connection:
+            users_service = user_data_service.UserDataService(connection)
+            users = await users_service.get_all_users()
 
-        guild_members = dict(map(lambda x: (str(x.id), x.name), ctx.guild.members))
+            guild_members = dict(map(lambda x: (str(x.id), x.name), ctx.guild.members))
 
-        await ctx.send(ctx.message.author.mention + f' Checking {len(user_data_rows)} users...')
+            await ctx.send(ctx.message.author.mention + f' Checking {len(users)} users...')
 
-        results = {
-            'success': [],
-            'user-not-found': []
-        }
+            results = {
+                'success': [],
+                'user-not-found': []
+            }
 
-        for user_data_row in user_data_rows:
-            user_id = user_data_row[0]
-            stored_username = user_data_row[1]
+            for user in users:
+                user_id = user[0]
+                stored_username = user[1]
 
-            if user_id not in guild_members.keys():
-                results['user-not-found'].append(f'{stored_username} ({user_id})')
-                continue
+                if user_id not in guild_members.keys():
+                    results['user-not-found'].append(f'{stored_username} ({user_id})')
+                    continue
 
-            actual_username = guild_members[user_id]
+                actual_username = guild_members[user_id]
 
-            if stored_username == actual_username:
-                continue
+                if stored_username == actual_username:
+                    continue
 
-            if save_changes:
-                await self.bot.db_conn.execute('UPDATE user_data SET username = $1 WHERE user_id = $2', actual_username,
-                                               user_id)
+                if save_changes:
+                    await users_service.set_username(user_id, actual_username)
 
-            results['success'].append(f'{stored_username} → {actual_username}')
+                results['success'].append(f'{stored_username} → {actual_username}')
 
         await ctx.send(ctx.message.author.mention + ' Done checking users, '
                                                     f'{len(results["success"])} usernames updated')
