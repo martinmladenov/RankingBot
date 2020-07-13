@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
-from utils import dm_util, programmes_util
+from utils import programmes_util
+from services import dm_service
 import constants
 from datetime import datetime, timedelta
 
@@ -27,41 +28,44 @@ class SendreminderdmCommand(commands.Cog):
 
         date = datetime.utcnow() - timedelta(days=age_days)
 
-        user_data_rows = await self.bot.db_conn.fetch('SELECT user_id, dm_programme, username FROM user_data '
-                                                      'WHERE dm_status = $1 '
-                                                      'AND dm_last_sent <= $2',
-                                                      dm_util.DmStatus.AWAITING_RANK, date)
+        async with self.bot.db_conn.acquire() as connection:
+            dm = dm_service.DMService(connection)
 
-        await ctx.send(ctx.message.author.mention + f' Sending DMs to {len(user_data_rows)} users...')
+            user_data_rows = await self.bot.db_conn.fetch('SELECT user_id, dm_programme, username FROM user_data '
+                                                          'WHERE dm_status = $1 '
+                                                          'AND dm_last_sent <= $2',
+                                                          dm.DmStatus.AWAITING_RANK, date)
 
-        results = {
-            'success': [],
-            'user-not-found': [],
-            'unhandled-exception': [],
-            'cannot-send-dm': [],
-        }
+            await ctx.send(ctx.message.author.mention + f' Sending DMs to {len(user_data_rows)} users...')
 
-        for user_data_row in user_data_rows:
-            user_id = user_data_row[0]
-            programme_id = user_data_row[1]
-            username = user_data_row[2]
+            results = {
+                'success': [],
+                'user-not-found': [],
+                'unhandled-exception': [],
+                'cannot-send-dm': [],
+            }
 
-            try:
-                user = self.bot.get_user(int(user_id))
+            for user_data_row in user_data_rows:
+                user_id = user_data_row[0]
+                programme_id = user_data_row[1]
+                username = user_data_row[2]
 
-                if not user:
-                    results['user-not-found'].append(f'{username} ({user_id})')
-                    continue
+                try:
+                    user = self.bot.get_user(int(user_id))
 
-                result = True
-                if send_messages:
-                    result = await dm_util.send_programme_rank_reminder_dm(
-                        user, programmes_util.programmes[programme_id], self.bot.db_conn)
+                    if not user:
+                        results['user-not-found'].append(f'{username} ({user_id})')
+                        continue
 
-                results['success' if result else 'cannot-send-dm'].append(f'{username}: {programme_id}')
-            except Exception as e:
-                print(f'an error occurred while sending message to {username}: {str(e)}')
-                results['unhandled-exception'].append(f'{username} ({user_id})')
+                    result = True
+                    if send_messages:
+                        result = await dm.send_programme_rank_reminder_dm(
+                            user, programmes_util.programmes[programme_id])
+
+                    results['success' if result else 'cannot-send-dm'].append(f'{username}: {programme_id}')
+                except Exception as e:
+                    print(f'an error occurred while sending message to {username}: {str(e)}')
+                    results['unhandled-exception'].append(f'{username} ({user_id})')
 
         await ctx.send(ctx.message.author.mention + f' Done sending DMs, '
                                                     f'{len(user_data_rows) - len(results["success"])} skipped')
