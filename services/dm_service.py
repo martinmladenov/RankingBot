@@ -72,6 +72,13 @@ class DMService:
 
         return True
 
+    async def get_users_with_active_dm_sent_before_date(self, max_datetime: datetime):
+        users = await self.db_conn.fetch('SELECT user_id, dm_programme, username FROM user_data '
+                                         'WHERE dm_status = $1 '
+                                         'AND dm_last_sent <= $2',
+                                         self.DmStatus.AWAITING_RANK, max_datetime)
+        return users
+
     async def send_programme_rank_reminder_dm(self, user: discord.User, programme: programmes_util.Programme):
         user_id = user.id
 
