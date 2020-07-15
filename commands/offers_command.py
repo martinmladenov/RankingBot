@@ -18,21 +18,13 @@ class OffersCommand(commands.Cog):
 
             return
 
-        rows = await self.bot.db_conn.fetch(
-            'select r.programme, r.rank, MAX(d.offer_date), ud.is_private '
-            'from (select programme, max(rank) as rank from ranks '
-            'where ranks.offer_date is not null '
-            'group by programme) as r '
-            'inner join ranks as d '
-            'on r.programme = d.programme and r.rank = d.rank '
-            'and d.offer_date is not null '
-            'left join user_data ud on d.user_id = ud.user_id '
-            'group by r.programme, r.rank, ud.is_private '
-            'order by MAX(d.offer_date) desc')
+        async with self.bot.db_conn.acquire() as connection:
+            offers_svc = offers_service.OffersService(connection)
+            offers = await offers_svc.get_highest_ranks_with_offers()
 
         embed = discord.Embed(title="Highest known ranks with offers", color=0x36bee6)
 
-        for offer in rows:
+        for offer in offers:
             programme = programmes_util.programmes[offer[0]]
             rank = offer[1]
             date_str = offer_date_util.format_offer_date(offer[2])
@@ -43,7 +35,7 @@ class OffersCommand(commands.Cog):
                                   f' on {date_str}',
                             inline=True)
 
-        any_rounded = any(map(lambda x: x[3] is True, rows))
+        any_rounded = any(map(lambda x: x[3] is True, offers))
 
         embed.add_field(name='_This data has been provided by server members.' +
                              (' Some ranking numbers (as indicated '
