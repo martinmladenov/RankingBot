@@ -31,12 +31,9 @@ class SendreminderdmCommand(commands.Cog):
         async with self.bot.db_conn.acquire() as connection:
             dm = dm_service.DMService(connection)
 
-            user_data_rows = await self.bot.db_conn.fetch('SELECT user_id, dm_programme, username FROM user_data '
-                                                          'WHERE dm_status = $1 '
-                                                          'AND dm_last_sent <= $2',
-                                                          dm.DmStatus.AWAITING_RANK, date)
+            user_data_arr = await dm.get_users_with_active_dm_sent_before_date(date)
 
-            await ctx.send(ctx.message.author.mention + f' Sending DMs to {len(user_data_rows)} users...')
+            await ctx.send(ctx.message.author.mention + f' Sending DMs to {len(user_data_arr)} users...')
 
             results = {
                 'success': [],
@@ -45,10 +42,10 @@ class SendreminderdmCommand(commands.Cog):
                 'cannot-send-dm': [],
             }
 
-            for user_data_row in user_data_rows:
-                user_id = user_data_row[0]
-                programme_id = user_data_row[1]
-                username = user_data_row[2]
+            for user_data in user_data_arr:
+                user_id = user_data[0]
+                programme_id = user_data[1]
+                username = user_data[2]
 
                 try:
                     user = self.bot.get_user(int(user_id))
@@ -68,7 +65,7 @@ class SendreminderdmCommand(commands.Cog):
                     results['unhandled-exception'].append(f'{username} ({user_id})')
 
         await ctx.send(ctx.message.author.mention + f' Done sending DMs, '
-                                                    f'{len(user_data_rows) - len(results["success"])} skipped')
+                                                    f'{len(user_data_arr) - len(results["success"])} skipped')
 
         if not results['success']:
             return
