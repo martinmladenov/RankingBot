@@ -82,6 +82,20 @@ class OffersService:
         plt.savefig(filename, facecolor=bg_color)
         plt.close()
 
+    async def get_highest_ranks_with_offers(self):
+        offers = await self.db_conn.fetch(
+            'select r.programme, r.rank, MAX(d.offer_date), ud.is_private '
+            'from (select programme, max(rank) as rank from ranks '
+            'where ranks.offer_date is not null '
+            'group by programme) as r '
+            'inner join ranks as d '
+            'on r.programme = d.programme and r.rank = d.rank '
+            'and d.offer_date is not null '
+            'left join user_data ud on d.user_id = ud.user_id '
+            'group by r.programme, r.rank, ud.is_private '
+            'order by MAX(d.offer_date) desc')
+        return offers
+
 
 def round_rank(number, base=5):
     return base * round(number / base)
