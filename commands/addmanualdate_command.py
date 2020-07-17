@@ -1,5 +1,6 @@
 from discord.ext import commands
-from utils import programmes_util, offer_date_util
+from utils import offer_date_util
+from helpers import programmes_helper
 from services import ranks_service
 from services.errors.date_incorrect_error import DateIncorrectError
 
@@ -27,7 +28,7 @@ class AddmanualdateCommand(commands.Cog):
             try:
                 await ranks.add_rank(rank_number, programme, offer_date=offer_date)
 
-                if rank_number <= programmes_util.programmes[programme].places:
+                if rank_number <= programmes_helper.programmes[programme].places:
                     raise DateIncorrectError
 
                 await tr.commit()
@@ -47,7 +48,7 @@ class AddmanualdateCommand(commands.Cog):
         if isinstance(error, commands.UserInputError) \
                 or isinstance(error, commands.CommandInvokeError) and isinstance(error.original, ValueError):
             await ctx.send(
-                user.mention + f' Invalid arguments. Usage: `.addmanualdate <{programmes_util.get_ids_string()}> '
+                user.mention + f' Invalid arguments. Usage: `.addmanualdate <{programmes_helper.get_ids_string()}> '
                                '<rank> <day> <month>`')
         else:
             await ctx.send(user.mention + ' An unexpected error occurred')

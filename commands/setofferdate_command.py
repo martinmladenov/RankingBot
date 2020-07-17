@@ -1,6 +1,6 @@
 from discord.ext import commands
 from utils.offer_date_util import parse_offer_date
-from utils import programmes_util
+from helpers import programmes_helper
 from services import ranks_service
 from services.errors.entry_not_found_error import EntryNotFoundError
 from services.errors.date_incorrect_error import DateIncorrectError
@@ -23,7 +23,7 @@ class SetofferdateCommand(commands.Cog):
                 await ranks.set_offer_date(str(user.id), programme, offer_date)
             except EntryNotFoundError:
                 await ctx.send(user.mention + ' Before setting an offer date, please set your rank first using '
-                                              f'`.setrank <rank> <{programmes_util.get_ids_string()}>`')
+                                              f'`.setrank <rank> <{programmes_helper.get_ids_string()}>`')
                 return
             except DateIncorrectError:
                 await ctx.send(user.mention + ' There\'s no need to set the offer date as your rank is within the '
@@ -38,7 +38,7 @@ class SetofferdateCommand(commands.Cog):
         if isinstance(error, commands.UserInputError) \
                 or isinstance(error, commands.CommandInvokeError) and isinstance(error.original, ValueError):
             await ctx.send(user.mention + f' Invalid arguments. Usage: `.setofferdate <day> <month> '
-                                          f'<{programmes_util.get_ids_string()}>`')
+                                          f'<{programmes_helper.get_ids_string()}>`')
         else:
             await ctx.send(user.mention + ' An unexpected error occurred')
             raise

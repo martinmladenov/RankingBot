@@ -1,6 +1,7 @@
 import discord
 from enum import IntEnum, Enum
-from utils import programmes_util, offer_date_util
+from utils import offer_date_util
+from helpers import programmes_helper
 from datetime import datetime, date
 import re
 
@@ -9,7 +10,7 @@ class DMService:
     def __init__(self, db_conn):
         self.db_conn = db_conn
 
-    async def send_programme_rank_dm(self, member: discord.Member, programme: programmes_util.Programme,
+    async def send_programme_rank_dm(self, member: discord.Member, programme: programmes_helper.Programme,
                                      send_messages: bool,
                                      results):
         programme_id = programme.id
@@ -79,7 +80,7 @@ class DMService:
                                          self.DmStatus.AWAITING_RANK, max_datetime)
         return users
 
-    async def send_programme_rank_reminder_dm(self, user: discord.User, programme: programmes_util.Programme):
+    async def send_programme_rank_reminder_dm(self, user: discord.User, programme: programmes_helper.Programme):
         user_id = user.id
 
         message = '**Hello {0}!**\n' \
@@ -134,7 +135,7 @@ class DMService:
                                            'an offer on 15 April, type `100 15 April`._')
                 return False
 
-            if parsed_rank <= programmes_util.programmes[dm_programme].places and parsed_date != date(2020, 4, 15):
+            if parsed_rank <= programmes_helper.programmes[dm_programme].places and parsed_date != date(2020, 4, 15):
                 await message.channel.send('Sorry, the ranking number you provided is within the programme limit '
                                            'but the offer date is different from 15 April, when everyone with such '
                                            'ranking numbers received their offers. Please check your ranking '

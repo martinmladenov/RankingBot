@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from matplotlib import pyplot as plt, dates as mdates
-from utils import programmes_util
+from helpers import programmes_helper
 
 filename = 'offers.png'
 
@@ -9,7 +9,7 @@ class OffersService:
     def __init__(self, db_conn):
         self.db_conn = db_conn
 
-    async def generate_graph(self, programme: programmes_util.Programme):
+    async def generate_graph(self, programme: programmes_helper.Programme):
         rows = await self.db_conn.fetch(
             'SELECT m.rank, ud.is_private, m.offer_date FROM '
             '(SELECT MAX(rank) as rank, offer_date, programme FROM ranks '

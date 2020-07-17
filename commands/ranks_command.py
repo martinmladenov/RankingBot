@@ -1,6 +1,6 @@
 from discord.ext import commands
 import discord
-from utils import programmes_util
+from helpers import programmes_helper
 from services import ranks_service
 
 
@@ -28,7 +28,7 @@ class RanksCommand(commands.Cog):
         embed = discord.Embed(title="Ranking numbers", color=0x36bee6)
 
         for group in grouped_ranks:
-            programme = programmes_util.programmes[group[0]]
+            programme = programmes_helper.programmes[group[0]]
             embed.add_field(name=f'**{programme.icon} {programme.uni_name}\n{programme.display_name.ljust(33, " ")}**',
                             value=('\n'.join(('`' + (' ' * (3 - len(str(x[1])))) + str(x[1]) + f' {x[0]}`')
                                              for x in group[1])) +
@@ -45,7 +45,7 @@ class RanksCommand(commands.Cog):
         embed.add_field(name='_Please note: This bot is purely for fun, the ranking numbers do not'
                              ' represent performance at university_',
                         value=f'To view all commands, type `.help`\n'
-                              f'To set your ranking number, type `.setrank <rank> <{programmes_util.get_ids_string()}>`',
+                              f'To set your ranking number, type `.setrank <rank> <{programmes_helper.get_ids_string()}>`',
                         inline=False)
 
         await ctx.send(embed=embed)

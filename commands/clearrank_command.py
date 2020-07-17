@@ -1,5 +1,5 @@
 from discord.ext import commands
-from utils import programmes_util
+from helpers import programmes_helper
 from services import ranks_service
 
 
@@ -32,7 +32,7 @@ class ClearrankCommand(commands.Cog):
         user = ctx.message.author
         if isinstance(error, commands.UserInputError):
             await ctx.send(
-                user.mention + f' Invalid arguments. Usage: `.clearrank <all/{programmes_util.get_ids_string()}>`')
+                user.mention + f' Invalid arguments. Usage: `.clearrank <all/{programmes_helper.get_ids_string()}>`')
         else:
             await ctx.send(user.mention + ' An unexpected error occurred')
             raise

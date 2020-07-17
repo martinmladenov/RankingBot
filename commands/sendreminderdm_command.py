@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
-from utils import programmes_util, response_building_util
+from utils import response_building_util
+from helpers import programmes_helper
 from services import dm_service
 import constants
 from datetime import datetime, timedelta
@@ -57,7 +58,7 @@ class SendreminderdmCommand(commands.Cog):
                     key = True
                     if send_messages:
                         key = await dm.send_programme_rank_reminder_dm(
-                            user, programmes_util.programmes[programme_id])
+                            user, programmes_helper.programmes[programme_id])
 
                     results['success' if key else 'cannot-send-dm'].append(f'{username}: {programme_id}')
                 except Exception as e:

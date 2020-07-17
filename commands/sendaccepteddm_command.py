@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
-from utils import programmes_util, response_building_util
+from utils import response_building_util
+from helpers import programmes_helper
 from services import dm_service
 import constants
 
@@ -85,7 +86,7 @@ class SendaccepteddmCommand(commands.Cog):
 
                 try:
                     key = await dm.send_programme_rank_dm(
-                        member, programmes_util.programmes[programme_id], send_messages, results)
+                        member, programmes_helper.programmes[programme_id], send_messages, results)
 
                     if key:
                         results['success'].append(member)

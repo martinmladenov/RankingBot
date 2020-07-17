@@ -2,7 +2,7 @@ from discord.ext import commands
 
 from services import ranks_service, user_data_service
 from services.errors.entry_already_exists_error import EntryAlreadyExistsError
-from utils import programmes_util
+from helpers import programmes_helper
 
 
 class SetrankCommand(commands.Cog):
@@ -46,7 +46,7 @@ class SetrankCommand(commands.Cog):
         user = ctx.message.author
         if isinstance(error, commands.UserInputError):
             await ctx.send(
-                user.mention + f' Invalid arguments. Usage: `.setrank <rank> <{programmes_util.get_ids_string()}>`')
+                user.mention + f' Invalid arguments. Usage: `.setrank <rank> <{programmes_helper.get_ids_string()}>`')
         else:
             await ctx.send(user.mention + ' An unexpected error occurred')
             raise
