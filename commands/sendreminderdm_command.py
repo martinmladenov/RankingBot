@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from utils import programmes_util
+from utils import programmes_util, response_building_util
 from services import dm_service
 import constants
 from datetime import datetime, timedelta
@@ -54,12 +54,12 @@ class SendreminderdmCommand(commands.Cog):
                         results['user-not-found'].append(f'{username} ({user_id})')
                         continue
 
-                    result = True
+                    key = True
                     if send_messages:
-                        result = await dm.send_programme_rank_reminder_dm(
+                        key = await dm.send_programme_rank_reminder_dm(
                             user, programmes_util.programmes[programme_id])
 
-                    results['success' if result else 'cannot-send-dm'].append(f'{username}: {programme_id}')
+                    results['success' if key else 'cannot-send-dm'].append(f'{username}: {programme_id}')
                 except Exception as e:
                     print(f'an error occurred while sending message to {username}: {str(e)}')
                     results['unhandled-exception'].append(f'{username} ({user_id})')
@@ -72,9 +72,12 @@ class SendreminderdmCommand(commands.Cog):
 
         results_embed = discord.Embed(title=f".sendreminderdm results", color=0x36bee6)
 
-        for result in results.keys():
-            user_string = '\n'.join(f'`{u}`' for u in results[result]) if results[result] else '_None_'
-            results_embed.add_field(name=result, value=user_string, inline=True)
+        user_groups = dict()
+
+        for key in results.keys():
+            user_groups[key] = list(f'`{u}`' for u in results[key]) if results[key] else ['_None_']
+
+        response_building_util.build_embed_groups(results_embed, user_groups)
 
         if dry_run:
             results_embed.set_footer(text='dry run: not sending DMs')
