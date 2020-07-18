@@ -1,6 +1,7 @@
 from discord.ext import commands
 import discord
-from utils import programmes_util
+from helpers import programmes_helper
+from services import ranks_service
 
 
 class RanksCommand(commands.Cog):
@@ -9,15 +10,9 @@ class RanksCommand(commands.Cog):
 
     @commands.command()
     async def ranks(self, ctx):
-        rows = await self.bot.db_conn.fetch('SELECT username, rank, programme FROM ranks '
-                                            'JOIN user_data ON ranks.user_id = user_data.user_id '
-                                            'WHERE (is_private IS NULL OR is_private = FALSE) AND username IS NOT NULL '
-                                            'ORDER BY rank ASC')
-
-        curr_programmes = set(map(lambda x: x[2], rows))
-        grouped_ranks = [(p, [row for row in rows if row[2] == p]) for p in curr_programmes]
-
-        grouped_ranks.sort(key=lambda g: len(g[1]), reverse=True)
+        async with self.bot.db_conn.acquire() as connection:
+            ranks = ranks_service.RanksService(connection)
+            grouped_ranks = await ranks.get_top_ranks()
 
         is_bot_channel = not ctx.guild or 'bot' in ctx.message.channel.name
 
@@ -33,7 +28,7 @@ class RanksCommand(commands.Cog):
         embed = discord.Embed(title="Ranking numbers", color=0x36bee6)
 
         for group in grouped_ranks:
-            programme = programmes_util.programmes[group[0]]
+            programme = programmes_helper.programmes[group[0]]
             embed.add_field(name=f'**{programme.icon} {programme.uni_name}\n{programme.display_name.ljust(33, " ")}**',
                             value=('\n'.join(('`' + (' ' * (3 - len(str(x[1])))) + str(x[1]) + f' {x[0]}`')
                                              for x in group[1])) +
@@ -50,7 +45,7 @@ class RanksCommand(commands.Cog):
         embed.add_field(name='_Please note: This bot is purely for fun, the ranking numbers do not'
                              ' represent performance at university_',
                         value=f'To view all commands, type `.help`\n'
-                              f'To set your ranking number, type `.setrank <rank> <{programmes_util.get_ids_string()}>`',
+                              f'To set your ranking number, type `.setrank <rank> <{programmes_helper.get_ids_string()}>`',
                         inline=False)
 
         await ctx.send(embed=embed)

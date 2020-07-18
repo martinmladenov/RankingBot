@@ -1,6 +1,9 @@
 from discord.ext import commands
 from utils.offer_date_util import parse_offer_date
-from utils import programmes_util
+from helpers import programmes_helper
+from services import ranks_service
+from services.errors.entry_not_found_error import EntryNotFoundError
+from services.errors.date_incorrect_error import DateIncorrectError
 
 
 class SetofferdateCommand(commands.Cog):
@@ -11,30 +14,23 @@ class SetofferdateCommand(commands.Cog):
     async def setofferdate(self, ctx, day: str, month: str, programme: str):
         user = ctx.message.author
 
-        if programme not in programmes_util.programmes:
-            raise commands.UserInputError
-
         offer_date = parse_offer_date(day, month)
 
-        try:
-            rank = await self.bot.db_conn.fetchval('SELECT rank FROM ranks WHERE user_id = $1 AND programme = $2',
-                                                   str(user.id), programme)
+        async with self.bot.db_conn.acquire() as connection:
+            ranks = ranks_service.RanksService(connection)
 
-            if not rank:
+            try:
+                await ranks.set_offer_date(str(user.id), programme, offer_date)
+            except EntryNotFoundError:
                 await ctx.send(user.mention + ' Before setting an offer date, please set your rank first using '
-                                              f'`.setrank <rank> <{programmes_util.get_ids_string()}>`')
+                                              f'`.setrank <rank> <{programmes_helper.get_ids_string()}>`')
                 return
-
-            if rank <= programmes_util.programmes[programme].places:
+            except DateIncorrectError:
                 await ctx.send(user.mention + ' There\'s no need to set the offer date as your rank is within the '
                                               'programme limit.')
                 return
 
-            await self.bot.db_conn.execute('UPDATE ranks SET offer_date = $1 WHERE user_id = $2 AND programme = $3',
-                                           offer_date, str(user.id), programme)
-            await ctx.send(user.mention + ' Offer date set. Thank you.')
-        except:
-            await ctx.send(user.mention + ' An error occurred while setting offer date.')
+        await ctx.send(user.mention + ' Offer date set. Thank you.')
 
     @setofferdate.error
     async def info_error(self, ctx, error):
@@ -42,7 +38,7 @@ class SetofferdateCommand(commands.Cog):
         if isinstance(error, commands.UserInputError) \
                 or isinstance(error, commands.CommandInvokeError) and isinstance(error.original, ValueError):
             await ctx.send(user.mention + f' Invalid arguments. Usage: `.setofferdate <day> <month> '
-                                          f'<{programmes_util.get_ids_string()}>`')
+                                          f'<{programmes_helper.get_ids_string()}>`')
         else:
             await ctx.send(user.mention + ' An unexpected error occurred')
             raise

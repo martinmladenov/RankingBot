@@ -1,0 +1,2 @@
+class DateIncorrectError(RuntimeError):
+    pass

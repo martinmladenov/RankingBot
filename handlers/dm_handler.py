@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
-from datetime import datetime
-from utils import dm_util
+from services import dm_service, received_dms_service
 
 
 class DmHandler(commands.Cog):
@@ -15,26 +14,25 @@ class DmHandler(commands.Cog):
 
         user_id = str(message.author.id)
 
-        user_data_row = await self.bot.db_conn.fetchrow('SELECT user_id, dm_status, dm_programme FROM user_data '
-                                                        'WHERE user_id = $1', user_id)
+        async with self.bot.db_conn.acquire() as connection:
+            dm = dm_service.DMService(connection)
+            received_dms = received_dms_service.ReceivedDMsService(connection)
 
-        if not user_data_row or user_data_row[1] is None:
-            await self.save_received_dm(user_id, message.content, None)
-            return
+            user_data_row = await self.bot.db_conn.fetchrow('SELECT user_id, dm_status, dm_programme FROM user_data '
+                                                            'WHERE user_id = $1', user_id)
 
-        dm_status = user_data_row[1]
-        dm_programme = user_data_row[2]
+            if not user_data_row or user_data_row[1] is None:
+                await received_dms.add_dm(user_id, message.content)
+                return
 
-        result = False
-        if dm_status == dm_util.DmStatus.AWAITING_RANK:
-            result = await dm_util.handle_awaiting_rank(message, dm_programme, self.bot.db_conn)
+            dm_status = user_data_row[1]
+            dm_programme = user_data_row[2]
 
-        await self.save_received_dm(user_id, message.content, result)
+            result = False
+            if dm_status == dm.DmStatus.AWAITING_RANK:
+                result = await dm.handle_awaiting_rank(message, dm_programme)
 
-    async def save_received_dm(self, user_id: str, content: str, success):
-        await self.bot.db_conn.execute(
-            'INSERT INTO received_dms (user_id, message, success, timestamp) VALUES ($1, $2, $3, $4)',
-            user_id, content, success, datetime.utcnow())
+            await received_dms.add_dm(user_id, message.content, result)
 
 
 def setup(bot):
