@@ -11,13 +11,10 @@ class OffersService:
 
     async def generate_graph(self, programme: programmes_helper.Programme, step: bool):
         rows = await self.db_conn.fetch(
-            'SELECT m.rank, ud.is_private, m.offer_date FROM '
-            '(SELECT MAX(rank) as rank, offer_date, programme FROM ranks '
+            'SELECT rank, is_private, offer_date FROM ranks '
+            'LEFT JOIN user_data ON ranks.user_id = user_data.user_id '
             'WHERE programme = $1 AND rank > $2 AND offer_date IS NOT NULL '
-            'GROUP BY offer_date, programme) AS m '
-            'JOIN ranks r ON m.rank = r.rank AND m.offer_date = r.offer_date AND m.programme = r.programme '
-            'LEFT JOIN user_data ud on r.user_id = ud.user_id '
-            'ORDER BY m.offer_date', programme.id, programme.places)
+            'ORDER BY offer_date, rank', programme.id, programme.places)
 
         x_values = [date(2020, 4, 15)]
         y_values = [programme.places]
