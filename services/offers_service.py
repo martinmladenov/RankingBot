@@ -86,7 +86,7 @@ class OffersService:
         for label in ax.get_xaxis().get_ticklabels()[1::2]:
             label.set_visible(False)
 
-        plt.savefig(filename, facecolor=bg_color)
+        plt.savefig(filename, facecolor=bg_color, dpi=200)
         plt.close()
 
     async def get_highest_ranks_with_offers(self):
