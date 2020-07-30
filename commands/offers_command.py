@@ -10,12 +10,13 @@ class OffersCommand(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def offers(self, ctx, programme_id: str = None):
+    async def offers(self, ctx, programme_id: str = None, graph_type: str = None):
         if programme_id is not None:
-            if programme_id not in programmes_helper.programmes:
+            if programme_id not in programmes_helper.programmes or \
+                    (graph_type is not None and graph_type != 'step'):
                 raise commands.UserInputError
 
-            await self.send_graph(ctx, programmes_helper.programmes[programme_id])
+            await self.send_graph(ctx, programmes_helper.programmes[programme_id], graph_type == 'step')
 
             return
 
@@ -53,15 +54,16 @@ class OffersCommand(commands.Cog):
     async def info_error(self, ctx, error):
         user = ctx.message.author
         if isinstance(error, commands.UserInputError):
-            await ctx.send(user.mention + f' Invalid arguments. Usage: `.offers [{programmes_helper.get_ids_string()}]`')
+            await ctx.send(user.mention + f' Invalid arguments. Usage: `.offers [{programmes_helper.get_ids_string()}] '
+                                          f'[step]`')
         else:
             await ctx.send(user.mention + ' An unexpected error occurred')
             raise
 
-    async def send_graph(self, ctx, programme: programmes_helper.Programme):
+    async def send_graph(self, ctx, programme: programmes_helper.Programme, step: bool):
         async with self.bot.db_conn.acquire() as connection:
             offers = offers_service.OffersService(connection)
-            await offers.generate_graph(programme)
+            await offers.generate_graph(programme, step)
         image = discord.File(offers_service.filename)
         await ctx.send(file=image)
 

@@ -9,7 +9,7 @@ class OffersService:
     def __init__(self, db_conn):
         self.db_conn = db_conn
 
-    async def generate_graph(self, programme: programmes_helper.Programme):
+    async def generate_graph(self, programme: programmes_helper.Programme, step: bool):
         rows = await self.db_conn.fetch(
             'SELECT m.rank, ud.is_private, m.offer_date FROM '
             '(SELECT MAX(rank) as rank, offer_date, programme FROM ranks '
@@ -54,6 +54,7 @@ class OffersService:
         bottom_limit = fill_between_end - (y_values[len(y_values) - 1] - fill_between_end) / 40
 
         bg_color = '#36393F'
+        fg_color = '#1f77b4'
 
         plt.rcParams['ytick.color'] = 'w'
         plt.rcParams['xtick.color'] = 'w'
@@ -74,8 +75,13 @@ class OffersService:
         ax.set_axisbelow(True)
         plt.grid(color='#444444', linestyle='--')
 
-        plt.step(x_values, y_values, where='post')
-        plt.fill_between(x_values, y_values, y2=fill_between_end, step="post", alpha=0.35)
+        if not step:
+            plt.plot(x_values, y_values, linestyle='--', color=fg_color)
+            plt.fill_between(x_values, y_values, y2=fill_between_end, alpha=0.15, color=fg_color)
+
+        plt.step(x_values, y_values, where='post', alpha=(0.5 if not step else None), color=fg_color)
+        plt.fill_between(x_values, y_values, y2=fill_between_end, step="post", alpha=(0.20 if not step else 0.35),
+                         color=fg_color)
         plt.title(f'{programme.uni_name} {programme.display_name}', color='w')
         ax.set_ylim(bottom=bottom_limit)
 
