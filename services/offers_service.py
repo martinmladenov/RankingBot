@@ -44,7 +44,8 @@ class OffersService:
                 x_values.append(offer_date)
                 y_values.append(rank)
 
-            x_values.append(datetime.utcnow().date())
+            #x_values.append(datetime.utcnow().date())
+            x_values.append(date(2020, 8, 15))
             y_values.append(y_values[len(y_values) - 1])
 
         fill_between_end = programme.places - (y_values[len(y_values) - 1] - programme.places) / 15
