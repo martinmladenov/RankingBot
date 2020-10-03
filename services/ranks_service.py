@@ -66,3 +66,14 @@ class RanksService:
         grouped_ranks.sort(key=lambda g: len(g[1]), reverse=True)
 
         return grouped_ranks
+
+    async def get_is_private(self, user_id: str) -> bool:
+        is_private = await self.db_conn.fetchval('SELECT is_private FROM ranks '
+                                                 'WHERE user_id = $1',
+                                                 user_id)
+        return is_private
+
+    async def set_is_private(self, user_id: str, is_private: bool):
+        await self.db_conn.execute('UPDATE ranks SET is_private = $1 '
+                                   'WHERE user_id = $2',
+                                   is_private, user_id)

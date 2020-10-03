@@ -1,5 +1,5 @@
 from discord.ext import commands
-from services import user_data_service
+from services import ranks_service
 
 
 class ToggleprivaterankCommand(commands.Cog):
@@ -12,15 +12,15 @@ class ToggleprivaterankCommand(commands.Cog):
         user_id = str(user.id)
 
         async with self.bot.db_conn.acquire() as connection:
-            users = user_data_service.UserDataService(connection)
+            ranks = ranks_service.RanksService(connection)
 
-            is_private = await users.get_is_private(user_id)
+            is_private = await ranks.get_is_private(user_id)
 
             if is_private is None:
                 await ctx.send(user.mention + ' You haven\'t set your ranking number yet.')
                 return
 
-            await users.set_is_private(user_id, not is_private)
+            await ranks.set_is_private(user_id, not is_private)
 
             await ctx.send(user.mention + f' Your rank is {"no longer" if is_private else "now"} hidden from `.ranks`')
 
