@@ -12,7 +12,6 @@ class OffersService:
     async def generate_graph(self, programme: programmes_helper.Programme, step: bool):
         rows = await self.db_conn.fetch(
             'SELECT rank, is_private, offer_date FROM ranks '
-            'LEFT JOIN user_data ON ranks.user_id = user_data.user_id '
             'WHERE programme = $1 AND rank > $2 AND offer_date IS NOT NULL '
             'ORDER BY offer_date, rank', programme.id, programme.places)
 
@@ -92,15 +91,14 @@ class OffersService:
 
     async def get_highest_ranks_with_offers(self):
         offers = await self.db_conn.fetch(
-            'select r.programme, r.rank, MAX(d.offer_date), ud.is_private '
+            'select r.programme, r.rank, MAX(d.offer_date), d.is_private '
             'from (select programme, max(rank) as rank from ranks '
             'where ranks.offer_date is not null '
             'group by programme) as r '
             'inner join ranks as d '
             'on r.programme = d.programme and r.rank = d.rank '
             'and d.offer_date is not null '
-            'left join user_data ud on d.user_id = ud.user_id '
-            'group by r.programme, r.rank, ud.is_private '
+            'group by r.programme, r.rank, d.is_private '
             'order by MAX(d.offer_date) desc')
         return offers
 
