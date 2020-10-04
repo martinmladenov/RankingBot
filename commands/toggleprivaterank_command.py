@@ -7,20 +7,20 @@ class ToggleprivaterankCommand(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def toggleprivaterank(self, ctx):
+    async def toggleprivaterank(self, ctx, programme: str):
         user = ctx.message.author
         user_id = str(user.id)
 
         async with self.bot.db_conn.acquire() as connection:
             ranks = ranks_service.RanksService(connection)
 
-            is_private = await ranks.get_is_private(user_id)
+            is_private = await ranks.get_is_private_programme(user_id, programme)
 
             if is_private is None:
                 await ctx.send(user.mention + ' You haven\'t set your ranking number yet.')
                 return
 
-            await ranks.set_is_private(user_id, not is_private)
+            await ranks.set_is_private_programme(user_id, not is_private, programme)
 
             await ctx.send(user.mention + f' Your rank is {"no longer" if is_private else "now"} hidden from `.ranks`')
 
