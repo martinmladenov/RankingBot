@@ -74,6 +74,9 @@ class RanksService:
         return is_private
 
     async def get_is_private_programme(self, user_id: str, programme: str) -> bool:
+        if programme not in programmes_helper.programmes:
+            raise ValueError
+
         is_private = await self.db_conn.fetchval('SELECT is_private FROM ranks '
                                                  'WHERE user_id = $1 AND programme = $2',
                                                  user_id, programme)

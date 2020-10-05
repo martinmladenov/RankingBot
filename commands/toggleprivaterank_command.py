@@ -14,9 +14,14 @@ class ToggleprivaterankCommand(commands.Cog):
         async with self.bot.db_conn.acquire() as connection:
             ranks = ranks_service.RanksService(connection)
 
-            is_private = await ranks.get_is_private_programme(user_id, programme)
+            is_private = await ranks.get_is_private(user_id)
 
             if is_private is None:
+                await ctx.send(user.mention + ' You haven\'t set your ranking number yet.')
+                return
+
+            is_private_programme = await ranks.get_is_private_programme(user_id, programme)
+            if is_private_programme is None:
                 await ctx.send(user.mention + ' You haven\'t set your ranking number yet.')
                 return
 
@@ -27,8 +32,8 @@ class ToggleprivaterankCommand(commands.Cog):
     @toggleprivaterank.error
     async def info_error(self, ctx, error):
         user = ctx.message.author
-        if isinstance(error, commands.UserInputError):
-            await ctx.send(user.mention + f' Invalid arguments. Usage: `.toggleprivaterank`')
+        if isinstance(error, commands.UserInputError) or isinstance(error, ValueError):
+            await ctx.send(user.mention + f' Invalid arguments. Usage: `.toggleprivaterank <programme>`')
         else:
             await ctx.send(user.mention + ' An unexpected error occurred')
             raise
