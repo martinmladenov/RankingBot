@@ -71,6 +71,7 @@ class RanksService:
         is_private = await self.db_conn.fetchval('SELECT is_private FROM ranks '
                                                  'WHERE user_id = $1',
                                                  user_id)
+        return is_private
 
     async def get_is_private_programme(self, user_id: str, programme: str) -> bool:
         is_private = await self.db_conn.fetchval('SELECT is_private FROM ranks '
