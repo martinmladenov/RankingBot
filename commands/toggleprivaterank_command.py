@@ -18,8 +18,8 @@ class ToggleprivaterankCommand(commands.Cog):
 
             is_private = await ranks.get_is_private(user_id)
 
-            if is_private is None:
-                await ctx.send(user.mention + ' You haven\'t set your ranking number yet.')
+            if await ranks.get_has_only_one_rank(user_id):
+                await ranks.set_is_private(user_id, not is_private)
                 return
 
             is_private_programme = await ranks.get_is_private_programme(user_id, programme)
