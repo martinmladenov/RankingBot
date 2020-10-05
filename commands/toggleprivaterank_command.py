@@ -1,4 +1,6 @@
 from discord.ext import commands
+
+from helpers import programmes_helper
 from services import ranks_service
 
 
@@ -33,7 +35,8 @@ class ToggleprivaterankCommand(commands.Cog):
     async def info_error(self, ctx, error):
         user = ctx.message.author
         if isinstance(error, commands.UserInputError) or isinstance(error, ValueError):
-            await ctx.send(user.mention + f' Invalid arguments. Usage: `.toggleprivaterank <programme>`')
+            await ctx.send(user.mention + f' Invalid arguments. Usage: `.toggleprivaterank '
+                                          f'<{programmes_helper.get_ids_string()}>`')
         else:
             await ctx.send(user.mention + ' An unexpected error occurred')
             raise
