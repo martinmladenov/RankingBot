@@ -73,7 +73,27 @@ class RanksService:
                                                  user_id)
         return is_private
 
+    async def get_has_only_one_rank(self, user_id: str) -> bool:
+        is_private = await self.db_conn.fetchval('SELECT COUNT(is_private) FROM ranks '
+                                                 'WHERE user_id = $1',
+                                                 user_id)
+        return is_private == 1
+
+    async def get_is_private_programme(self, user_id: str, programme: str) -> bool:
+        if programme not in programmes_helper.programmes:
+            raise ValueError
+
+        is_private = await self.db_conn.fetchval('SELECT is_private FROM ranks '
+                                                 'WHERE user_id = $1 AND programme = $2',
+                                                 user_id, programme)
+        return is_private
+
     async def set_is_private(self, user_id: str, is_private: bool):
         await self.db_conn.execute('UPDATE ranks SET is_private = $1 '
                                    'WHERE user_id = $2',
                                    is_private, user_id)
+
+    async def set_is_private_programme(self, user_id: str, is_private: bool, programme: str):
+        await self.db_conn.execute('UPDATE ranks SET is_private = $1 '
+                                   'WHERE user_id = $2 AND programme = $3',
+                                   is_private, user_id, programme)
