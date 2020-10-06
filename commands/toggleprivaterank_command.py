@@ -9,7 +9,7 @@ class ToggleprivaterankCommand(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def toggleprivaterank(self, ctx, programme: str):
+    async def toggleprivaterank(self, ctx, programme: str = None):
         user = ctx.message.author
         user_id = str(user.id)
 
@@ -18,7 +18,7 @@ class ToggleprivaterankCommand(commands.Cog):
 
             is_private = await ranks.get_is_private(user_id)
 
-            if await ranks.get_has_only_one_rank(user_id):
+            if programme is None and await ranks.get_has_only_one_rank(user_id):
                 await ranks.set_is_private(user_id, not is_private)
                 return
 
