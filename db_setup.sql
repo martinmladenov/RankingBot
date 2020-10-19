@@ -6,6 +6,7 @@ create table ranks
     programme  varchar(15) not null,
     offer_date DATE,
     is_private boolean     not null default false,
+    source     varchar(25),
     UNIQUE (user_id, programme)
 );
 
