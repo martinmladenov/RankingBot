@@ -4,9 +4,7 @@ from utils import offer_date_util
 from helpers import programmes_helper
 from datetime import datetime, date
 import re
-import sys
-sys.path.insert(1,'/path/to/application/app/folder')
-from constants import year
+import constants
 
 class DMService:
     def __init__(self, db_conn):

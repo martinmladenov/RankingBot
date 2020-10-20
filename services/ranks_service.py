@@ -3,9 +3,7 @@ from helpers import programmes_helper
 from services.errors.entry_already_exists_error import EntryAlreadyExistsError
 from services.errors.date_incorrect_error import DateIncorrectError
 from services.errors.entry_not_found_error import EntryNotFoundError
-import sys
-sys.path.insert(1,'/path/to/application/app/folder')
-from constants import year
+import constants
 
 class RanksService:
     def __init__(self, db_conn):
