@@ -11,7 +11,7 @@ class RanksService:
         self.db_conn = db_conn
 
     async def add_rank(self, rank: int, programme: str, user_id: str = None, offer_date: date = None,
-                       source: str = None):
+                       source: str = None, is_private: bool = False):
         if rank <= 0 or rank >= 10000 or programme not in programmes_helper.programmes:
             raise ValueError
 
@@ -28,8 +28,9 @@ class RanksService:
                 raise DateIncorrectError
 
         await self.db_conn.execute(
-            'INSERT INTO ranks (user_id, rank, programme, offer_date, source) VALUES ($1, $2, $3, $4, $5)',
-            user_id, rank, programme, offer_date, source)
+            'INSERT INTO ranks (user_id, rank, programme, offer_date, is_private, source) '
+            'VALUES ($1, $2, $3, $4, $5, $6)',
+            user_id, rank, programme, offer_date, is_private, source)
 
     async def delete_rank(self, user_id: str, programme: str):
         if programme is None:

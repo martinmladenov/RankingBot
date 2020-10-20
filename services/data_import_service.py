@@ -68,13 +68,10 @@ class DataImportService:
                 try:
                     await ranks.add_rank(ranking_number, programme.id, discord_id,
                                          offer_date if ranking_number > programme.places else None,
-                                         source)
+                                         source, is_private)
                 except EntryAlreadyExistsError:
                     skipped += 1
                     continue
-
-                if is_private:
-                    await ranks.set_is_private_programme(discord_id, True, programme.id)
 
                 inserted += 1
 
