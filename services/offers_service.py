@@ -1,8 +1,10 @@
 from datetime import date, datetime
 from matplotlib import pyplot as plt, dates as mdates
 from helpers import programmes_helper
+import sys
+sys.path.insert(1,'/path/to/application/app/folder')
 from constant import year
-from constant import year
+
 
 filename = 'offers.png'
 
