@@ -1,6 +1,8 @@
 from datetime import date, datetime
 from matplotlib import pyplot as plt, dates as mdates
 from helpers import programmes_helper
+import constants
+
 
 filename = 'offers.png'
 
@@ -15,7 +17,7 @@ class OffersService:
             'WHERE programme = $1 AND rank > $2 AND offer_date IS NOT NULL '
             'ORDER BY offer_date, rank', programme.id, programme.places)
 
-        x_values = [date(2020, 4, 15)]
+        x_values = [date(constants.current_year, 4, 15)]
         y_values = [programme.places]
 
         if rows:
@@ -44,7 +46,7 @@ class OffersService:
                 y_values.append(rank)
 
             #x_values.append(datetime.utcnow().date())
-            x_values.append(date(2020, 8, 15))
+            x_values.append(date(constants.current_year, 8, 15))
             y_values.append(y_values[len(y_values) - 1])
 
         fill_between_end = programme.places - (y_values[len(y_values) - 1] - programme.places) / 15

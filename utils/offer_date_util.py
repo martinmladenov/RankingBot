@@ -1,4 +1,5 @@
 from datetime import date
+import constants
 
 months = {
     'apr': 4,
@@ -22,7 +23,7 @@ def parse_offer_date(day: str, month: str):
     else:
         parsed_month = int(month)
 
-    return date(2020, parsed_month, parsed_day)
+    return date(constants.current_year, parsed_month, parsed_day)
 
 
 def format_offer_date(offer_date: date):
