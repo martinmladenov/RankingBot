@@ -29,6 +29,13 @@ programmes = {
         '<:TuE:562730919815807003>',
         325
     ),
+    'tud-nb': Programme(
+        'tud-nb',
+        'Nanobiology',
+        'TU Delft',
+        '<:TUD:555817896203255824>',
+        100
+    ),
 }
 
 
