@@ -5,6 +5,7 @@ from services.errors.date_incorrect_error import DateIncorrectError
 from services.errors.entry_not_found_error import EntryNotFoundError
 import constants
 
+
 class RanksService:
     def __init__(self, db_conn):
         self.db_conn = db_conn
@@ -22,7 +23,7 @@ class RanksService:
 
         if rank <= programmes_helper.programmes[programme].places:
             if offer_date is None:
-                offer_date = date(year, 4, 15)
+                offer_date = date(constants.current_year, 4, 15)
             else:
                 raise DateIncorrectError
 
