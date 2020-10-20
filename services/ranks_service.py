@@ -22,7 +22,7 @@ class RanksService:
 
         if rank <= programmes_helper.programmes[programme].places:
             if offer_date is None:
-                offer_date = date(2020, 4, 15)
+                offer_date = date(year, 4, 15)
             else:
                 raise DateIncorrectError
 

@@ -17,7 +17,7 @@ if __name__ == '__main__':
                 bot.load_extension(full_name)
                 print(f'Loaded {full_name}')
             except (discord.ClientException, ModuleNotFoundError):
-                print(f'Failed to load extension {extension}.')
+                print(f'Failed to load extension {extension}.')  
 
 
 @bot.event
