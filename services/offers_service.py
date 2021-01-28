@@ -3,7 +3,6 @@ from matplotlib import pyplot as plt, dates as mdates
 from helpers import programmes_helper
 import constants
 
-
 filename = 'offers.png'
 
 
@@ -45,7 +44,7 @@ class OffersService:
                 x_values.append(offer_date)
                 y_values.append(rank)
 
-            #x_values.append(datetime.utcnow().date())
+            # x_values.append(datetime.utcnow().date())
             x_values.append(date(constants.current_year, 8, 15))
             y_values.append(y_values[len(y_values) - 1])
 
@@ -73,6 +72,13 @@ class OffersService:
 
         ax.set_axisbelow(True)
         plt.grid(color='#444444', linestyle='--')
+
+        if programme.visa_cutoff is not None:
+            cutoff_date = date(constants.current_year, programme.visa_cutoff[1], programme.visa_cutoff[0])
+            plt.axvline(cutoff_date, ymin=0.02, linestyle='--', alpha=0.7, color=fg_color)
+            plt.text(cutoff_date, y_values[-1], "Non-EU cutoff", rotation='vertical', color=fg_color,
+                     verticalalignment='center_baseline', horizontalalignment='right', stretch='condensed',
+                     fontsize='small', fontweight='ultralight', fontstyle='italic')
 
         if not step:
             plt.plot(x_values, y_values, linestyle='--', color=fg_color)
