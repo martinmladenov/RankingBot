@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from services import dm_service, received_dms_service
+import traceback
 
 
 class DmHandler(commands.Cog):
@@ -22,7 +23,7 @@ class DmHandler(commands.Cog):
                                                             'WHERE user_id = $1', user_id)
 
             if not user_data_row or user_data_row[1] is None:
-                await received_dms.add_dm(user_id, message.content)
+                await received_dms.add_dm(user_id, message.content, False)
                 return
 
             dm_status = user_data_row[1]
@@ -30,7 +31,11 @@ class DmHandler(commands.Cog):
 
             result = False
             if dm_status == dm.DmStatus.AWAITING_RANK:
-                result = await dm.handle_awaiting_rank(message, dm_programme)
+                try:
+                    result = await dm.handle_awaiting_rank(message, dm_programme)
+                except:
+                    result = None
+                    traceback.print_exc()
 
             await received_dms.add_dm(user_id, message.content, result)
 
