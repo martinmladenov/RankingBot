@@ -159,8 +159,9 @@ class DMService:
                                            parsed_date, str(message.author.id), dm_programme)
             else:
                 await self.db_conn.execute(
-                    'INSERT INTO ranks (user_id, rank, programme, offer_date, is_private) VALUES ($1, $2, $3, $4)',
-                    str(message.author.id), parsed_rank, dm_programme, parsed_date, True)
+                    'INSERT INTO ranks (user_id, rank, programme, offer_date, is_private, source) '
+                    'VALUES ($1, $2, $3, $4, $5, $6)',
+                    str(message.author.id), parsed_rank, dm_programme, parsed_date, True, 'dm')
 
             await message.channel.send('**Thank you for the information!**\n'
                                        'We will do our best to put it to good use and help other applicants '
