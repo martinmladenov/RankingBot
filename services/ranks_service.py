@@ -34,14 +34,14 @@ class RanksService:
             'VALUES ($1, $2, $3, $4, $5, $6, $7)',
             user_id, rank, programme, offer_date, is_private, source, year)
 
-    async def delete_rank(self, user_id: str, programme: str):
+    async def delete_rank(self, user_id: str, programme: str, year: int):
         if programme is None:
-            await self.db_conn.execute('DELETE FROM ranks WHERE user_id = $1', user_id)
+            await self.db_conn.execute('DELETE FROM ranks WHERE user_id = $1 AND year = $2', user_id, year)
         else:
             if programme not in programmes_helper.programmes:
                 raise ValueError
-            await self.db_conn.execute('DELETE FROM ranks WHERE user_id = $1 AND programme = $2',
-                                       user_id, programme)
+            await self.db_conn.execute('DELETE FROM ranks WHERE user_id = $1 AND programme = $2 AND year = $3',
+                                       user_id, programme, year)
 
     async def set_offer_date(self, user_id: str, programme: str, offer_date: date):
         if programme not in programmes_helper.programmes:
