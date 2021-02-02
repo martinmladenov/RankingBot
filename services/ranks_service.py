@@ -75,33 +75,33 @@ class RanksService:
 
         return grouped_ranks
 
-    async def get_is_private(self, user_id: str) -> bool:
+    async def get_is_private(self, user_id: str, year: int) -> bool:
         is_private = await self.db_conn.fetchval('SELECT is_private FROM ranks '
-                                                 'WHERE user_id = $1',
-                                                 user_id)
+                                                 'WHERE user_id = $1 AND year = $2',
+                                                 user_id, year)
         return is_private
 
-    async def get_has_only_one_rank(self, user_id: str) -> bool:
+    async def get_has_only_one_rank(self, user_id: str, year: int) -> bool:
         is_private = await self.db_conn.fetchval('SELECT COUNT(is_private) FROM ranks '
-                                                 'WHERE user_id = $1',
-                                                 user_id)
+                                                 'WHERE user_id = $1 AND year = $2',
+                                                 user_id, year)
         return is_private == 1
 
-    async def get_is_private_programme(self, user_id: str, programme: str) -> bool:
+    async def get_is_private_programme(self, user_id: str, programme: str, year: int) -> bool:
         if programme not in programmes_helper.programmes:
             raise ValueError
 
         is_private = await self.db_conn.fetchval('SELECT is_private FROM ranks '
-                                                 'WHERE user_id = $1 AND programme = $2',
-                                                 user_id, programme)
+                                                 'WHERE user_id = $1 AND programme = $2 AND year = $3',
+                                                 user_id, programme, year)
         return is_private
 
-    async def set_is_private(self, user_id: str, is_private: bool):
+    async def set_is_private(self, user_id: str, is_private: bool, year: int):
         await self.db_conn.execute('UPDATE ranks SET is_private = $1 '
-                                   'WHERE user_id = $2',
-                                   is_private, user_id)
+                                   'WHERE user_id = $2 AND year = $3',
+                                   is_private, user_id, year)
 
-    async def set_is_private_programme(self, user_id: str, is_private: bool, programme: str):
+    async def set_is_private_programme(self, user_id: str, is_private: bool, programme: str, year: int):
         await self.db_conn.execute('UPDATE ranks SET is_private = $1 '
-                                   'WHERE user_id = $2 AND programme = $3',
-                                   is_private, user_id, programme)
+                                   'WHERE user_id = $2 AND programme = $3 AND year = $4',
+                                   is_private, user_id, programme, year)
