@@ -43,12 +43,12 @@ class RanksService:
             await self.db_conn.execute('DELETE FROM ranks WHERE user_id = $1 AND programme = $2 AND year = $3',
                                        user_id, programme, year)
 
-    async def set_offer_date(self, user_id: str, programme: str, offer_date: date):
+    async def set_offer_date(self, user_id: str, programme: str, offer_date: date, year: int):
         if programme not in programmes_helper.programmes:
             raise ValueError
 
-        rank = await self.db_conn.fetchval('SELECT rank FROM ranks WHERE user_id = $1 AND programme = $2',
-                                           user_id, programme)
+        rank = await self.db_conn.fetchval('SELECT rank FROM ranks WHERE user_id = $1 AND programme = $2 AND year = $3',
+                                           user_id, programme, year)
 
         if not rank:
             raise EntryNotFoundError
@@ -56,8 +56,9 @@ class RanksService:
         if rank <= programmes_helper.programmes[programme].places:
             raise DateIncorrectError
 
-        await self.db_conn.execute('UPDATE ranks SET offer_date = $1 WHERE user_id = $2 AND programme = $3',
-                                   offer_date, user_id, programme)
+        await self.db_conn.execute('UPDATE ranks SET offer_date = $1 '
+                                   'WHERE user_id = $2 AND programme = $3 AND year = $4',
+                                   offer_date, user_id, programme, year)
 
     async def get_top_ranks(self, year: int):
         rows = await self.db_conn.fetch('SELECT username, rank, programme FROM ranks '
