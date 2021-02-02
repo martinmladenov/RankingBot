@@ -10,7 +10,8 @@ class HelpCommand(commands.Cog):
     async def help(self, ctx):
         await ctx.send(
             '**Commands:**\n'
-            f'`.setrank <rank> <{programmes_helper.get_ids_string()}>` Sets your rank for the specified programme\n'
+            f'`.setrank <rank> <{programmes_helper.get_ids_string()}> [year]` '
+            f'Sets your rank for the specified programme\n'
             f'`.ranks` Displays all ranks\n'
             f'`.offers [{programmes_helper.get_ids_string()}] [step]` Shows the last known ranks which have '
             f'received an offer\n'
