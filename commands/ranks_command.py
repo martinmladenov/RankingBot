@@ -2,6 +2,7 @@ from discord.ext import commands
 import discord
 from helpers import programmes_helper
 from services import ranks_service
+import constants
 
 
 class RanksCommand(commands.Cog):
@@ -9,10 +10,14 @@ class RanksCommand(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def ranks(self, ctx):
+    async def ranks(self, ctx, year: int = None):
+
+        if year is None:
+            year = constants.current_year
+
         async with self.bot.db_conn.acquire() as connection:
             ranks = ranks_service.RanksService(connection)
-            grouped_ranks = await ranks.get_top_ranks()
+            grouped_ranks = await ranks.get_top_ranks(year)
 
         is_bot_channel = not ctx.guild or 'bot' in ctx.message.channel.name
 
@@ -25,7 +30,7 @@ class RanksCommand(commands.Cog):
                 group_truncated[group_name] = len(grouped_ranks[i][1]) - 10
                 grouped_ranks[i] = (group_name, truncated_list)
 
-        embed = discord.Embed(title="Ranking numbers", color=0x36bee6)
+        embed = discord.Embed(title=f"Ranking numbers ({year})", color=0x36bee6)
 
         for group in grouped_ranks:
             programme = programmes_helper.programmes[group[0]]
@@ -54,7 +59,7 @@ class RanksCommand(commands.Cog):
     async def info_error(self, ctx, error):
         user = ctx.message.author
         if isinstance(error, commands.UserInputError):
-            await ctx.send(user.mention + ' Invalid arguments. Usage: `.ranks`')
+            await ctx.send(user.mention + ' Invalid arguments. Usage: `.ranks [year]`')
         else:
             await ctx.send(user.mention + ' An unexpected error occurred')
             raise

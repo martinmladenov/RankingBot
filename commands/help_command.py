@@ -12,7 +12,7 @@ class HelpCommand(commands.Cog):
             '**Commands:**\n'
             f'`.setrank <rank> <{programmes_helper.get_ids_string()}> [year]` '
             f'Sets your rank for the specified programme\n'
-            f'`.ranks` Displays all ranks\n'
+            f'`.ranks [year]` Displays all ranks\n'
             f'`.offers [{programmes_helper.get_ids_string()}] [step]` Shows the last known ranks which have '
             f'received an offer\n'
             f'`.clearrank <all/{programmes_helper.get_ids_string()}>` Clears your rank for the specified programme\n'
