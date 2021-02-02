@@ -3,6 +3,7 @@ from utils import offer_date_util
 from helpers import programmes_helper
 from services import ranks_service
 from services.errors.date_incorrect_error import DateIncorrectError
+import constants
 
 
 class AddmanualdateCommand(commands.Cog):
@@ -10,7 +11,8 @@ class AddmanualdateCommand(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def addmanualdate(self, ctx, programme: str, rank_number: int, day: str, month: str, source: str = None):
+    async def addmanualdate(self, ctx, programme: str, rank_number: int, day: str, month: str, source: str = None,
+                            year: int = None):
         user = ctx.message.author
 
         if not ctx.guild:
@@ -22,6 +24,9 @@ class AddmanualdateCommand(commands.Cog):
         if not source:
             source = 'manual'
 
+        if year is None:
+            year = constants.current_year
+
         async with self.bot.db_conn.acquire() as connection:
             ranks = ranks_service.RanksService(connection)
 
@@ -29,7 +34,7 @@ class AddmanualdateCommand(commands.Cog):
             await tr.start()
 
             try:
-                await ranks.add_rank(rank_number, programme, offer_date=offer_date, source=source)
+                await ranks.add_rank(rank_number, programme, year, offer_date=offer_date, source=source)
 
                 if rank_number <= programmes_helper.programmes[programme].places:
                     raise DateIncorrectError
@@ -52,7 +57,7 @@ class AddmanualdateCommand(commands.Cog):
                 or isinstance(error, commands.CommandInvokeError) and isinstance(error.original, ValueError):
             await ctx.send(
                 user.mention + f' Invalid arguments. Usage: `.addmanualdate <{programmes_helper.get_ids_string()}> '
-                               '<rank> <day> <month> [source]`')
+                               '<rank> <day> <month> [source] [year]`')
         else:
             await ctx.send(user.mention + ' An unexpected error occurred')
             raise

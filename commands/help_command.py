@@ -20,8 +20,8 @@ class HelpCommand(commands.Cog):
             f' an offer on Studielink to help other applicants predict when they might receive one\n'
             f'`.toggleprivaterank <{programmes_helper.get_ids_string()}>` Toggles whether your rank is displayed on '
             f'`.ranks` for the specified programme\n'
-            f'`.addmanualdate <{programmes_helper.get_ids_string()}> <rank> <day> <month> [source]` Manually adds a'
-            f' ranking number and a date without associating them with a user\n'
+            f'`.addmanualdate <{programmes_helper.get_ids_string()}> <rank> <day> <month> [source] [year]` '
+            f'Manually adds a ranking number and a date without associating them with a user\n'
             f'`.help` Displays this message\n'
         )
 
