@@ -3,6 +3,7 @@ import discord
 from utils import offer_date_util
 from helpers import programmes_helper
 from services import offers_service
+import constants
 
 
 class OffersCommand(commands.Cog):
@@ -10,21 +11,24 @@ class OffersCommand(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def offers(self, ctx, programme_id: str = None, graph_type: str = None):
-        if programme_id is not None:
+    async def offers(self, ctx, programme_id: str = None, year: int = None, graph_type: str = None):
+        if year is None:
+            year = constants.current_year
+
+        if programme_id is not None and programme_id != 'all':
             if programme_id not in programmes_helper.programmes or \
                     (graph_type is not None and graph_type != 'step'):
                 raise commands.UserInputError
 
-            await self.send_graph(ctx, programmes_helper.programmes[programme_id], graph_type == 'step')
+            await self.send_graph(ctx, programmes_helper.programmes[programme_id], graph_type == 'step', year)
 
             return
 
         async with self.bot.db_conn.acquire() as connection:
             offers_svc = offers_service.OffersService(connection)
-            offers = await offers_svc.get_highest_ranks_with_offers()
+            offers = await offers_svc.get_highest_ranks_with_offers(year)
 
-        embed = discord.Embed(title="Highest known ranks with offers", color=0x36bee6)
+        embed = discord.Embed(title=f"Highest known ranks with offers ({year})", color=0x36bee6)
 
         for offer in offers:
             programme = programmes_helper.programmes[offer[0]]
@@ -54,16 +58,16 @@ class OffersCommand(commands.Cog):
     async def info_error(self, ctx, error):
         user = ctx.message.author
         if isinstance(error, commands.UserInputError):
-            await ctx.send(user.mention + f' Invalid arguments. Usage: `.offers [{programmes_helper.get_ids_string()}] '
-                                          f'[step]`')
+            await ctx.send(user.mention + f' Invalid arguments. Usage: '
+                                          f'`.offers [all/{programmes_helper.get_ids_string()}] [year] [step]`')
         else:
             await ctx.send(user.mention + ' An unexpected error occurred')
             raise
 
-    async def send_graph(self, ctx, programme: programmes_helper.Programme, step: bool):
+    async def send_graph(self, ctx, programme: programmes_helper.Programme, step: bool, year: int):
         async with self.bot.db_conn.acquire() as connection:
             offers = offers_service.OffersService(connection)
-            await offers.generate_graph(programme, step)
+            await offers.generate_graph(programme, step, year)
         image = discord.File(offers_service.filename)
         await ctx.send(file=image)
 
