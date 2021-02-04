@@ -46,7 +46,7 @@ class DataImportService:
                 discord_tag = row[5].split('#') if len(row[4]) > 0 else None
 
                 # If the ranking number is below the programme limit and discord_tag is null, do not import it
-                if ranking_number <= programme.places and discord_tag is None:
+                if ranking_number <= programme.places[year] and discord_tag is None:
                     skipped += 1
                     continue
 
@@ -62,13 +62,13 @@ class DataImportService:
                     else:
                         print("Can't find user " + row[4])
                         unknown_user += 1
-                        if ranking_number <= programme.places:
+                        if ranking_number <= programme.places[year]:
                             skipped += 1
                             continue
 
                 try:
                     await ranks.add_rank(ranking_number, programme.id, year, discord_id,
-                                         offer_date if ranking_number > programme.places else None,
+                                         offer_date if ranking_number > programme.places[year] else None,
                                          source, is_private)
                 except EntryAlreadyExistsError:
                     skipped += 1

@@ -11,13 +11,16 @@ class OffersService:
         self.db_conn = db_conn
 
     async def generate_graph(self, programme: programmes_helper.Programme, step: bool, year: int):
+        if year not in programme.places:
+            raise ValueError
+
         rows = await self.db_conn.fetch(
             'SELECT rank, is_private, offer_date FROM ranks '
             'WHERE programme = $1 AND rank > $2 AND offer_date IS NOT NULL AND year = $3 '
-            'ORDER BY offer_date, rank', programme.id, programme.places, year)
+            'ORDER BY offer_date, rank', programme.id, programme.places[year], year)
 
         x_values = [date(constants.current_year, 4, 15)]
-        y_values = [programme.places]
+        y_values = [programme.places[year]]
 
         if rows:
             for i in range(len(rows)):
@@ -48,7 +51,7 @@ class OffersService:
             x_values.append(date(constants.current_year, 8, 15))
             y_values.append(y_values[len(y_values) - 1])
 
-        fill_between_end = programme.places - (y_values[len(y_values) - 1] - programme.places) / 15
+        fill_between_end = programme.places[year] - (y_values[len(y_values) - 1] - programme.places[year]) / 15
         bottom_limit = fill_between_end - (y_values[len(y_values) - 1] - fill_between_end) / 40
 
         bg_color = '#36393F'

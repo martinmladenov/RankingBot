@@ -12,8 +12,8 @@ class RanksService:
 
     async def add_rank(self, rank: int, programme: str, year: int, user_id: str = None, offer_date: date = None,
                        source: str = None, is_private: bool = False):
-        # TODO add year validation
-        if rank <= 0 or rank >= 10000 or programme not in programmes_helper.programmes:
+        if rank <= 0 or rank >= 10000 or programme not in programmes_helper.programmes \
+                or year not in programmes_helper.programmes[programme].places:
             raise ValueError
 
         if user_id is not None:
@@ -23,7 +23,7 @@ class RanksService:
             if curr_rank is not None:
                 raise EntryAlreadyExistsError
 
-        if rank <= programmes_helper.programmes[programme].places:
+        if rank <= programmes_helper.programmes[programme].places[year]:
             if offer_date is None:
                 offer_date = date(constants.current_year, 4, 15)
             else:
@@ -44,7 +44,7 @@ class RanksService:
                                        user_id, programme, year)
 
     async def set_offer_date(self, user_id: str, programme: str, offer_date: date, year: int):
-        if programme not in programmes_helper.programmes:
+        if programme not in programmes_helper.programmes or year not in programmes_helper.programmes[programme].places:
             raise ValueError
 
         rank = await self.db_conn.fetchval('SELECT rank FROM ranks WHERE user_id = $1 AND programme = $2 AND year = $3',
@@ -53,7 +53,7 @@ class RanksService:
         if not rank:
             raise EntryNotFoundError
 
-        if rank <= programmes_helper.programmes[programme].places:
+        if rank <= programmes_helper.programmes[programme].places[year]:
             raise DateIncorrectError
 
         await self.db_conn.execute('UPDATE ranks SET offer_date = $1 '

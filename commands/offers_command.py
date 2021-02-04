@@ -20,7 +20,10 @@ class OffersCommand(commands.Cog):
                     (graph_type is not None and graph_type != 'step'):
                 raise commands.UserInputError
 
-            await self.send_graph(ctx, programmes_helper.programmes[programme_id], graph_type == 'step', year)
+            try:
+                await self.send_graph(ctx, programmes_helper.programmes[programme_id], graph_type == 'step', year)
+            except ValueError:
+                raise commands.UserInputError
 
             return
 

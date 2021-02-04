@@ -36,7 +36,7 @@ class AddmanualdateCommand(commands.Cog):
             try:
                 await ranks.add_rank(rank_number, programme, year, offer_date=offer_date, source=source)
 
-                if rank_number <= programmes_helper.programmes[programme].places:
+                if rank_number <= programmes_helper.programmes[programme].places[year]:
                     raise DateIncorrectError
 
                 await tr.commit()

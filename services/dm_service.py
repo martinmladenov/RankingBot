@@ -136,7 +136,7 @@ class DMService:
                                            'an offer on 15 April, type `100 15 April`._')
                 return False
 
-            if parsed_rank <= programmes_helper.programmes[dm_programme].places \
+            if parsed_rank <= programmes_helper.programmes[dm_programme].places[constants.current_year] \
                     and parsed_date != date(constants.current_year, 4, 15):
                 await message.channel.send('Sorry, the ranking number you provided is within the programme limit '
                                            'but the offer date is different from 15 April, when everyone with such '
