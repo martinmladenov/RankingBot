@@ -11,7 +11,7 @@ class OffersCommand(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def offers(self, ctx, programme_id: str = None, year: int = None, graph_type: str = None):
+    async def offers(self, ctx, year: int = None, programme_id: str = None, graph_type: str = None):
         if year is None:
             year = constants.current_year
 
@@ -62,7 +62,7 @@ class OffersCommand(commands.Cog):
         user = ctx.message.author
         if isinstance(error, commands.UserInputError):
             await ctx.send(user.mention + f' Invalid arguments. Usage: '
-                                          f'`.offers [all/{programmes_helper.get_ids_string()}] [year] [step]`')
+                                          f'`.offers [year] [all/{programmes_helper.get_ids_string()}] [step]`')
         else:
             await ctx.send(user.mention + ' An unexpected error occurred')
             raise
