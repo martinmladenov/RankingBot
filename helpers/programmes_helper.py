@@ -1,5 +1,5 @@
 class Programme:
-    def __init__(self, programme_id: str, display_name: str, uni_name: str, icon: str, places: int, visa_cutoff):
+    def __init__(self, programme_id: str, display_name: str, uni_name: str, icon: str, places: dict, visa_cutoff):
         self.id = programme_id
         self.display_name = display_name
         self.uni_name = uni_name
@@ -14,7 +14,7 @@ programmes = {
         'Computer Science and Engineering',
         'TU Delft',
         '<:TUD:555817896203255824>',
-        500,
+        {2020: 500, 2021: 500},
         (15, 6)
     ),
     'tud-ae': Programme(
@@ -22,7 +22,7 @@ programmes = {
         'Aerospace Engineering',
         'TU Delft',
         '<:TUD:555817896203255824>',
-        440,
+        {2020: 440, 2021: 440},
         (15, 6)
     ),
     'tue-cse': Programme(
@@ -30,7 +30,7 @@ programmes = {
         'Computer Science and Engineering',
         'TU Eindhoven',
         '<:TuE:562730919815807003>',
-        325,
+        {2020: 325, 2021: 325},
         None
     ),
     'tud-nb': Programme(
@@ -38,7 +38,7 @@ programmes = {
         'Nanobiology',
         'TU Delft',
         '<:TUD:555817896203255824>',
-        100,
+        {2020: 100, 2021: 120},
         (15, 6)
     ),
 }
