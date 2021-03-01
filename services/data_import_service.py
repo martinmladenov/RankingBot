@@ -13,7 +13,7 @@ class DataImportService:
     async def import_ranks_from_csv(self, csv_data: str, source: str, all_members):
         """
         This method imports data into "ranks" in the following format:
-        programme_id(str),ranking_number(int),offer_date(dd/mm),is_private(bool),discord_tag(Optional;User#1234)
+        programme_id(str),ranking_number(int),offer_date(dd/mm),year(int),is_private(bool),discord_tag(Optional;User#1234)
         :param csv_data: The rows of the CSV, separated by '\n'
         :param all_members: bot.get_all_members()
         :param source: data source
@@ -41,11 +41,12 @@ class DataImportService:
                 ranking_number = int(row[1])
                 offer_date_arr = row[2].split('/')
                 offer_date = offer_date_util.parse_offer_date(offer_date_arr[0], offer_date_arr[1])
-                is_private = row[3].lower() == 'true'
-                discord_tag = row[4].split('#') if len(row[4]) > 0 else None
+                year = int(row[3])
+                is_private = row[4].lower() == 'true'
+                discord_tag = row[5].split('#') if len(row[4]) > 0 else None
 
                 # If the ranking number is below the programme limit and discord_tag is null, do not import it
-                if ranking_number <= programme.places and discord_tag is None:
+                if ranking_number <= programme.places[year] and discord_tag is None:
                     skipped += 1
                     continue
 
@@ -61,13 +62,13 @@ class DataImportService:
                     else:
                         print("Can't find user " + row[4])
                         unknown_user += 1
-                        if ranking_number <= programme.places:
+                        if ranking_number <= programme.places[year]:
                             skipped += 1
                             continue
 
                 try:
-                    await ranks.add_rank(ranking_number, programme.id, discord_id,
-                                         offer_date if ranking_number > programme.places else None,
+                    await ranks.add_rank(ranking_number, programme.id, year, discord_id,
+                                         offer_date if ranking_number > programme.places[year] else None,
                                          source, is_private)
                 except EntryAlreadyExistsError:
                     skipped += 1

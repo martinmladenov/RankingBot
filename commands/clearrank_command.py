@@ -8,7 +8,7 @@ class ClearrankCommand(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def clearrank(self, ctx, programme: str):
+    async def clearrank(self, ctx, programme: str, year: int):
         user = ctx.message.author
 
         if programme is None:
@@ -21,7 +21,7 @@ class ClearrankCommand(commands.Cog):
             ranks = ranks_service.RanksService(connection)
 
             try:
-                await ranks.delete_rank(str(user.id), programme)
+                await ranks.delete_rank(str(user.id), programme, year)
             except ValueError:
                 raise commands.UserInputError
 
@@ -32,7 +32,8 @@ class ClearrankCommand(commands.Cog):
         user = ctx.message.author
         if isinstance(error, commands.UserInputError):
             await ctx.send(
-                user.mention + f' Invalid arguments. Usage: `.clearrank <all/{programmes_helper.get_ids_string()}>`')
+                user.mention + f' Invalid arguments. Usage: '
+                               f'`.clearrank <all/{programmes_helper.get_ids_string()}> <year>`')
         else:
             await ctx.send(user.mention + ' An unexpected error occurred')
             raise

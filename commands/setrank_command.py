@@ -3,6 +3,7 @@ from discord.ext import commands
 from services import ranks_service, user_data_service
 from services.errors.entry_already_exists_error import EntryAlreadyExistsError
 from helpers import programmes_helper
+import constants
 
 
 class SetrankCommand(commands.Cog):
@@ -10,9 +11,12 @@ class SetrankCommand(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def setrank(self, ctx, rank_number: int, programme: str):
+    async def setrank(self, ctx, rank_number: int, programme: str, year: int = None):
         user = ctx.message.author
         user_id = str(user.id)
+
+        if year is None:
+            year = constants.current_year
 
         async with self.bot.db_conn.acquire() as connection:
             ranks = ranks_service.RanksService(connection)
@@ -23,7 +27,7 @@ class SetrankCommand(commands.Cog):
 
             try:
                 try:
-                    await ranks.add_rank(rank_number, programme, user_id, source='command')
+                    await ranks.add_rank(rank_number, programme, year, user_id, source='command')
                 except ValueError:
                     raise commands.UserInputError
                 except EntryAlreadyExistsError:
@@ -46,7 +50,8 @@ class SetrankCommand(commands.Cog):
         user = ctx.message.author
         if isinstance(error, commands.UserInputError):
             await ctx.send(
-                user.mention + f' Invalid arguments. Usage: `.setrank <rank> <{programmes_helper.get_ids_string()}>`')
+                user.mention + f' Invalid arguments. Usage: '
+                               f'`.setrank <rank> <{programmes_helper.get_ids_string()}> [year]`')
         else:
             await ctx.send(user.mention + ' An unexpected error occurred')
             raise

@@ -4,6 +4,7 @@ from helpers import programmes_helper
 from services import ranks_service
 from services.errors.entry_not_found_error import EntryNotFoundError
 from services.errors.date_incorrect_error import DateIncorrectError
+import constants
 
 
 class SetofferdateCommand(commands.Cog):
@@ -11,7 +12,10 @@ class SetofferdateCommand(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def setofferdate(self, ctx, day: str, month: str, programme: str):
+    async def setofferdate(self, ctx, day: str, month: str, programme: str, year: int = None):
+        if year is None:
+            year = constants.current_year
+
         user = ctx.message.author
 
         offer_date = parse_offer_date(day, month)
@@ -20,7 +24,7 @@ class SetofferdateCommand(commands.Cog):
             ranks = ranks_service.RanksService(connection)
 
             try:
-                await ranks.set_offer_date(str(user.id), programme, offer_date)
+                await ranks.set_offer_date(str(user.id), programme, offer_date, year)
             except EntryNotFoundError:
                 await ctx.send(user.mention + ' Before setting an offer date, please set your rank first using '
                                               f'`.setrank <rank> <{programmes_helper.get_ids_string()}>`')
@@ -38,7 +42,7 @@ class SetofferdateCommand(commands.Cog):
         if isinstance(error, commands.UserInputError) \
                 or isinstance(error, commands.CommandInvokeError) and isinstance(error.original, ValueError):
             await ctx.send(user.mention + f' Invalid arguments. Usage: `.setofferdate <day> <month> '
-                                          f'<{programmes_helper.get_ids_string()}>`')
+                                          f'<{programmes_helper.get_ids_string()}> [year]`')
         else:
             await ctx.send(user.mention + ' An unexpected error occurred')
             raise

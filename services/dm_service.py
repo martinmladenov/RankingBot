@@ -18,8 +18,8 @@ class DMService:
         user_id = member.id
 
         rank_row = await self.db_conn.fetchrow(
-            'SELECT rank FROM ranks WHERE user_id = $1 AND programme = $2 AND offer_date IS NOT NULL',
-            str(user_id), programme_id)
+            'SELECT rank FROM ranks WHERE user_id = $1 AND programme = $2 AND offer_date IS NOT NULL AND year = $3',
+            str(user_id), programme_id, constants.current_year)
 
         if rank_row:
             results['rank-already-set'].append(member)
@@ -136,7 +136,7 @@ class DMService:
                                            'an offer on 15 April, type `100 15 April`._')
                 return False
 
-            if parsed_rank <= programmes_helper.programmes[dm_programme].places \
+            if parsed_rank <= programmes_helper.programmes[dm_programme].places[constants.current_year] \
                     and parsed_date != date(constants.current_year, 4, 15):
                 await message.channel.send('Sorry, the ranking number you provided is within the programme limit '
                                            'but the offer date is different from 15 April, when everyone with such '
@@ -144,24 +144,30 @@ class DMService:
                                            'number and date and try again.')
                 return False
 
-            rank = await self.db_conn.fetchval('SELECT rank FROM ranks WHERE user_id = $1 AND programme = $2',
-                                               str(message.author.id), dm_programme)
+            rank = await self.db_conn.fetchval('SELECT rank FROM ranks '
+                                               'WHERE user_id = $1 AND programme = $2 AND year = $3',
+                                               str(message.author.id), dm_programme, constants.current_year)
 
             if rank:
                 if rank != parsed_rank:
                     await message.channel.send(f'It seems that you\'ve already set your ranking number '
                                                f'to **{rank}**. '
-                                               f'If that\'s incorrect, please type `.clearrank {dm_programme}`'
+                                               f'If that\'s incorrect, please type '
+                                               f'`.clearrank {dm_programme} {constants.current_year}` '
                                                f'and reply with `{message.content}` again.')
                     return False
 
-                await self.db_conn.execute('UPDATE ranks SET offer_date = $1 WHERE user_id = $2 AND programme = $3',
-                                           parsed_date, str(message.author.id), dm_programme)
+                await self.db_conn.execute('UPDATE ranks SET offer_date = $1 '
+                                           'WHERE user_id = $2 AND programme = $3 AND year = $4',
+                                           parsed_date, str(message.author.id), dm_programme, constants.current_year)
             else:
                 await self.db_conn.execute(
-                    'INSERT INTO ranks (user_id, rank, programme, offer_date, is_private, source) '
-                    'VALUES ($1, $2, $3, $4, $5, $6)',
-                    str(message.author.id), parsed_rank, dm_programme, parsed_date, True, 'dm')
+                    'INSERT INTO ranks (user_id, rank, programme, offer_date, is_private, source, year) '
+                    'VALUES ($1, $2, $3, $4, $5, $6, $7)',
+                    str(message.author.id), parsed_rank, dm_programme, parsed_date, True, 'dm', constants.current_year)
+
+            await self.db_conn.execute('UPDATE user_data SET dm_programme = NULL, dm_status = NULL '
+                                       'WHERE user_id = $1', str(message.author.id))
 
             await message.channel.send('**Thank you for the information!**\n'
                                        'We will do our best to put it to good use and help other applicants '

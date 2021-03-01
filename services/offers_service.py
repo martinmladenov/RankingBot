@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date
 from matplotlib import pyplot as plt, dates as mdates
 from helpers import programmes_helper
 import constants
@@ -10,14 +10,17 @@ class OffersService:
     def __init__(self, db_conn):
         self.db_conn = db_conn
 
-    async def generate_graph(self, programme: programmes_helper.Programme, step: bool):
+    async def generate_graph(self, programme: programmes_helper.Programme, step: bool, year: int):
+        if year not in programme.places:
+            raise ValueError
+
         rows = await self.db_conn.fetch(
             'SELECT rank, is_private, offer_date FROM ranks '
-            'WHERE programme = $1 AND rank > $2 AND offer_date IS NOT NULL '
-            'ORDER BY offer_date, rank', programme.id, programme.places)
+            'WHERE programme = $1 AND rank > $2 AND offer_date IS NOT NULL AND year = $3 '
+            'ORDER BY offer_date, rank', programme.id, programme.places[year], year)
 
         x_values = [date(constants.current_year, 4, 15)]
-        y_values = [programme.places]
+        y_values = [programme.places[year]]
 
         if rows:
             for i in range(len(rows)):
@@ -48,7 +51,7 @@ class OffersService:
             x_values.append(date(constants.current_year, 8, 15))
             y_values.append(y_values[len(y_values) - 1])
 
-        fill_between_end = programme.places - (y_values[len(y_values) - 1] - programme.places) / 15
+        fill_between_end = programme.places[year] - (y_values[len(y_values) - 1] - programme.places[year]) / 15
         bottom_limit = fill_between_end - (y_values[len(y_values) - 1] - fill_between_end) / 40
 
         bg_color = '#36393F'
@@ -87,7 +90,7 @@ class OffersService:
         plt.step(x_values, y_values, where='post', alpha=(0.5 if not step else None), color=fg_color)
         plt.fill_between(x_values, y_values, y2=fill_between_end, step="post", alpha=(0.20 if not step else 0.35),
                          color=fg_color)
-        plt.title(f'{programme.uni_name} {programme.display_name}', color='w')
+        plt.title(f'{programme.uni_name} {programme.display_name} ({year})', color='w')
         ax.set_ylim(bottom=bottom_limit)
 
         # only show every second week
@@ -97,17 +100,17 @@ class OffersService:
         plt.savefig(filename, facecolor=bg_color, dpi=200)
         plt.close()
 
-    async def get_highest_ranks_with_offers(self):
+    async def get_highest_ranks_with_offers(self, year):
         offers = await self.db_conn.fetch(
             'select r.programme, r.rank, MAX(d.offer_date), d.is_private '
             'from (select programme, max(rank) as rank from ranks '
-            'where ranks.offer_date is not null '
+            'where ranks.offer_date is not null and ranks.year = $1 '
             'group by programme) as r '
             'inner join ranks as d '
-            'on r.programme = d.programme and r.rank = d.rank '
+            'on r.programme = d.programme and r.rank = d.rank and d.year = $1 '
             'and d.offer_date is not null '
             'group by r.programme, r.rank, d.is_private '
-            'order by MAX(d.offer_date) desc')
+            'order by MAX(d.offer_date) desc', year)
         return offers
 
 
