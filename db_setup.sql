@@ -35,4 +35,17 @@ create table excluded_programmes
     id        serial primary key,
     user_id   varchar(50) not null,
     programme varchar(15) not null
-)
+);
+
+create table dms
+(
+    id            serial primary key,
+    user_id       varchar(50) not null,
+    programme     varchar(15),
+    status        int         not null,
+    scheduled     timestamp   not null,
+    sent          timestamp,
+    reminder_sent timestamp,
+    num_reminders int         not null default 0,
+    done          timestamp
+);
