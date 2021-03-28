@@ -219,4 +219,29 @@ class DMService:
             if cse_role in roles and 'tue-cse' not in excluded_programmes:
                 return 'tue-cse'
 
-        return None
+    async def send_first_dm(self, member: discord.Member, programme: programmes_helper.Programme) -> bool:
+        message = '**Hi {0}!**\n' \
+                  'On the **3TU** server, your roles indicate that you have been accepted to the ' \
+                  '**{1}** programme at {2} **{3}**. Congratulations!\n' \
+                  'We\'d appreciate it a lot if you\'d like to help other applicants determine when they might ' \
+                  'receive an offer by providing us with your **ranking number** and **the date you\'ve received ' \
+                  'your offer on Studielink**. If you want to help, please reply to this ' \
+                  'message in the following format: `<rank> <day> <month>`.\n' \
+                  '_For example, if your ranking number is 100 and you received an offer on 15 April, ' \
+                  'please reply `100 15 April`._\n' \
+                  '**Thanks for your help!**\n' \
+                  '_Note: If you don\'t want to share your ranking number or the date, feel free to round them ' \
+                  'up or down. Additionally, if you provide any information here, your username will not be shown ' \
+                  'alongside it on the statistics visible to all server members. If you want it to be displayed, ' \
+                  'you can type `.toggleprivaterank` on any channel on the server._\n' \
+                  'If you haven\'t applied for the **{1}** programme at **{3}** but have the server role ' \
+                  'for a different reason, please type `wrong`.' \
+            .format(member.name, programme.display_name, programme.icon, programme.uni_name)
+
+        try:
+            dm_channel = await member.create_dm()
+            await dm_channel.send(message)
+            return True
+        except Exception as e:
+            print(f'failed to send message to {member.name}: {str(e)}')
+            return False
