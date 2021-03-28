@@ -5,6 +5,10 @@ from helpers import programmes_helper
 from datetime import datetime, date
 import re
 import constants
+from asyncio import Lock
+
+user_locks = dict()
+user_lock_dict_lock = Lock()
 
 
 class DMService:
@@ -223,7 +227,71 @@ class DMService:
 
         return list()
 
+    async def handle_reaction(self, member: discord.Member, emoji: str):
+        if emoji == 'TUD':
+            uni = self.University.TUD
+        elif emoji == 'TuE':
+            uni = self.University.TUE
+        else:
+            return
 
+        programmes = await self.get_member_programmes(member, uni)
+
+        if not programmes:
+            return
+
+        user_id = str(member.id)
+
+        # Find or create and acquire user lock
+        async with user_lock_dict_lock:
+            if user_id not in user_locks:
+                user_locks[user_id] = Lock()
+
+            lock = user_locks[user_id]
+
+        async with lock:
+            user_data_row = await self.db_conn.fetchrow('SELECT user_id, dm_status FROM user_data '
+                                                        'WHERE user_id = $1',
+                                                        user_id)
+            if not user_data_row:
+                await self.db_conn.execute('INSERT INTO user_data (user_id, username) '
+                                           'VALUES ($1, $2)',
+                                           user_id, member.name)
+
+            sent_programmes = await self.db_conn.fetch('SELECT programme FROM dms '
+                                                       'WHERE user_id = $1',
+                                                       user_id)
+
+            should_send = len(sent_programmes) == 0
+            for programme in programmes:
+                if any(programme == p[0] for p in sent_programmes):
+                    continue
+
+                rank_row = await self.db_conn.fetchrow(
+                    'SELECT rank FROM ranks '
+                    'WHERE user_id = $1 AND programme = $2 '
+                    'AND offer_date IS NOT NULL AND year = $3',
+                    user_id, programme, constants.current_year)
+
+                if rank_row is not None:
+                    continue
+                sched_time = datetime.utcnow()
+                sent = False
+                if should_send:
+                    sent = await self.send_first_dm(member, programmes_helper.programmes[programme])
+                    should_send = False
+
+                await self.db_conn.execute('INSERT INTO dms (user_id, programme, status, scheduled, sent) '
+                                           'VALUES ($1, $2, $3, $4, $5)',
+                                           user_id, programme,
+                                           self.DmStatus.SENT if sent else self.DmStatus.SCHEDULED,
+                                           sched_time,
+                                           datetime.utcnow() if sent else None)
+
+        # Delete user lock
+        async with user_lock_dict_lock:
+            if not lock.locked() and user_id in user_locks:
+                del user_locks[user_id]
 
     async def send_first_dm(self, member: discord.Member, programme: programmes_helper.Programme) -> bool:
         message = '**Hi {0}!**\n' \
