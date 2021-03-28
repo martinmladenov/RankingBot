@@ -188,22 +188,22 @@ class DMService:
         return False
 
     class DmStatus(IntEnum):
-        AWAITING_PROGRAMME = 0
-        AWAITING_RANK = 1
-        AWAITING_DATE = 2
+        SCHEDULED = 0
+        SENT = 1
+        DONE = 2
 
     class University(Enum):
         TUD = 0,
         TUE = 1
 
-    async def get_member_programme(self, member: discord.Member, uni: University):
+    async def get_member_programmes(self, member: discord.Member, uni: University) -> list:
         cse_role = 'Computer Science and Engineering'
         ae_role = 'Aerospace Engineering'
 
         roles = list(map(lambda x: x.name, member.roles))
 
         if any(map(lambda x: 'students' in x.lower() and x != 'IB Students', roles)):
-            return None
+            return list()
 
         excluded_programmes_rows = await self.db_conn.fetch(
             'SELECT programme FROM excluded_programmes WHERE user_id = $1',
@@ -211,13 +211,19 @@ class DMService:
         excluded_programmes = list(map(lambda x: x[0], excluded_programmes_rows))
 
         if uni == self.University.TUD:
+            programmes = list()
             if ae_role in roles and 'tud-ae' not in excluded_programmes:
-                return 'tud-ae'
+                programmes.append('tud-ae')
             if cse_role in roles and 'tud-cse' not in excluded_programmes:
-                return 'tud-cse'
+                programmes.append('tud-cse')
+            return programmes
         if uni == self.University.TUE:
             if cse_role in roles and 'tue-cse' not in excluded_programmes:
-                return 'tue-cse'
+                return ['tue-cse']
+
+        return list()
+
+
 
     async def send_first_dm(self, member: discord.Member, programme: programmes_helper.Programme) -> bool:
         message = '**Hi {0}!**\n' \
