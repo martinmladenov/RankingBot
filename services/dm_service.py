@@ -25,88 +25,32 @@ class DMService:
             'SELECT rank FROM ranks WHERE user_id = $1 AND programme = $2 AND offer_date IS NOT NULL AND year = $3',
             str(user_id), programme_id, constants.current_year)
 
-        if rank_row:
-            results['rank-already-set'].append(member)
+    async def handle_incoming_dm(self, message: discord.Message) -> bool:
+        user_id = str(message.author.id)
+
+        dm_row = await self.db_conn.fetchrow('SELECT id, programme FROM dms '
+                                             'WHERE user_id = $1 AND status = $2',
+                                             user_id, self.DmStatus.SENT)
+        if not dm_row:
             return False
 
-        user_data_row = await self.db_conn.fetchrow('SELECT user_id, dm_status FROM user_data WHERE user_id = $1',
-                                                    str(user_id))
+        dm_row_id, programme_id = dm_row
 
-        if user_data_row and user_data_row[1] is not None:
-            results['dm-status-not-null'].append(member)
-            return False
-
-        if not send_messages:
+        if message.content.lower() in ['wrong', 'stop']:
+            await self.db_conn.execute('UPDATE dms SET status = $1, done = $2 '
+                                       'WHERE id = $3', self.DmStatus.REFUSED, datetime.utcnow(), dm_row_id)
+            await message.channel.send('Noted. Sorry for bothering you!')
+            # TODO: send next scheduled message
             return True
 
-        message = '**Hi {0}!**\n' \
-                  'On the **3TU** server, you have chosen a role indicating you have been accepted to the ' \
-                  '**{1}** programme at {2} **{3}**. Congratulations!\n' \
-                  'We\'d appreciate it a lot if you\'d like to help other applicants determine when they might ' \
-                  'receive an offer by providing us with your **ranking number** and **the date you\'ve received ' \
-                  'your offer on Studielink**. If you want to participate in this research, please reply to this ' \
-                  'message in the following format: `<rank> <day> <month>`.\n' \
-                  '_For example, if your ranking number is 100 and you\'ve received an offer on 15 April, ' \
-                  'please reply `100 15 April`._\n' \
-                  '**Thanks for your help!**\n' \
-                  '_Note: If you don\'t want to share your ranking number or the date, feel free to round them ' \
-                  'up or down. Additionally, if you provide any information here, your username won\'t be shown ' \
-                  'alongside it on the statistics visible to all server members. If you want it to be displayed, ' \
-                  'you can type `.toggleprivaterank` on any channel on the server._\n' \
-                  'If you haven\'t applied for the **{1}** programme at **{3}** but have the server role ' \
-                  'for a different reason, please type `wrong`.' \
-            .format(member.name, programme.display_name, programme.icon, programme.uni_name)
+        result = await self.handle_rank_response(message, programme_id)
 
-        try:
-            dm_channel = await member.create_dm()
-            await dm_channel.send(message)
-        except Exception as e:
-            print(f'failed to send message to {member.name}: {str(e)}')
-            results['cannot-send-dm'].append(member)
-            return False
+        if result:
+            await self.db_conn.execute('UPDATE dms SET status = $1, done = $2 '
+                                       'WHERE id = $3', self.DmStatus.DONE, datetime.utcnow(), dm_row_id)
+            # TODO: send next scheduled message
 
-        if not user_data_row:
-            await self.db_conn.execute('INSERT INTO user_data (user_id, username, dm_programme, dm_status, '
-                                       'dm_last_sent) '
-                                       'VALUES ($1, $2, $3, $4, $5)',
-                                       str(user_id), member.name, programme_id, self.DmStatus.AWAITING_RANK,
-                                       datetime.utcnow())
-        else:
-            await self.db_conn.execute(
-                'UPDATE user_data SET dm_programme = $1, dm_status = $2, dm_last_sent = $3 WHERE user_id = $4',
-                programme_id, self.DmStatus.AWAITING_RANK, datetime.utcnow(), str(user_id))
-
-        return True
-
-    async def get_users_with_active_dm_sent_before_date(self, max_datetime: datetime):
-        users = await self.db_conn.fetch('SELECT user_id, dm_programme, username FROM user_data '
-                                         'WHERE dm_status = $1 '
-                                         'AND dm_last_sent <= $2',
-                                         self.DmStatus.AWAITING_RANK, max_datetime)
-        return users
-
-    async def send_programme_rank_reminder_dm(self, user: discord.User, programme: programmes_helper.Programme):
-        user_id = user.id
-
-        message = '**Hello {0}!**\n' \
-                  'We\'d be very grateful if you could provide us with your **ranking number** and ' \
-                  '**the date you\'ve received your offer on Studielink** for the **{1}** programme at {2} **{3}**. ' \
-                  'This information is very helpful to other applicants who have not received an offer yet.\n' \
-                  'If you want to help, please reply to this message in the following format: `<rank> <day> ' \
-                  '<month>`.\n' \
-                  '_For example, if your ranking number is 100 and you\'ve received an offer on 15 April, ' \
-                  'please reply `100 15 April`._\n' \
-                  '**Thanks a lot!**\n' \
-                  'If you haven\'t applied for the **{1}** programme at **{3}**, please type `wrong`.\n' \
-                  'If you don\'t want to receive any more messages from the bot, type `stop`.' \
-            .format(user.name, programme.display_name, programme.icon, programme.uni_name)
-
-        try:
-            dm_channel = await user.create_dm()
-            await dm_channel.send(message)
-        except Exception as e:
-            print(f'failed to send message to {user.name}: {str(e)}')
-            return False
+        return result
 
     async def handle_rank_response(self, message: discord.Message, dm_programme: str) -> bool:
         try:
