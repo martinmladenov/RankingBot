@@ -108,21 +108,8 @@ class DMService:
             print(f'failed to send message to {user.name}: {str(e)}')
             return False
 
-        await self.db_conn.execute('UPDATE user_data SET dm_last_sent = $1 WHERE user_id = $2',
-                                   datetime.utcnow(), str(user_id))
-
-        return True
-
-    async def handle_awaiting_rank(self, message: discord.Message, dm_programme: str):
+    async def handle_rank_response(self, message: discord.Message, dm_programme: str) -> bool:
         try:
-            if message.content.lower() in ['wrong', 'stop']:
-                await self.db_conn.execute('INSERT INTO excluded_programmes (user_id, programme) VALUES ($1, $2)',
-                                           str(message.author.id), dm_programme)
-                await self.db_conn.execute('UPDATE user_data SET dm_programme = NULL, dm_status = NULL '
-                                           'WHERE user_id = $1', str(message.author.id))
-                await message.channel.send('Noted. Sorry for bothering you!')
-                return True
-
             match = re.search(r'^[^A-Za-z0-9]*(\d+)[^A-Za-z0-9]+(\d+)[^A-Za-z0-9]+([A-Za-z0-9]+)[^A-Za-z0-9]*$',
                               message.content)
 
@@ -169,9 +156,6 @@ class DMService:
                     'INSERT INTO ranks (user_id, rank, programme, offer_date, is_private, source, year) '
                     'VALUES ($1, $2, $3, $4, $5, $6, $7)',
                     str(message.author.id), parsed_rank, dm_programme, parsed_date, True, 'dm', constants.current_year)
-
-            await self.db_conn.execute('UPDATE user_data SET dm_programme = NULL, dm_status = NULL '
-                                       'WHERE user_id = $1', str(message.author.id))
 
             await message.channel.send('**Thank you for the information!**\n'
                                        'We will do our best to put it to good use and help other applicants '
