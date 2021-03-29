@@ -192,9 +192,10 @@ class DMService:
         return False
 
     class DmStatus(IntEnum):
-        SCHEDULED = 0
-        SENT = 1
-        DONE = 2
+        SCHEDULED = 0,
+        SENT = 1,
+        DONE = 2,
+        REFUSED = 3
 
     class University(Enum):
         TUD = 0,
