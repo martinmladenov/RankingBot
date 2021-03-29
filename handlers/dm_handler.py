@@ -13,31 +13,17 @@ class DmHandler(commands.Cog):
         if message.author.bot or message.channel.type != discord.ChannelType.private or message.content.startswith('.'):
             return
 
-        user_id = str(message.author.id)
-
         async with self.bot.db_conn.acquire() as connection:
             dm = dm_service.DMService(connection)
             received_dms = received_dms_service.ReceivedDMsService(connection)
 
-            user_data_row = await self.bot.db_conn.fetchrow('SELECT user_id, dm_status, dm_programme FROM user_data '
-                                                            'WHERE user_id = $1', user_id)
+            result = None
+            try:
+                result = await dm.handle_incoming_dm(message)
+            except:
+                traceback.print_exc()
 
-            if not user_data_row or user_data_row[1] is None:
-                await received_dms.add_dm(user_id, message.content, False)
-                return
-
-            dm_status = user_data_row[1]
-            dm_programme = user_data_row[2]
-
-            result = False
-            if dm_status == dm.DmStatus.AWAITING_RANK:
-                try:
-                    result = await dm.handle_awaiting_rank(message, dm_programme)
-                except:
-                    result = None
-                    traceback.print_exc()
-
-            await received_dms.add_dm(user_id, message.content, result)
+            await received_dms.add_dm(str(message.author.id), message.content, result)
 
 
 def setup(bot):
