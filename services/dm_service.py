@@ -188,7 +188,7 @@ class DMService:
             lock = user_locks[user_id]
 
         async with lock:
-            user_data_row = await self.db_conn.fetchrow('SELECT user_id, dm_status FROM user_data '
+            user_data_row = await self.db_conn.fetchrow('SELECT user_id FROM user_data '
                                                         'WHERE user_id = $1',
                                                         user_id)
             if not user_data_row:
