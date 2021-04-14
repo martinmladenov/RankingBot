@@ -138,20 +138,15 @@ class DMService:
         if any(map(lambda x: 'students' in x.lower() and x != 'IB Students', roles)):
             return list()
 
-        excluded_programmes_rows = await self.db_conn.fetch(
-            'SELECT programme FROM excluded_programmes WHERE user_id = $1',
-            str(member.id))
-        excluded_programmes = list(map(lambda x: x[0], excluded_programmes_rows))
-
         if uni == self.University.TUD:
             programmes = list()
-            if ae_role in roles and 'tud-ae' not in excluded_programmes:
+            if ae_role in roles:
                 programmes.append('tud-ae')
-            if cse_role in roles and 'tud-cse' not in excluded_programmes:
+            if cse_role in roles:
                 programmes.append('tud-cse')
             return programmes
         if uni == self.University.TUE:
-            if cse_role in roles and 'tue-cse' not in excluded_programmes:
+            if cse_role in roles:
                 return ['tue-cse']
 
         return list()
