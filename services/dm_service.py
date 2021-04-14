@@ -5,120 +5,45 @@ from helpers import programmes_helper
 from datetime import datetime, date
 import re
 import constants
+from asyncio import Lock
+
+user_locks = dict()
+user_lock_dict_lock = Lock()
 
 
 class DMService:
     def __init__(self, db_conn):
         self.db_conn = db_conn
 
-    async def send_programme_rank_dm(self, member: discord.Member, programme: programmes_helper.Programme,
-                                     send_messages: bool,
-                                     results):
-        programme_id = programme.id
-        user_id = member.id
+    async def handle_incoming_dm(self, message: discord.Message) -> bool:
+        user_id = str(message.author.id)
 
-        rank_row = await self.db_conn.fetchrow(
-            'SELECT rank FROM ranks WHERE user_id = $1 AND programme = $2 AND offer_date IS NOT NULL AND year = $3',
-            str(user_id), programme_id, constants.current_year)
-
-        if rank_row:
-            results['rank-already-set'].append(member)
+        dm_row = await self.db_conn.fetchrow('SELECT id, programme FROM dms '
+                                             'WHERE user_id = $1 AND status = $2',
+                                             user_id, self.DmStatus.SENT)
+        if not dm_row:
             return False
 
-        user_data_row = await self.db_conn.fetchrow('SELECT user_id, dm_status FROM user_data WHERE user_id = $1',
-                                                    str(user_id))
+        dm_row_id, programme_id = dm_row
 
-        if user_data_row and user_data_row[1] is not None:
-            results['dm-status-not-null'].append(member)
-            return False
-
-        if not send_messages:
+        if message.content.lower() in ['wrong', 'stop']:
+            await self.db_conn.execute('UPDATE dms SET status = $1, done = $2 '
+                                       'WHERE id = $3', self.DmStatus.REFUSED, datetime.utcnow(), dm_row_id)
+            await message.channel.send('Noted. Sorry for bothering you!')
+            await self.process_next_scheduled_dm(message.author)
             return True
 
-        message = '**Hi {0}!**\n' \
-                  'On the **3TU** server, you have chosen a role indicating you have been accepted to the ' \
-                  '**{1}** programme at {2} **{3}**. Congratulations!\n' \
-                  'We\'d appreciate it a lot if you\'d like to help other applicants determine when they might ' \
-                  'receive an offer by providing us with your **ranking number** and **the date you\'ve received ' \
-                  'your offer on Studielink**. If you want to participate in this research, please reply to this ' \
-                  'message in the following format: `<rank> <day> <month>`.\n' \
-                  '_For example, if your ranking number is 100 and you\'ve received an offer on 15 April, ' \
-                  'please reply `100 15 April`._\n' \
-                  '**Thanks for your help!**\n' \
-                  '_Note: If you don\'t want to share your ranking number or the date, feel free to round them ' \
-                  'up or down. Additionally, if you provide any information here, your username won\'t be shown ' \
-                  'alongside it on the statistics visible to all server members. If you want it to be displayed, ' \
-                  'you can type `.toggleprivaterank` on any channel on the server._\n' \
-                  'If you haven\'t applied for the **{1}** programme at **{3}** but have the server role ' \
-                  'for a different reason, please type `wrong`.' \
-            .format(member.name, programme.display_name, programme.icon, programme.uni_name)
+        result = await self.handle_rank_response(message, programme_id)
 
+        if result:
+            await self.db_conn.execute('UPDATE dms SET status = $1, done = $2 '
+                                       'WHERE id = $3', self.DmStatus.DONE, datetime.utcnow(), dm_row_id)
+            await self.process_next_scheduled_dm(message.author)
+
+        return result
+
+    async def handle_rank_response(self, message: discord.Message, dm_programme: str) -> bool:
         try:
-            dm_channel = await member.create_dm()
-            await dm_channel.send(message)
-        except Exception as e:
-            print(f'failed to send message to {member.name}: {str(e)}')
-            results['cannot-send-dm'].append(member)
-            return False
-
-        if not user_data_row:
-            await self.db_conn.execute('INSERT INTO user_data (user_id, username, dm_programme, dm_status, '
-                                       'dm_last_sent) '
-                                       'VALUES ($1, $2, $3, $4, $5)',
-                                       str(user_id), member.name, programme_id, self.DmStatus.AWAITING_RANK,
-                                       datetime.utcnow())
-        else:
-            await self.db_conn.execute(
-                'UPDATE user_data SET dm_programme = $1, dm_status = $2, dm_last_sent = $3 WHERE user_id = $4',
-                programme_id, self.DmStatus.AWAITING_RANK, datetime.utcnow(), str(user_id))
-
-        return True
-
-    async def get_users_with_active_dm_sent_before_date(self, max_datetime: datetime):
-        users = await self.db_conn.fetch('SELECT user_id, dm_programme, username FROM user_data '
-                                         'WHERE dm_status = $1 '
-                                         'AND dm_last_sent <= $2',
-                                         self.DmStatus.AWAITING_RANK, max_datetime)
-        return users
-
-    async def send_programme_rank_reminder_dm(self, user: discord.User, programme: programmes_helper.Programme):
-        user_id = user.id
-
-        message = '**Hello {0}!**\n' \
-                  'We\'d be very grateful if you could provide us with your **ranking number** and ' \
-                  '**the date you\'ve received your offer on Studielink** for the **{1}** programme at {2} **{3}**. ' \
-                  'This information is very helpful to other applicants who have not received an offer yet.\n' \
-                  'If you want to help, please reply to this message in the following format: `<rank> <day> ' \
-                  '<month>`.\n' \
-                  '_For example, if your ranking number is 100 and you\'ve received an offer on 15 April, ' \
-                  'please reply `100 15 April`._\n' \
-                  '**Thanks a lot!**\n' \
-                  'If you haven\'t applied for the **{1}** programme at **{3}**, please type `wrong`.\n' \
-                  'If you don\'t want to receive any more messages from the bot, type `stop`.' \
-            .format(user.name, programme.display_name, programme.icon, programme.uni_name)
-
-        try:
-            dm_channel = await user.create_dm()
-            await dm_channel.send(message)
-        except Exception as e:
-            print(f'failed to send message to {user.name}: {str(e)}')
-            return False
-
-        await self.db_conn.execute('UPDATE user_data SET dm_last_sent = $1 WHERE user_id = $2',
-                                   datetime.utcnow(), str(user_id))
-
-        return True
-
-    async def handle_awaiting_rank(self, message: discord.Message, dm_programme: str):
-        try:
-            if message.content.lower() in ['wrong', 'stop']:
-                await self.db_conn.execute('INSERT INTO excluded_programmes (user_id, programme) VALUES ($1, $2)',
-                                           str(message.author.id), dm_programme)
-                await self.db_conn.execute('UPDATE user_data SET dm_programme = NULL, dm_status = NULL '
-                                           'WHERE user_id = $1', str(message.author.id))
-                await message.channel.send('Noted. Sorry for bothering you!')
-                return True
-
             match = re.search(r'^[^A-Za-z0-9]*(\d+)[^A-Za-z0-9]+(\d+)[^A-Za-z0-9]+([A-Za-z0-9]+)[^A-Za-z0-9]*$',
                               message.content)
 
@@ -166,9 +91,6 @@ class DMService:
                     'VALUES ($1, $2, $3, $4, $5, $6, $7)',
                     str(message.author.id), parsed_rank, dm_programme, parsed_date, True, 'dm', constants.current_year)
 
-            await self.db_conn.execute('UPDATE user_data SET dm_programme = NULL, dm_status = NULL '
-                                       'WHERE user_id = $1', str(message.author.id))
-
             await message.channel.send('**Thank you for the information!**\n'
                                        'We will do our best to put it to good use and help other applicants '
                                        'determine when they might receive an offer.\n'
@@ -187,36 +109,173 @@ class DMService:
 
         return False
 
+    async def process_next_scheduled_dm(self, member: discord.Member):
+        user_id = str(member.id)
+
+        dm_row = await self.db_conn.fetchrow('SELECT id, programme FROM dms '
+                                             'WHERE user_id = $1 AND status = $2',
+                                             user_id, self.DmStatus.SCHEDULED)
+        if not dm_row:
+            return
+
+        dm_row_id, programme_id = dm_row
+
+        programme = programmes_helper.programmes[programme_id]
+
+        result = await self.send_scheduled_dm(member, programme)
+
+        if not result:
+            return
+
+        await self.db_conn.execute('UPDATE dms SET status = $1, sent = $2 '
+                                   'WHERE id = $3', self.DmStatus.SENT, datetime.utcnow(), dm_row_id)
+
     class DmStatus(IntEnum):
-        AWAITING_PROGRAMME = 0
-        AWAITING_RANK = 1
-        AWAITING_DATE = 2
+        SCHEDULED = 0,
+        SENT = 1,
+        DONE = 2,
+        REFUSED = 3
 
     class University(Enum):
         TUD = 0,
         TUE = 1
 
-    async def get_member_programme(self, member: discord.Member, uni: University):
+    async def get_member_programmes(self, member: discord.Member, uni: University) -> list:
         cse_role = 'Computer Science and Engineering'
         ae_role = 'Aerospace Engineering'
+        nb_role = 'Nanobiology'
 
         roles = list(map(lambda x: x.name, member.roles))
 
         if any(map(lambda x: 'students' in x.lower() and x != 'IB Students', roles)):
-            return None
-
-        excluded_programmes_rows = await self.db_conn.fetch(
-            'SELECT programme FROM excluded_programmes WHERE user_id = $1',
-            str(member.id))
-        excluded_programmes = list(map(lambda x: x[0], excluded_programmes_rows))
+            return list()
 
         if uni == self.University.TUD:
-            if ae_role in roles and 'tud-ae' not in excluded_programmes:
-                return 'tud-ae'
-            if cse_role in roles and 'tud-cse' not in excluded_programmes:
-                return 'tud-cse'
+            programmes = list()
+            if ae_role in roles:
+                programmes.append('tud-ae')
+            if cse_role in roles:
+                programmes.append('tud-cse')
+            if nb_role in roles:
+                programmes.append('tud-nb')
+            return programmes
         if uni == self.University.TUE:
-            if cse_role in roles and 'tue-cse' not in excluded_programmes:
-                return 'tue-cse'
+            if cse_role in roles:
+                return ['tue-cse']
 
-        return None
+        return list()
+
+    async def handle_reaction(self, member: discord.Member, emoji: str):
+        if emoji == 'TUD':
+            uni = self.University.TUD
+        elif emoji == 'TuE':
+            uni = self.University.TUE
+        else:
+            return
+
+        programmes = await self.get_member_programmes(member, uni)
+
+        if not programmes:
+            return
+
+        user_id = str(member.id)
+
+        # Find or create and acquire user lock
+        async with user_lock_dict_lock:
+            if user_id not in user_locks:
+                user_locks[user_id] = Lock()
+
+            lock = user_locks[user_id]
+
+        async with lock:
+            user_data_row = await self.db_conn.fetchrow('SELECT user_id FROM user_data '
+                                                        'WHERE user_id = $1',
+                                                        user_id)
+            if not user_data_row:
+                await self.db_conn.execute('INSERT INTO user_data (user_id, username) '
+                                           'VALUES ($1, $2)',
+                                           user_id, member.name)
+
+            sent_programmes = await self.db_conn.fetch('SELECT programme FROM dms '
+                                                       'WHERE user_id = $1',
+                                                       user_id)
+
+            should_send = len(sent_programmes) == 0
+            for programme in programmes:
+                if any(programme == p[0] for p in sent_programmes):
+                    continue
+
+                rank_row = await self.db_conn.fetchrow(
+                    'SELECT rank FROM ranks '
+                    'WHERE user_id = $1 AND programme = $2 '
+                    'AND offer_date IS NOT NULL AND year = $3',
+                    user_id, programme, constants.current_year)
+
+                if rank_row is not None:
+                    continue
+                sched_time = datetime.utcnow()
+                sent = False
+                if should_send:
+                    sent = await self.send_first_dm(member, programmes_helper.programmes[programme])
+                    should_send = False
+
+                await self.db_conn.execute('INSERT INTO dms (user_id, programme, status, scheduled, sent) '
+                                           'VALUES ($1, $2, $3, $4, $5)',
+                                           user_id, programme,
+                                           self.DmStatus.SENT if sent else self.DmStatus.SCHEDULED,
+                                           sched_time,
+                                           datetime.utcnow() if sent else None)
+
+        # Delete user lock
+        async with user_lock_dict_lock:
+            if not lock.locked() and user_id in user_locks:
+                del user_locks[user_id]
+
+    async def send_first_dm(self, member: discord.Member, programme: programmes_helper.Programme) -> bool:
+        message = '**Hi {0}!**\n' \
+                  'On the **Dutch 3TU Applicants** server, you chose a role indicating that you have been ' \
+                  'accepted to the **{1}** programme at {2} **{3}**. Congratulations!\n' \
+                  'We\'d appreciate it a lot if you\'d like to help other applicants estimate when they might ' \
+                  'receive an offer by providing us with your **ranking number** and **the date you received ' \
+                  'your offer on Studielink**. If you want to help, please reply to this ' \
+                  'message in the following format: `<rank> <day> <month>`.\n' \
+                  '_For example, if your ranking number is 100 and you received an offer on 15 April, ' \
+                  'please reply `100 15 April`._\n' \
+                  '**Thanks for your help!**\n' \
+                  '_Note: If you don\'t want to share your ranking number or the date, feel free to round them ' \
+                  'up or down. Additionally, if you provide any information here, it will always be anonymized ' \
+                  'before other people can see it. If you decide to make it public, ' \
+                  'you can type `.toggleprivaterank` later._\n' \
+                  'If you haven\'t applied for the **{1}** programme at **{3}** but have the server role ' \
+                  'for a different reason, please type `wrong`.\n' \
+                  'If you don\'t want to share your ranking number, please type `stop`.' \
+            .format(member.name, programme.display_name, programme.icon, programme.uni_name)
+
+        try:
+            dm_channel = await member.create_dm()
+            await dm_channel.send(message)
+            return True
+        except Exception as e:
+            print(f'failed to send message to {member.name}: {str(e)}')
+            return False
+
+    async def send_scheduled_dm(self, member: discord.Member, programme: programmes_helper.Programme) -> bool:
+        message = 'You also have a role indicating that you\'ve been accepted to ' \
+                  '**{0}** at {1} **{2}**.\n' \
+                  'Would you like to share your _ranking number_ and _the date you received ' \
+                  'your offer_ for this programme? If so, please reply in the following format: ' \
+                  '`<rank> <day> <month>`.\n' \
+                  '_For example, if your ranking number is 100 and you received an offer on 15 April, ' \
+                  'please reply `100 15 April`._\n' \
+                  '**Thanks again!**\n' \
+                  'Like before, you can type `wrong` if you haven\'t applied to this programme, or `stop` if you' \
+                  'don\'t want to share your ranking number.' \
+            .format(programme.display_name, programme.icon, programme.uni_name)
+
+        try:
+            dm_channel = await member.create_dm()
+            await dm_channel.send(message)
+            return True
+        except Exception as e:
+            print(f'failed to send message to {member.name}: {str(e)}')
+            return False

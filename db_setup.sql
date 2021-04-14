@@ -15,10 +15,7 @@ create table user_data
 (
     id           serial primary key unique,
     user_id      varchar(50) unique not null,
-    username     varchar(50)        not null,
-    dm_programme varchar(15),
-    dm_status    int,
-    dm_last_sent timestamp
+    username     varchar(50)        not null
 );
 
 create table received_dms
@@ -30,9 +27,15 @@ create table received_dms
     timestamp timestamp
 );
 
-create table excluded_programmes
+create table dms
 (
-    id        serial primary key,
-    user_id   varchar(50) not null,
-    programme varchar(15) not null
-)
+    id            serial primary key,
+    user_id       varchar(50) not null,
+    programme     varchar(15),
+    status        int         not null,
+    scheduled     timestamp   not null,
+    sent          timestamp,
+    reminder_sent timestamp,
+    num_reminders int         not null default 0,
+    done          timestamp
+);
