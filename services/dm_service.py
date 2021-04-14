@@ -132,6 +132,7 @@ class DMService:
     async def get_member_programmes(self, member: discord.Member, uni: University) -> list:
         cse_role = 'Computer Science and Engineering'
         ae_role = 'Aerospace Engineering'
+        nb_role = 'Nanobiology'
 
         roles = list(map(lambda x: x.name, member.roles))
 
@@ -144,6 +145,8 @@ class DMService:
                 programmes.append('tud-ae')
             if cse_role in roles:
                 programmes.append('tud-cse')
+            if nb_role in roles:
+                programmes.append('tud-nb')
             return programmes
         if uni == self.University.TUE:
             if cse_role in roles:
