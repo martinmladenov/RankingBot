@@ -27,13 +27,6 @@ create table received_dms
     timestamp timestamp
 );
 
-create table excluded_programmes
-(
-    id        serial primary key,
-    user_id   varchar(50) not null,
-    programme varchar(15) not null
-);
-
 create table dms
 (
     id            serial primary key,
