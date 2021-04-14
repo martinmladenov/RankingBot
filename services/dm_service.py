@@ -15,16 +15,6 @@ class DMService:
     def __init__(self, db_conn):
         self.db_conn = db_conn
 
-    async def send_programme_rank_dm(self, member: discord.Member, programme: programmes_helper.Programme,
-                                     send_messages: bool,
-                                     results):
-        programme_id = programme.id
-        user_id = member.id
-
-        rank_row = await self.db_conn.fetchrow(
-            'SELECT rank FROM ranks WHERE user_id = $1 AND programme = $2 AND offer_date IS NOT NULL AND year = $3',
-            str(user_id), programme_id, constants.current_year)
-
     async def handle_incoming_dm(self, message: discord.Message) -> bool:
         user_id = str(message.author.id)
 
@@ -40,7 +30,7 @@ class DMService:
             await self.db_conn.execute('UPDATE dms SET status = $1, done = $2 '
                                        'WHERE id = $3', self.DmStatus.REFUSED, datetime.utcnow(), dm_row_id)
             await message.channel.send('Noted. Sorry for bothering you!')
-            # TODO: send next scheduled message
+            await self.process_next_scheduled_dm(message.author)
             return True
 
         result = await self.handle_rank_response(message, programme_id)
@@ -48,7 +38,7 @@ class DMService:
         if result:
             await self.db_conn.execute('UPDATE dms SET status = $1, done = $2 '
                                        'WHERE id = $3', self.DmStatus.DONE, datetime.utcnow(), dm_row_id)
-            # TODO: send next scheduled message
+            await self.process_next_scheduled_dm(message.author)
 
         return result
 
@@ -118,6 +108,27 @@ class DMService:
             raise
 
         return False
+
+    async def process_next_scheduled_dm(self, member: discord.Member):
+        user_id = str(member.id)
+
+        dm_row = await self.db_conn.fetchrow('SELECT id, programme FROM dms '
+                                             'WHERE user_id = $1 AND status = $2',
+                                             user_id, self.DmStatus.SCHEDULED)
+        if not dm_row:
+            return
+
+        dm_row_id, programme_id = dm_row
+
+        programme = programmes_helper.programmes[programme_id]
+
+        result = await self.send_scheduled_dm(member, programme)
+
+        if not result:
+            return
+
+        await self.db_conn.execute('UPDATE dms SET status = $1, sent = $2 '
+                                   'WHERE id = $3', self.DmStatus.SENT, datetime.utcnow(), dm_row_id)
 
     class DmStatus(IntEnum):
         SCHEDULED = 0,
@@ -238,6 +249,27 @@ class DMService:
                   'If you haven\'t applied for the **{1}** programme at **{3}** but have the server role ' \
                   'for a different reason, please type `wrong`.' \
             .format(member.name, programme.display_name, programme.icon, programme.uni_name)
+
+        try:
+            dm_channel = await member.create_dm()
+            await dm_channel.send(message)
+            return True
+        except Exception as e:
+            print(f'failed to send message to {member.name}: {str(e)}')
+            return False
+
+    async def send_scheduled_dm(self, member: discord.Member, programme: programmes_helper.Programme) -> bool:
+        message = 'You also have a role indicating that you\'ve been accepted to ' \
+                  '**{0}** at {1} **{2}**.\n' \
+                  'Would you like to share your _ranking number_ and _the date you received ' \
+                  'your offer_ for this programme? If so, please reply in the following format: ' \
+                  '`<rank> <day> <month>`.\n' \
+                  '_For example, if your ranking number is 100 and you received an offer on 15 April, ' \
+                  'please reply `100 15 April`._\n' \
+                  '**Thanks again!**\n' \
+                  'Like before, you can type `wrong` if you haven\'t applied to this programme, or `stop` if you' \
+                  'don\'t want to share your ranking number.' \
+            .format(programme.display_name, programme.icon, programme.uni_name)
 
         try:
             dm_channel = await member.create_dm()
