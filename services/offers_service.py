@@ -1,7 +1,6 @@
-from datetime import date
+from datetime import date, datetime
 from matplotlib import pyplot as plt, dates as mdates
 from helpers import programmes_helper
-import constants
 
 filename = 'offers.png'
 
@@ -19,7 +18,7 @@ class OffersService:
             'WHERE programme = $1 AND rank > $2 AND offer_date IS NOT NULL AND year = $3 '
             'ORDER BY offer_date, rank', programme.id, programme.places[year], year)
 
-        x_values = [date(constants.current_year, 4, 15)]
+        x_values = [date(year, 4, 15)]
         y_values = [programme.places[year]]
 
         if rows:
@@ -47,8 +46,9 @@ class OffersService:
                 x_values.append(offer_date)
                 y_values.append(rank)
 
-            # x_values.append(datetime.utcnow().date())
-            x_values.append(date(constants.current_year, 8, 15))
+            end_date = date(year, 8, 15)
+            curr_date = datetime.utcnow().date()
+            x_values.append(min(end_date, curr_date))
             y_values.append(y_values[len(y_values) - 1])
 
         fill_between_end = programme.places[year] - (y_values[len(y_values) - 1] - programme.places[year]) / 15
@@ -77,7 +77,7 @@ class OffersService:
         plt.grid(color='#444444', linestyle='--')
 
         if programme.visa_cutoff is not None:
-            cutoff_date = date(constants.current_year, programme.visa_cutoff[1], programme.visa_cutoff[0])
+            cutoff_date = date(year, programme.visa_cutoff[1], programme.visa_cutoff[0])
             plt.axvline(cutoff_date, ymin=0.02, linestyle='--', alpha=0.7, color=fg_color)
             plt.text(cutoff_date, y_values[-1], "Non-EU cutoff", rotation='vertical', color=fg_color,
                      verticalalignment='center_baseline', horizontalalignment='right', stretch='condensed',
