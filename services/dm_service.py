@@ -197,8 +197,8 @@ class DMService:
                                            user_id, member.name)
 
             sent_programmes = await self.db_conn.fetch('SELECT programme FROM dms '
-                                                       'WHERE user_id = $1',
-                                                       user_id)
+                                                       'WHERE user_id = $1 AND status = $2',
+                                                       user_id, self.DmStatus.SENT)
 
             should_send = len(sent_programmes) == 0
             for programme in programmes:
