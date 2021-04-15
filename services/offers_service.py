@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from matplotlib import pyplot as plt, dates as mdates
 from helpers import programmes_helper
 
@@ -78,10 +78,11 @@ class OffersService:
 
         if programme.visa_cutoff is not None:
             cutoff_date = date(year, programme.visa_cutoff[1], programme.visa_cutoff[0])
-            plt.axvline(cutoff_date, ymin=0.02, linestyle='--', alpha=0.7, color=fg_color)
-            plt.text(cutoff_date, y_values[-1], "Non-EU cutoff", rotation='vertical', color=fg_color,
-                     verticalalignment='center_baseline', horizontalalignment='right', stretch='condensed',
-                     fontsize='small', fontweight='ultralight', fontstyle='italic')
+            if (datetime.utcnow() + timedelta(days=20)).date() >= cutoff_date:
+                plt.axvline(cutoff_date, ymin=0.02, linestyle='--', alpha=0.7, color=fg_color)
+                plt.text(cutoff_date, y_values[-1], "Non-EU cutoff", rotation='vertical', color=fg_color,
+                         verticalalignment='center_baseline', horizontalalignment='right', stretch='condensed',
+                         fontsize='small', fontweight='ultralight', fontstyle='italic')
 
         if not step:
             plt.plot(x_values, y_values, linestyle='--', color=fg_color)
