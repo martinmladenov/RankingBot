@@ -65,7 +65,7 @@ class OffersService:
         ax = plt.gca()
         formatter = mdates.DateFormatter("%d %b")
         ax.xaxis.set_major_formatter(formatter)
-        locator = mdates.WeekdayLocator(byweekday=mdates.WEDNESDAY)
+        locator = mdates.WeekdayLocator(byweekday=x_values[0].weekday())
         ax.xaxis.set_major_locator(locator)
         ax.set_xlabel('Offer date')
         ax.set_ylabel('Ranking number')
@@ -96,6 +96,8 @@ class OffersService:
 
         # only show every second week
         for label in ax.get_xaxis().get_ticklabels()[1::2]:
+            label.set_visible(False)
+        for label in ax.get_xaxis().get_major_ticks()[1::2]:
             label.set_visible(False)
 
         plt.savefig(filename, facecolor=bg_color, dpi=200)
