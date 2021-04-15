@@ -114,6 +114,13 @@ class OffersService:
             'and d.offer_date is not null '
             'group by r.programme, r.rank, d.is_private '
             'order by MAX(d.offer_date) desc', year)
+
+        for i in range(len(offers)):
+            programme_id, rank = offers[i][0:2]
+            places = programmes_helper.programmes[programme_id].places[year]
+            if rank <= places:
+                offers[i] = (programme_id, places, date(year, 4, 15), False)
+
         return offers
 
 
