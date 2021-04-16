@@ -58,3 +58,7 @@ def get_programme_choices():
             value=programme_id
         ) for programme_id in programmes
     )
+
+
+def get_year_choices():
+    return list(create_choice(name=str(year), value=year) for year in [2020, 2021])
