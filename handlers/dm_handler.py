@@ -13,7 +13,7 @@ class DmHandler(commands.Cog):
         if message.author.bot or message.channel.type != discord.ChannelType.private or message.content.startswith('.'):
             return
 
-        async with self.bot.db_conn.acquire() as connection:
+        async with (await self.bot.get_db_conn()).acquire() as connection:
             dm = dm_service.DMService(connection)
             received_dms = received_dms_service.ReceivedDMsService(connection)
 

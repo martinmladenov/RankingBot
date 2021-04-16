@@ -21,7 +21,7 @@ class ImportcsvCommand(commands.Cog):
 
         await ctx.send(ctx.message.author.mention + ' Importing ranks...')
 
-        async with self.bot.db_conn.acquire() as connection:
+        async with (await self.bot.get_db_conn()).acquire() as connection:
             data_import = data_import_service.DataImportService(connection)
 
             tr = connection.transaction()

@@ -16,7 +16,7 @@ class RanksCommand(commands.Cog):
         if year is None:
             year = constants.current_year
 
-        async with self.bot.db_conn.acquire() as connection:
+        async with (await self.bot.get_db_conn()).acquire() as connection:
             ranks = ranks_service.RanksService(connection)
             grouped_ranks = await ranks.get_top_ranks(year)
 

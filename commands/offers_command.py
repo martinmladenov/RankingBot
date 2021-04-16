@@ -27,7 +27,7 @@ class OffersCommand(commands.Cog):
 
             return
 
-        async with self.bot.db_conn.acquire() as connection:
+        async with (await self.bot.get_db_conn()).acquire() as connection:
             offers_svc = offers_service.OffersService(connection)
             offers = await offers_svc.get_highest_ranks_with_offers(year)
 
@@ -68,7 +68,7 @@ class OffersCommand(commands.Cog):
             raise
 
     async def send_graph(self, ctx, programme: programmes_helper.Programme, step: bool, year: int):
-        async with self.bot.db_conn.acquire() as connection:
+        async with (await self.bot.get_db_conn()).acquire() as connection:
             offers = offers_service.OffersService(connection)
             await offers.generate_graph(programme, step, year)
         image = discord.File(offers_service.filename)

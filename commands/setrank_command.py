@@ -18,7 +18,7 @@ class SetrankCommand(commands.Cog):
         if year is None:
             year = constants.current_year
 
-        async with self.bot.db_conn.acquire() as connection:
+        async with (await self.bot.get_db_conn()).acquire() as connection:
             ranks = ranks_service.RanksService(connection)
             users = user_data_service.UserDataService(connection)
 
