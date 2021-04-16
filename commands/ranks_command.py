@@ -1,5 +1,9 @@
 from discord.ext import commands
 import discord
+from discord_slash import SlashContext
+from discord_slash.cog_ext import cog_slash as slash
+from discord_slash.utils.manage_commands import create_option
+from utils import command_option_type
 from helpers import programmes_helper
 from services import ranks_service
 from utils.response_building_util import build_embed_groups
@@ -10,8 +14,18 @@ class RanksCommand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
-    async def ranks(self, ctx, year: int = None):
+    @slash(name='ranks',
+           description='Show all public ranks (not necessarily accepted)',
+           options=[
+               create_option(
+                   name='year',
+                   description='Year of application',
+                   option_type=command_option_type.INTEGER,
+                   required=False,
+                   choices=programmes_helper.get_year_choices()
+               )
+           ])
+    async def ranks(self, ctx: SlashContext, year: int = None):
 
         if year is None:
             year = constants.current_year
@@ -20,7 +34,7 @@ class RanksCommand(commands.Cog):
             ranks = ranks_service.RanksService(connection)
             grouped_ranks = await ranks.get_top_ranks(year)
 
-        is_bot_channel = not ctx.guild or 'bot' in ctx.message.channel.name
+        is_bot_channel = not ctx.guild or 'bot' in ctx.channel.name
 
         group_truncated = {}
 
@@ -60,15 +74,6 @@ class RanksCommand(commands.Cog):
                         inline=False)
 
         await ctx.send(embed=embed)
-
-    @ranks.error
-    async def info_error(self, ctx, error):
-        user = ctx.message.author
-        if isinstance(error, commands.UserInputError):
-            await ctx.send(user.mention + ' Invalid arguments. Usage: `.ranks [year]`')
-        else:
-            await ctx.send(user.mention + ' An unexpected error occurred')
-            raise
 
 
 def setup(bot):
