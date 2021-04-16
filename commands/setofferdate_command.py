@@ -20,7 +20,7 @@ class SetofferdateCommand(commands.Cog):
 
         offer_date = parse_offer_date(day, month)
 
-        async with self.bot.db_conn.acquire() as connection:
+        async with (await self.bot.get_db_conn()).acquire() as connection:
             ranks = ranks_service.RanksService(connection)
 
             try:

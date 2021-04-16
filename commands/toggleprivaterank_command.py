@@ -17,7 +17,7 @@ class ToggleprivaterankCommand(commands.Cog):
         if year is None:
             year = constants.current_year
 
-        async with self.bot.db_conn.acquire() as connection:
+        async with (await self.bot.get_db_conn()).acquire() as connection:
             ranks = ranks_service.RanksService(connection)
 
             if programme is None and await ranks.get_has_only_one_rank(user_id, year):

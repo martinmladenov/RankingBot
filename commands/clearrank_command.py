@@ -17,7 +17,7 @@ class ClearrankCommand(commands.Cog):
         if programme == 'all':
             programme = None
 
-        async with self.bot.db_conn.acquire() as connection:
+        async with (await self.bot.get_db_conn()).acquire() as connection:
             ranks = ranks_service.RanksService(connection)
 
             try:

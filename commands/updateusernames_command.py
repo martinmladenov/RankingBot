@@ -24,7 +24,7 @@ class UpdateusernamesCommand(commands.Cog):
             else:
                 raise commands.UserInputError
 
-        async with self.bot.db_conn.acquire() as connection:
+        async with (await self.bot.get_db_conn()).acquire() as connection:
             users_service = user_data_service.UserDataService(connection)
             users = await users_service.get_all_users()
 

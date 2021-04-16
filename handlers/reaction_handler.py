@@ -13,7 +13,7 @@ class ReactionHandler(commands.Cog):
         if payload.message_id != constants.accepted_message_id:
             return
 
-        async with self.bot.db_conn.acquire() as connection:
+        async with (await self.bot.get_db_conn()).acquire() as connection:
             dm = dm_service.DMService(connection)
             await dm.handle_reaction(payload.member, payload.emoji.name)
 
