@@ -1,3 +1,4 @@
 discord.py
 asyncpg
 matplotlib
+discord-py-slash-command
