@@ -2,6 +2,7 @@ from discord.ext import commands
 import discord
 from helpers import programmes_helper
 from services import ranks_service
+from utils.response_building_util import build_embed_groups
 import constants
 
 
@@ -30,16 +31,21 @@ class RanksCommand(commands.Cog):
                 group_truncated[group_name] = len(grouped_ranks[i][1]) - 10
                 grouped_ranks[i] = (group_name, truncated_list)
 
-        embed = discord.Embed(title=f"Ranking numbers ({year})", color=0x36bee6)
+        embed_dict = dict()
 
         for group in grouped_ranks:
             programme = programmes_helper.programmes[group[0]]
-            embed.add_field(name=f'**{programme.icon} {programme.uni_name}\n{programme.display_name.ljust(33, " ")}**',
-                            value=('\n'.join(('`' + (' ' * (3 - len(str(x[1])))) + str(x[1]) + f' {x[0]}`')
-                                             for x in group[1])) +
-                                  (f'\n**_+ {group_truncated[group[0]]} more..._**'
-                                   if not is_bot_channel and group_truncated[group[0]] > 0 else ''),
-                            inline=True)
+            group_name = f'**{programme.icon} {programme.uni_name}\n{programme.display_name.ljust(33, " ")}**'
+            group_list = list(('`' + (' ' * (3 - len(str(x[1])))) + str(x[1]) + f' {x[0]}`')
+                              for x in group[1])
+            if not is_bot_channel and group_truncated[group[0]] > 0:
+                group_list.append(f'\n**_+ {group_truncated[group[0]]} more..._**')
+
+            embed_dict[group_name] = group_list
+
+        embed = discord.Embed(title=f"Ranking numbers ({year})", color=0x36bee6)
+
+        build_embed_groups(embed, embed_dict)
 
         if any(x > 0 for x in group_truncated.values()):
             embed.add_field(name='**_List is truncated_**',
