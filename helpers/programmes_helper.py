@@ -61,4 +61,4 @@ def get_programme_choices():
 
 
 def get_year_choices():
-    return list(create_choice(name=str(year), value=year) for year in [2020, 2021])
+    return list(create_choice(name=str(year), value=year) for year in [2021, 2020])
