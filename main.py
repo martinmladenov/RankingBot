@@ -5,7 +5,7 @@ import asyncpg
 
 from discord.ext import commands
 import discord
-from discord_slash import SlashCommand
+from discord_slash import SlashCommand, SlashContext
 import os
 
 bot = commands.Bot(command_prefix='.', help_command=None)
@@ -28,6 +28,12 @@ async def on_ready():
     print('Logged in as ' + bot.user.name)
     await bot.change_presence(activity=(discord.Game('/offers | /ranks')))
     await set_up_db()
+
+
+@bot.event
+async def on_slash_command_error(ctx: SlashContext, ex: Exception):
+    await ctx.send('An unexpected error occurred. Please try again later.')
+    raise ex
 
 
 # Block threads until database is fully initialised
