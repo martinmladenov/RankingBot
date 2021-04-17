@@ -41,6 +41,9 @@ class OffergraphCommand(commands.Cog):
         if year is None:
             year = constants.current_year
 
+        # Show "Bot is thinking" message
+        await ctx.defer()
+
         async with (await self.bot.get_db_conn()).acquire() as connection:
             offers = offers_service.OffersService(connection)
             await offers.generate_graph(programmes_helper.programmes[programme_id], step, year)
