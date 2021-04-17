@@ -15,7 +15,7 @@ class OffersCommand(commands.Cog):
         self.bot = bot
 
     @slash(name='offers',
-           description='Show last known ranks with offers',
+           description='Show highest known ranks with offers',
            options=[
                create_option(
                    name='year',
