@@ -61,7 +61,7 @@ class SetrankCommand(commands.Cog):
                     return
                 except EntryAlreadyExistsError:
                     await ctx.send(user.mention + ' You have already set your ranking number. To set a different one, '
-                                                  f'clear it using `.clearrank {programme}` and try setting it again.')
+                                                  'clear it using `/clearrank` and try setting it again.')
                     await tr.rollback()
                     return
 

@@ -26,7 +26,7 @@ if __name__ == '__main__':
 @bot.event
 async def on_ready():
     print('Logged in as ' + bot.user.name)
-    await bot.change_presence(activity=(discord.Game('.help | .ranks')))
+    await bot.change_presence(activity=(discord.Game('/offers | /ranks')))
     await set_up_db()
 
 

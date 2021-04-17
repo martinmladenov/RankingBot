@@ -59,18 +59,21 @@ class RanksCommand(commands.Cog):
 
         embed = discord.Embed(title=f"Ranking numbers ({year})", color=0x36bee6)
 
+        embed.add_field(name='Note: Not everyone in this list has received an offer.',
+                        value='To view the highest known ranking numbers with offers, use `/offers`.',
+                        inline=False)
+
         build_embed_groups(embed, embed_dict)
 
         if any(x > 0 for x in group_truncated.values()):
             embed.add_field(name='**_List is truncated_**',
-                            value='**To view the full list, please type this command in a bot channel, such as '
-                                  '<#556533405794172939>**\n',
+                            value='To view the full list, please use this command in a bot channel, such as '
+                                  '<#556533405794172939>\n',
                             inline=False)
 
-        embed.add_field(name='_Please note: This bot is purely for fun, the ranking numbers do not'
-                             ' represent performance at university_',
-                        value=f'To view all commands, type `.help`\n'
-                              f'To set your ranking number, type `.setrank <rank> <{programmes_helper.get_ids_string()}>`',
+        embed.add_field(name='To set your ranking number, use `/setrank`.',
+                        value='_Please note: This command is purely for fun, the ranking numbers do not'
+                              ' represent performance at university_',
                         inline=False)
 
         await ctx.send(embed=embed)

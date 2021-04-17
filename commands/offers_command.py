@@ -52,9 +52,8 @@ class OffersCommand(commands.Cog):
                              (' Some ranking numbers (as indicated '
                               'by **≈** in front of them) have been rounded to the nearest multiple of 5 '
                               'to help protect users\' privacy._' if any_rounded else '_'),
-                        value='To view all commands, type `.help`\n'
-                              'To add the date you\'ve received an offer, type '
-                              f'`.setofferdate <day> <month> <{programmes_helper.get_ids_string()}>`',
+                        value='To set your ranking number, use `/setrank`. '
+                              'Then, to set the date you received an offer, use `/setofferdate`.',
                         inline=False)
 
         await ctx.send(embed=embed)

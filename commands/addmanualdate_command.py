@@ -15,7 +15,7 @@ class AddmanualdateCommand(commands.Cog):
         self.bot = bot
 
     @slash(name='addmanualdate',
-           description='Manually add the date of an offer which is __not__ yours '
+           description='Manually add the date of an offer which is not yours '
                        '(for example, one that you found online)',
            options=[
                create_option(

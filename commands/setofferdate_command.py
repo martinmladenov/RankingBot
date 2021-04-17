@@ -72,7 +72,7 @@ class SetofferdateCommand(commands.Cog):
                 await ranks.set_offer_date(str(user.id), programme, offer_date, year)
             except EntryNotFoundError:
                 await ctx.send(user.mention + ' Before setting an offer date, please set your rank first using '
-                                              f'`.setrank <rank> <{programmes_helper.get_ids_string()}>`')
+                                              '`/setrank`')
                 return
             except DateIncorrectError:
                 await ctx.send(user.mention + ' There\'s no need to set the offer date as your rank is within the '
