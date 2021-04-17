@@ -1,4 +1,8 @@
 from discord.ext import commands
+from discord_slash import SlashContext
+from discord_slash.cog_ext import cog_slash as slash
+from discord_slash.utils.manage_commands import create_option
+from utils import command_option_type
 
 from services import ranks_service, user_data_service
 from services.errors.entry_already_exists_error import EntryAlreadyExistsError
@@ -10,9 +14,32 @@ class SetrankCommand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
-    async def setrank(self, ctx, rank_number: int, programme: str, year: int = None):
-        user = ctx.message.author
+    @slash(name='setrank',
+           description='Set your ranking number',
+           options=[
+               create_option(
+                   name='rank',
+                   description='Your ranking number',
+                   option_type=command_option_type.INTEGER,
+                   required=True
+               ),
+               create_option(
+                   name='programme',
+                   description='Study programme',
+                   option_type=command_option_type.STRING,
+                   required=True,
+                   choices=programmes_helper.get_programme_choices()
+               ),
+               create_option(
+                   name='year',
+                   description='Year of application',
+                   option_type=command_option_type.INTEGER,
+                   required=False,
+                   choices=programmes_helper.get_year_choices()
+               )
+           ])
+    async def setrank(self, ctx: SlashContext, rank: int, programme: str, year: int = None):
+        user = ctx.author
         user_id = str(user.id)
 
         if year is None:
@@ -27,12 +54,14 @@ class SetrankCommand(commands.Cog):
 
             try:
                 try:
-                    await ranks.add_rank(rank_number, programme, year, user_id, source='command')
+                    await ranks.add_rank(rank, programme, year, user_id, source='command')
                 except ValueError:
-                    raise commands.UserInputError
+                    await ctx.send(user.mention + ' Invalid command arguments.')
+                    await tr.rollback()
+                    return
                 except EntryAlreadyExistsError:
                     await ctx.send(user.mention + ' You have already set your ranking number. To set a different one, '
-                                                  f'clear it using `.clearrank {programme}` and try setting it again.')
+                                                  'clear it using `/clearrank` and try setting it again.')
                     await tr.rollback()
                     return
 
@@ -44,17 +73,6 @@ class SetrankCommand(commands.Cog):
 
             await tr.commit()
         await ctx.send(user.mention + ' Rank set.')
-
-    @setrank.error
-    async def info_error(self, ctx, error):
-        user = ctx.message.author
-        if isinstance(error, commands.UserInputError):
-            await ctx.send(
-                user.mention + f' Invalid arguments. Usage: '
-                               f'`.setrank <rank> <{programmes_helper.get_ids_string()}> [year]`')
-        else:
-            await ctx.send(user.mention + ' An unexpected error occurred')
-            raise
 
 
 def setup(bot):

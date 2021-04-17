@@ -1,4 +1,8 @@
 from discord.ext import commands
+from discord_slash import SlashContext
+from discord_slash.cog_ext import cog_slash as slash
+from discord_slash.utils.manage_commands import create_option
+from utils import command_option_type
 
 from helpers import programmes_helper
 from services import ranks_service
@@ -9,9 +13,26 @@ class ToggleprivaterankCommand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
-    async def toggleprivaterank(self, ctx, programme: str = None, year: int = None):
-        user = ctx.message.author
+    @slash(name='toggleprivaterank',
+           description='Toggle whether your rank is displayed to other people',
+           options=[
+               create_option(
+                   name='programme',
+                   description='Study programme',
+                   option_type=command_option_type.STRING,
+                   required=False,
+                   choices=programmes_helper.get_programme_choices()
+               ),
+               create_option(
+                   name='year',
+                   description='Year of application',
+                   option_type=command_option_type.INTEGER,
+                   required=False,
+                   choices=programmes_helper.get_year_choices()
+               )
+           ])
+    async def toggleprivaterank(self, ctx: SlashContext, programme: str = None, year: int = None):
+        user = ctx.author
         user_id = str(user.id)
 
         if year is None:
@@ -24,8 +45,10 @@ class ToggleprivaterankCommand(commands.Cog):
                 is_private = await ranks.get_is_private(user_id, year)
                 await ranks.set_is_private(user_id, not is_private, year)
             else:
-                if programme not in programmes_helper.programmes:
-                    raise commands.UserInputError
+                if programme is None:
+                    await ctx.send(user.mention + ' Please specify the programme of the rank you wish to '
+                                                  'toggle the visibility of.')
+                    return
 
                 is_private = await ranks.get_is_private_programme(user_id, programme, year)
                 if is_private is None:
@@ -35,16 +58,6 @@ class ToggleprivaterankCommand(commands.Cog):
                 await ranks.set_is_private_programme(user_id, not is_private, programme, year)
 
             await ctx.send(user.mention + f' Your rank is {"no longer" if is_private else "now"} hidden from `.ranks`')
-
-    @toggleprivaterank.error
-    async def info_error(self, ctx, error):
-        user = ctx.message.author
-        if isinstance(error, commands.UserInputError):
-            await ctx.send(user.mention + f' Invalid arguments. Usage: `.toggleprivaterank '
-                                          f'<{programmes_helper.get_ids_string()}> [year]`')
-        else:
-            await ctx.send(user.mention + ' An unexpected error occurred')
-            raise
 
 
 def setup(bot):

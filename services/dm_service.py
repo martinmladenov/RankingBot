@@ -77,8 +77,8 @@ class DMService:
                 if rank != parsed_rank:
                     await message.channel.send(f'It seems that you\'ve already set your ranking number '
                                                f'to **{rank}**. '
-                                               f'If that\'s incorrect, please type '
-                                               f'`.clearrank {dm_programme} {constants.current_year}` '
+                                               f'If that\'s incorrect, please use '
+                                               f'`/clearrank` to clear it '
                                                f'and reply with `{message.content}` again.')
                     return False
 
@@ -94,9 +94,9 @@ class DMService:
             await message.channel.send('**Thank you for the information!**\n'
                                        'We will do our best to put it to good use and help other applicants '
                                        'determine when they might receive an offer.\n'
-                                       '_Note: Your username is now hidden from the statistics visible to '
-                                       'all server members. If you want it to be displayed, '
-                                       'you can type `.toggleprivaterank` on any channel on the server._')
+                                       '_Note: Your ranking number is now protected, so it is hidden from the '
+                                       'statistics visible to server members. If you want it to be displayed, '
+                                       'you can use `/toggleprivaterank`._')
 
             return True
         except ValueError:
@@ -244,8 +244,7 @@ class DMService:
                   '**Thanks for your help!**\n' \
                   '_Note: If you don\'t want to share your ranking number or the date, feel free to round them ' \
                   'up or down. Additionally, if you provide any information here, it will always be anonymized ' \
-                  'before other people can see it. If you decide to make it public, ' \
-                  'you can type `.toggleprivaterank` later._\n' \
+                  'before other people can see it. If you wish, you can make it public later._\n' \
                   'If you haven\'t applied for the **{1}** programme at **{3}** but have the server role ' \
                   'for a different reason, please type `wrong`.\n' \
                   'If you don\'t want to share your ranking number, please type `stop`.' \

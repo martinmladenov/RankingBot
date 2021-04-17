@@ -1,3 +1,6 @@
+from discord_slash.utils.manage_commands import create_choice
+
+
 class Programme:
     def __init__(self, programme_id: str, display_name: str, uni_name: str, icon: str, places: dict, visa_cutoff):
         self.id = programme_id
@@ -46,3 +49,16 @@ programmes = {
 
 def get_ids_string():
     return "/".join(programmes.keys())
+
+
+def get_programme_choices():
+    return list(
+        create_choice(
+            name=f'{programmes[programme_id].uni_name} {programmes[programme_id].display_name}',
+            value=programme_id
+        ) for programme_id in programmes
+    )
+
+
+def get_year_choices():
+    return list(create_choice(name=str(year), value=year) for year in [2021, 2020])

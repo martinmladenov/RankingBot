@@ -1,5 +1,9 @@
 from discord.ext import commands
 import discord
+from discord_slash import SlashContext
+from discord_slash.cog_ext import cog_slash as slash
+from discord_slash.utils.manage_commands import create_option
+from utils import command_option_type
 from utils import offer_date_util
 from helpers import programmes_helper
 from services import offers_service
@@ -10,22 +14,20 @@ class OffersCommand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
-    async def offers(self, ctx, year: int = None, programme_id: str = None, graph_type: str = None):
+    @slash(name='offers',
+           description='Show last known ranks with offers',
+           options=[
+               create_option(
+                   name='year',
+                   description='Year of application',
+                   option_type=command_option_type.INTEGER,
+                   required=False,
+                   choices=programmes_helper.get_year_choices()
+               )
+           ])
+    async def offers(self, ctx: SlashContext, year: int = None):
         if year is None:
             year = constants.current_year
-
-        if programme_id is not None and programme_id != 'all':
-            if programme_id not in programmes_helper.programmes or \
-                    (graph_type is not None and graph_type != 'step'):
-                raise commands.UserInputError
-
-            try:
-                await self.send_graph(ctx, programmes_helper.programmes[programme_id], graph_type == 'step', year)
-            except ValueError:
-                raise commands.UserInputError
-
-            return
 
         async with (await self.bot.get_db_conn()).acquire() as connection:
             offers_svc = offers_service.OffersService(connection)
@@ -46,33 +48,17 @@ class OffersCommand(commands.Cog):
 
         any_rounded = any(map(lambda x: x[3] is True, offers))
 
-        embed.add_field(name='_This data has been provided by server members.' +
-                             (' Some ranking numbers (as indicated '
-                              'by **≈** in front of them) have been rounded to the nearest multiple of 5 '
-                              'to help protect users\' privacy._' if any_rounded else '_'),
-                        value='To view all commands, type `.help`\n'
-                              'To add the date you\'ve received an offer, type '
-                              f'`.setofferdate <day> <month> <{programmes_helper.get_ids_string()}>`',
+        embed.add_field(name='To see a graph of ranking numbers and the dates when they received offers,'
+                             ' use `/offergraph`.',
+                        value='This data has been provided by server members.' +
+                              (' Some ranking numbers (as indicated '
+                               'by **≈** in front of them) have been rounded to the nearest multiple of 5 '
+                               'to help protect users\' privacy.' if any_rounded else '') +
+                              '\nTo set your ranking number, use `/setrank`. '
+                              'Then, to set the date you received an offer, use `/setofferdate`.',
                         inline=False)
 
         await ctx.send(embed=embed)
-
-    @offers.error
-    async def info_error(self, ctx, error):
-        user = ctx.message.author
-        if isinstance(error, commands.UserInputError):
-            await ctx.send(user.mention + f' Invalid arguments. Usage: '
-                                          f'`.offers [year] [all/{programmes_helper.get_ids_string()}] [step]`')
-        else:
-            await ctx.send(user.mention + ' An unexpected error occurred')
-            raise
-
-    async def send_graph(self, ctx, programme: programmes_helper.Programme, step: bool, year: int):
-        async with (await self.bot.get_db_conn()).acquire() as connection:
-            offers = offers_service.OffersService(connection)
-            await offers.generate_graph(programme, step, year)
-        image = discord.File(offers_service.filename)
-        await ctx.send(file=image)
 
 
 def setup(bot):
