@@ -48,11 +48,13 @@ class OffersCommand(commands.Cog):
 
         any_rounded = any(map(lambda x: x[3] is True, offers))
 
-        embed.add_field(name='_This data has been provided by server members.' +
-                             (' Some ranking numbers (as indicated '
-                              'by **≈** in front of them) have been rounded to the nearest multiple of 5 '
-                              'to help protect users\' privacy._' if any_rounded else '_'),
-                        value='To set your ranking number, use `/setrank`. '
+        embed.add_field(name='To see a graph of ranking numbers and the dates when they received offers,'
+                             ' use `/offergraph`.',
+                        value='This data has been provided by server members.' +
+                              (' Some ranking numbers (as indicated '
+                               'by **≈** in front of them) have been rounded to the nearest multiple of 5 '
+                               'to help protect users\' privacy.' if any_rounded else '') +
+                              '\nTo set your ranking number, use `/setrank`. '
                               'Then, to set the date you received an offer, use `/setofferdate`.',
                         inline=False)
 
