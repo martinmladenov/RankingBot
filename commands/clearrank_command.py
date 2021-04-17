@@ -33,19 +33,13 @@ class ClearrankCommand(commands.Cog):
     async def clearrank(self, ctx: SlashContext, programme: str, year: int):
         user = ctx.author
 
-        if programme is None:
-            raise commands.UserInputError
-
         if programme == 'all':
             programme = None
 
         async with (await self.bot.get_db_conn()).acquire() as connection:
             ranks = ranks_service.RanksService(connection)
 
-            try:
-                await ranks.delete_rank(str(user.id), programme, year)
-            except ValueError:
-                raise commands.UserInputError
+            await ranks.delete_rank(str(user.id), programme, year)
 
         await ctx.send(user.mention + ' Rank cleared.')
 
