@@ -14,7 +14,7 @@ class OffergraphCommand(commands.Cog):
         self.bot = bot
 
     @slash(name='offergraph',
-           description='Show a graph of ranking numbers and the dates when they\'ve received offers',
+           description='Show a graph of ranking numbers and the dates when they received offers',
            options=[
                create_option(
                    name='programme_id',

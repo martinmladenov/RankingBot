@@ -12,7 +12,7 @@ class ClearrankCommand(commands.Cog):
         self.bot = bot
 
     @slash(name='clearrank',
-           description='Toggle whether your rank is displayed to other people',
+           description='Delete your ranking number and the corresponding offer date (if it exists) from the bot',
            options=[
                create_option(
                    name='programme',
