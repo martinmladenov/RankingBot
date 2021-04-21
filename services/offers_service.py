@@ -1,5 +1,6 @@
 from datetime import date, datetime, timedelta
 from matplotlib import pyplot as plt, dates as mdates
+from matplotlib.ticker import MaxNLocator
 from helpers import programmes_helper
 
 filename = 'offers.png'
@@ -67,6 +68,7 @@ class OffersService:
         ax.xaxis.set_major_formatter(formatter)
         locator = mdates.WeekdayLocator(byweekday=x_values[0].weekday())
         ax.xaxis.set_major_locator(locator)
+        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
         ax.set_xlabel('Offer date')
         ax.set_ylabel('Ranking number')
 
