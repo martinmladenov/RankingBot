@@ -10,7 +10,7 @@ class ReactionHandler(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
-        if payload.message_id != constants.accepted_message_id:
+        if payload.message_id not in constants.reaction_message_ids:
             return
 
         async with (await self.bot.get_db_conn()).acquire() as connection:
