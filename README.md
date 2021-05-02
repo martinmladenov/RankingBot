@@ -8,4 +8,4 @@
 5. set the DISCORD_SECRET environment variable to the bot token (not the application token)
 6. change the configuration in constants.py (optional, only needed for very few features/commands)
 7. install dependencies usinhg "pip install -r requirements.txt"
-8. run main.py and enjoy.
+8. run main.py and enjoy
