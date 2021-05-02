@@ -7,6 +7,20 @@ from discord.ext import commands
 import discord
 from discord_slash import SlashCommand, SlashContext
 import os
+from dotenv import load_dotenv
+
+# loads the dotenv variables into the environment
+load_dotenv()
+
+# if its not present in the .env then it will load it from the environ, if not present it will be set to none
+POSTGRESS_USER = os.getenv('POSTGRESS_USER')
+DB_PASSWORD = os.getenv('DB_PASSWORD')
+DB_NAME = os.getenv('DB_NAME')
+SSL_MODE = '?sslmode=require' if os.environ['SSL_MODE'] == 'True' else ''
+
+# Comment out this option if you set the DATABASE_URL directly INCLUDING '?sslmode=require'
+os.environ['DATABASE_URL'] = f"postgres://{POSTGRESS_USER}:{DB_PASSWORD}@localhost:5432/{DB_NAME}{SSL_MODE}"
+print(os.environ['DATABASE_URL'])
 
 bot = commands.Bot(command_prefix='.', help_command=None)
 slash = SlashCommand(bot, sync_commands=True)
@@ -54,7 +68,7 @@ async def get_db_conn_actual():
 
 
 async def set_up_db():
-    bot.db_conn_internal = await asyncpg.create_pool(dsn=os.environ['DATABASE_URL'] + '?sslmode=require')
+    bot.db_conn_internal = await asyncpg.create_pool(dsn=os.environ['DATABASE_URL'])
     bot.get_db_conn = get_db_conn_actual
     db_init_event.set()
 
