@@ -16,5 +16,5 @@
 10. run main.py and enjoy
 
 **Deploying bot**
-   - Environment variables need to be set for DATABASE_URL and DISCORD_SECRET 
-       - if SSL_MODE is missing from .env it will default to using SSL for heroku
+   - Environment variables need to be set for `DATABASE_URL` and `DISCORD_SECRET` 
+       - If `SSL_MODE` is missing from `.env`, it will default to using SSL
