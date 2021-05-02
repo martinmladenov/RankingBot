@@ -12,14 +12,16 @@ from dotenv import load_dotenv
 # loads the dotenv variables into the environment
 load_dotenv()
 
-# if its not present in the .env then it will load it from the environ, if not present it will be set to none
-POSTGRESS_USER = os.getenv('POSTGRESS_USER')
-DB_PASSWORD = os.getenv('DB_PASSWORD')
-DB_NAME = os.getenv('DB_NAME')
-SSL_MODE = '?sslmode=require' if os.environ['SSL_MODE'] == 'True' else ''
-
-# Comment out this option if you set the DATABASE_URL directly INCLUDING '?sslmode=require'
-os.environ['DATABASE_URL'] = f"postgres://{POSTGRESS_USER}:{DB_PASSWORD}@localhost:5432/{DB_NAME}{SSL_MODE}"
+# if its not present in the .env then it will load it from the environ, if not present it will be set to None
+if (os.getenv('DATABASE_URL') == None):
+    print("if")
+    POSTGRESS_USER = os.getenv('POSTGRESS_USER')
+    DB_PASSWORD = os.getenv('DB_PASSWORD')
+    DB_NAME = os.getenv('DB_NAME')
+    SSL_MODE = '?sslmode=require' if os.getenv('SSL_MODE') == 'True' else ''
+    os.environ['DATABASE_URL'] = f"postgres://{POSTGRESS_USER}:{DB_PASSWORD}@localhost:5432/{DB_NAME}{SSL_MODE}"
+else:
+    print("else")
 print(os.environ['DATABASE_URL'])
 
 bot = commands.Bot(command_prefix='.', help_command=None)

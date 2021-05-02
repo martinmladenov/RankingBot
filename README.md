@@ -13,3 +13,6 @@
 8. change the configuration in constants.py (optional, only needed for very few features/commands)
 9. install dependencies usinhg "pip install -r requirements.txt"
 10. run main.py and enjoy
+
+**Deploying bot**
+   - Environment variables need to be set for DATABASE_URL and DISCORD_SECRET 
