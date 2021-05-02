@@ -17,10 +17,10 @@ SSLString = '?sslmode=require' if os.getenv(
     'SSL_MODE') == None or os.getenv('SSL_MODE') == 'True' else ''
 
 if (os.getenv('DATABASE_URL') == None):
-    POSTGRESS_USER = os.getenv('POSTGRESS_USER')
+    DB_USER = os.getenv('DB_USER')
     DB_PASSWORD = os.getenv('DB_PASSWORD')
     DB_NAME = os.getenv('DB_NAME')
-    os.environ['DATABASE_URL'] = f"postgres://{POSTGRESS_USER}:{DB_PASSWORD}@localhost:5432/{DB_NAME}{SSLString}"
+    os.environ['DATABASE_URL'] = f"postgres://{DB_USER}:{DB_PASSWORD}@localhost:5432/{DB_NAME}{SSLString}"
 else:
     os.environ['DATABASE_URL'] = f"{os.environ['DATABASE_URL']}{SSLString}"
 
