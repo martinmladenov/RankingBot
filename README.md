@@ -7,6 +7,7 @@
 4. set environment variables POSTGRESS_USER, DB_PASSWORD and DB_NAME
    - if desired you can set the DATABASE_URL environment variable to the correct connection string
    - keep SSL_MODE at false, unless you need it
+       - if SSL_MODE is missing from .env it will default to using SSL for heroku
 5. create a discord app on https://discord.com/developers and create a bot user too
 6. set the DISCORD_SECRET environment variable to the bot token (not the application token)
 7. set the GUILD_IDS environment variable to the id of your server for faster development
@@ -16,3 +17,4 @@
 
 **Deploying bot**
    - Environment variables need to be set for DATABASE_URL and DISCORD_SECRET 
+       - if SSL_MODE is missing from .env it will default to using SSL for heroku

@@ -13,16 +13,16 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # if its not present in the .env then it will load it from the environ, if not present it will be set to None
+SSLString = '?sslmode=require' if os.getenv(
+    'SSL_MODE') == None or os.getenv('SSL_MODE') == 'True' else ''
+
 if (os.getenv('DATABASE_URL') == None):
-    print("if")
     POSTGRESS_USER = os.getenv('POSTGRESS_USER')
     DB_PASSWORD = os.getenv('DB_PASSWORD')
     DB_NAME = os.getenv('DB_NAME')
-    SSL_MODE = '?sslmode=require' if os.getenv('SSL_MODE') == 'True' else ''
-    os.environ['DATABASE_URL'] = f"postgres://{POSTGRESS_USER}:{DB_PASSWORD}@localhost:5432/{DB_NAME}{SSL_MODE}"
+    os.environ['DATABASE_URL'] = f"postgres://{POSTGRESS_USER}:{DB_PASSWORD}@localhost:5432/{DB_NAME}{SSLString}"
 else:
-    print("else")
-print(os.environ['DATABASE_URL'])
+    os.environ['DATABASE_URL'] = f"{os.environ['DATABASE_URL']}{SSLString}"
 
 bot = commands.Bot(command_prefix='.', help_command=None)
 slash = SlashCommand(bot, sync_commands=True)
