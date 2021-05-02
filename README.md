@@ -1,4 +1,4 @@
-# RankingNumberBot
+# RankingBot
 
 **Running bot locally**
 1. create a local postgresql database
