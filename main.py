@@ -13,10 +13,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # if its not present in the .env then it will load it from the environ, if not present it will be set to None
-SSLString = '?sslmode=require' if os.getenv(
-    'SSL_MODE') == None or os.getenv('SSL_MODE') == 'True' else ''
+SSLString = '?sslmode=require' if os.getenv('SSL_MODE') is None or os.getenv('SSL_MODE') == 'True' else ''
 
-if (os.getenv('DATABASE_URL') == None):
+if os.getenv('DATABASE_URL') is None:
     DB_USER = os.getenv('DB_USER')
     DB_PASSWORD = os.getenv('DB_PASSWORD')
     DB_NAME = os.getenv('DB_NAME')
