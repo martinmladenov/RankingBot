@@ -2,3 +2,4 @@ discord.py==1.7.1
 asyncpg==0.22.0
 matplotlib==3.4.1
 discord-py-slash-command==1.1.2
+python-dotenv==0.17.1
