@@ -1,4 +1,3 @@
-import os
 from discord.ext import commands
 import discord
 from discord_slash import SlashContext

@@ -63,10 +63,13 @@ def get_programme_choices():
 
 
 def get_guild_ids():
-    if os.getenv('DEBUG_SERVER_IDS') == "":
+    if os.getenv('DEBUG_SERVER_IDS') is None:
         return None
     else:
-        return re.findall(r"\d+", os.environ['DEBUG_SERVER_IDS'])
+        if len(re.findall(r"\d+", os.environ['DEBUG_SERVER_IDS'])) == 0:
+            return None
+        else:
+            return re.findall(r"\d+", os.environ['DEBUG_SERVER_IDS'])
 
 
 def get_year_choices():
