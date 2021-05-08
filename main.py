@@ -25,10 +25,10 @@ else:
     os.environ['DATABASE_URL'] = f"{os.environ['DATABASE_URL']}{SSLString}"
 
 # for now we just remove the [] from the string later we split to get an array, chose to have [] in the .env to make clear its used as an array
-if os.getenv('GUILD_IDS') is not None and len(os.getenv('GUILD_IDS')) > 2:
-    os.environ['GUILD_IDS'] = os.getenv('GUILD_IDS')[1:-1]
+if os.getenv('DEBUG_SERVER_IDS') is not None and len(os.getenv('DEBUG_SERVER_IDS')) > 2:
+    os.environ['DEBUG_SERVER_IDS'] = os.getenv('DEBUG_SERVER_IDS')[1:-1]
 else:
-    os.environ['GUILD_IDS'] = ""
+    os.environ['DEBUG_SERVER_IDS'] = ""
 
 bot = commands.Bot(command_prefix='.', help_command=None)
 slash = SlashCommand(bot, sync_commands=True)

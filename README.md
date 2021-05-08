@@ -10,7 +10,9 @@
        - If `SSL_MODE` is missing from `.env`, it will default to using SSL
 5. Create Discord application at https://discord.com/developers and add a bot user
 6. Set the `DISCORD_SECRET` environment variable to the bot token (not the application token)
-7. Set the `GUILD_IDS` environment variable to the id of your server to force Discord to register the commands more quickly
+7. Set the `DEBUG_SERVER_IDS` environment variable array to the ids of your servers to force Discord to register the commands more quickly.
+    - i.e. [12345678987] or [12345678987,98765432123]
+    - this is not meant for deployment, since this can duplicate commands etc.
 8. Change the configuration in `constants.py` (optional, only needed for very few features/commands such as listening to message reactions)
 9. Install dependencies using `pip install -r requirements.txt`
 10. Run main.py and enjoy

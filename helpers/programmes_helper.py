@@ -1,4 +1,5 @@
 import os
+import re
 from discord_slash.utils.manage_commands import create_choice
 
 
@@ -62,10 +63,10 @@ def get_programme_choices():
 
 
 def get_guild_ids():
-    if os.getenv('GUILD_IDS') == "":
+    if os.getenv('DEBUG_SERVER_IDS') == "":
         return None
     else:
-        return os.environ['GUILD_IDS'].split(",")
+        return re.findall(r"\d+", os.environ['DEBUG_SERVER_IDS'])
 
 
 def get_year_choices():
