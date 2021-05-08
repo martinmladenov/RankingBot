@@ -1,3 +1,4 @@
+import os
 from discord_slash.utils.manage_commands import create_choice
 
 
@@ -58,6 +59,13 @@ def get_programme_choices():
             value=programme_id
         ) for programme_id in programmes
     )
+
+
+def get_guild_ids():
+    if os.getenv('GUILD_IDS') == "":
+        return None
+    else:
+        return os.environ['GUILD_IDS'].split(",")
 
 
 def get_year_choices():

@@ -1,3 +1,4 @@
+import os
 from discord.ext import commands
 from discord_slash import SlashContext
 from discord_slash.cog_ext import cog_slash as slash
@@ -52,7 +53,7 @@ class SetofferdateCommand(commands.Cog):
                    required=False,
                    choices=programmes_helper.get_year_choices()
                )
-           ])
+           ], guild_ids=programmes_helper.get_guild_ids())
     async def setofferdate(self, ctx: SlashContext, day: int, month: int, programme: str, year: int = None):
         if year is None:
             year = constants.current_year

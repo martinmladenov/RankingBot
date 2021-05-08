@@ -1,3 +1,4 @@
+import os
 from discord.ext import commands
 import discord
 from discord_slash import SlashContext
@@ -24,7 +25,7 @@ class OffersCommand(commands.Cog):
                    required=False,
                    choices=programmes_helper.get_year_choices()
                )
-           ])
+           ], guild_ids=programmes_helper.get_guild_ids())
     async def offers(self, ctx: SlashContext, year: int = None):
         if year is None:
             year = constants.current_year
@@ -33,7 +34,8 @@ class OffersCommand(commands.Cog):
             offers_svc = offers_service.OffersService(connection)
             offers = await offers_svc.get_highest_ranks_with_offers(year)
 
-        embed = discord.Embed(title=f"Highest known ranks with offers ({year})", color=0x36bee6)
+        embed = discord.Embed(
+            title=f"Highest known ranks with offers ({year})", color=0x36bee6)
 
         for offer in offers:
             programme = programmes_helper.programmes[offer[0]]

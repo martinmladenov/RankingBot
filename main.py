@@ -13,7 +13,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # if its not present in the .env then it will load it from the environ, if not present it will be set to None
-SSLString = '?sslmode=require' if os.getenv('SSL_MODE') is None or os.getenv('SSL_MODE') == 'True' else ''
+SSLString = '?sslmode=require' if os.getenv(
+    'SSL_MODE') is None or os.getenv('SSL_MODE') == 'True' else ''
 
 if os.getenv('DATABASE_URL') is None:
     DB_USER = os.getenv('DB_USER')
@@ -22,6 +23,12 @@ if os.getenv('DATABASE_URL') is None:
     os.environ['DATABASE_URL'] = f"postgres://{DB_USER}:{DB_PASSWORD}@localhost:5432/{DB_NAME}{SSLString}"
 else:
     os.environ['DATABASE_URL'] = f"{os.environ['DATABASE_URL']}{SSLString}"
+
+# for now we just remove the [] from the string later we split to get an array, chose to have [] in the .env to make clear its used as an array
+if os.getenv('GUILD_IDS') is not None and len(os.getenv('GUILD_IDS')) > 2:
+    os.environ['GUILD_IDS'] = os.getenv('GUILD_IDS')[1:-1]
+else:
+    os.environ['GUILD_IDS'] = ""
 
 bot = commands.Bot(command_prefix='.', help_command=None)
 slash = SlashCommand(bot, sync_commands=True)

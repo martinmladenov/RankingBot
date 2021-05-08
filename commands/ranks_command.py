@@ -1,3 +1,4 @@
+import os
 from discord.ext import commands
 import discord
 from discord_slash import SlashContext
@@ -24,7 +25,7 @@ class RanksCommand(commands.Cog):
                    required=False,
                    choices=programmes_helper.get_year_choices()
                )
-           ])
+           ], guild_ids=programmes_helper.get_guild_ids())
     async def ranks(self, ctx: SlashContext, year: int = None):
 
         if year is None:
@@ -53,11 +54,13 @@ class RanksCommand(commands.Cog):
             group_list = list(('`' + (' ' * (3 - len(str(x[1])))) + str(x[1]) + f' {x[0]}`')
                               for x in group[1])
             if not is_bot_channel and group_truncated[group[0]] > 0:
-                group_list.append(f'\n**_+ {group_truncated[group[0]]} more..._**')
+                group_list.append(
+                    f'\n**_+ {group_truncated[group[0]]} more..._**')
 
             embed_dict[group_name] = group_list
 
-        embed = discord.Embed(title=f"Ranking numbers ({year})", color=0x36bee6)
+        embed = discord.Embed(
+            title=f"Ranking numbers ({year})", color=0x36bee6)
 
         embed.add_field(name='Note: Not everyone in this list has received an offer.',
                         value='To view the highest known ranking numbers with offers, use `/offers`.',

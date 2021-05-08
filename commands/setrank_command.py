@@ -1,3 +1,4 @@
+import os
 from discord.ext import commands
 from discord_slash import SlashContext
 from discord_slash.cog_ext import cog_slash as slash
@@ -37,7 +38,7 @@ class SetrankCommand(commands.Cog):
                    required=False,
                    choices=programmes_helper.get_year_choices()
                )
-           ])
+           ], guild_ids=programmes_helper.get_guild_ids())
     async def setrank(self, ctx: SlashContext, rank: int, programme: str, year: int = None):
         user = ctx.author
         user_id = str(user.id)
