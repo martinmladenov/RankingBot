@@ -332,7 +332,7 @@ class DMService:
             print(f'failed to send message to {member.name}: {str(e)}')
             return False
 
-    async def send_reminder_dm(self, member: discord.Member, programme: programmes_helper.Programme) -> bool:
+    async def send_reminder_dm(self, user: discord.User, programme: programmes_helper.Programme) -> bool:
         message = '**Hello {0}!**\n' \
                   'We\'d be very grateful if you could provide us with your **ranking number** and ' \
                   '**the date when you received your offer on Studielink** for the **{1}** programme at {2} **{3}**. ' \
@@ -346,12 +346,12 @@ class DMService:
                   'username or precise ranking number will never be shared with other applicants._\n' \
                   'If you haven\'t applied for the **{1}** programme at **{3}**, please type `wrong`.\n' \
                   'If you don\'t want to share your ranking number, type `stop`.' \
-            .format(member.name, programme.display_name, programme.icon, programme.uni_name)
+            .format(user.name, programme.display_name, programme.icon, programme.uni_name)
 
         try:
-            dm_channel = await member.create_dm()
+            dm_channel = await user.create_dm()
             await dm_channel.send(message)
             return True
         except Exception as e:
-            print(f'failed to send reminder message to {member.name}: {str(e)}')
+            print(f'failed to send reminder message to {user.name}: {str(e)}')
             return False
