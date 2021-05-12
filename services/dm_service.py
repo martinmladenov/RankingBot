@@ -356,6 +356,39 @@ class DMService:
             print(f'failed to send reminder message to {user.name}: {str(e)}')
             return False
 
+    async def send_all_reminder_dms(self, bot: Bot):
+        dm_rows = await self.db_conn.fetch('SELECT id, user_id, programme, num_reminders, next_reminder FROM dms '
+                                           'WHERE status = $1 AND next_reminder < $2',
+                                           self.DmStatus.SENT, datetime.utcnow())
+
+        for row_id, user_id, programme_id, num_reminders, sched_curr_reminder in dm_rows:
+            print(f'sending reminder to id = {user_id}, programme = {programme_id}, count = {num_reminders}')
+            try:
+                user = await bot.fetch_user(int(user_id))
+
+                if not user:
+                    print(f'unable to send reminder to {user_id}: cannot obtain user handle')
+                    await self.reschedule_reminder(sched_curr_reminder, timedelta(days=3), row_id)
+                    continue
+
+                result = await self.send_reminder_dm(user, programmes_helper.programmes[programme_id])
+                if not result:
+                    print(f'unable to send reminder to {user_id}: sending DM failed')
+                    await self.reschedule_reminder(sched_curr_reminder, timedelta(days=3), row_id)
+                    continue
+
+                new_time = self.reminder_build_new_datetime(sched_curr_reminder, timedelta(days=7))
+
+                await self.db_conn.execute('UPDATE dms SET next_reminder = $1, num_reminders = $2, reminder_sent = $3'
+                                           'WHERE id = $4',
+                                           new_time, num_reminders + 1, datetime.utcnow(), row_id)
+
+                print(f'sent reminder to {user_id}')
+
+            except Exception as e:
+                print(f'an error occurred while sending reminder message to {user_id}: {str(e)}')
+                await self.reschedule_reminder(timedelta(days=3), row_id)
+
     def reminder_build_new_datetime(self, sched_curr_reminder: datetime, delta: timedelta) -> datetime:
         new_date_curr_time = datetime.utcnow() + delta
         new_time = datetime(new_date_curr_time.year, new_date_curr_time.month, new_date_curr_time.day,
