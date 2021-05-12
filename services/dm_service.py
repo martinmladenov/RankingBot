@@ -355,3 +355,15 @@ class DMService:
         except Exception as e:
             print(f'failed to send reminder message to {user.name}: {str(e)}')
             return False
+
+    def reminder_build_new_datetime(self, sched_curr_reminder: datetime, delta: timedelta) -> datetime:
+        new_date_curr_time = datetime.utcnow() + delta
+        new_time = datetime(new_date_curr_time.year, new_date_curr_time.month, new_date_curr_time.day,
+                            sched_curr_reminder.hour, sched_curr_reminder.minute, sched_curr_reminder.second)
+        return new_time
+
+    async def reschedule_reminder(self, sched_curr_reminder: datetime, delta: timedelta, row_id: int):
+        new_time = self.reminder_build_new_datetime(sched_curr_reminder, delta)
+        await self.db_conn.execute('UPDATE dms SET next_reminder = $1'
+                                   'WHERE id = $2',
+                                   new_time, row_id)
