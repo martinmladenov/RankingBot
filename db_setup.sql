@@ -37,5 +37,6 @@ create table dms
     sent          timestamp,
     reminder_sent timestamp,
     num_reminders int         not null default 0,
+    next_reminder timestamp,
     done          timestamp
 );

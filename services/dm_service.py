@@ -1,8 +1,9 @@
 import discord
+from discord.ext.commands import Bot
 from enum import IntEnum, Enum
 from utils import offer_date_util
 from helpers import programmes_helper
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import re
 import constants
 from asyncio import Lock
@@ -27,7 +28,7 @@ class DMService:
         dm_row_id, programme_id = dm_row
 
         if message.content.lower() in ['wrong', 'stop']:
-            await self.db_conn.execute('UPDATE dms SET status = $1, done = $2 '
+            await self.db_conn.execute('UPDATE dms SET status = $1, done = $2, next_reminder = NULL '
                                        'WHERE id = $3', self.DmStatus.REFUSED, datetime.utcnow(), dm_row_id)
             await message.channel.send('Noted. Sorry for bothering you!')
             await self.process_next_scheduled_dm(message.author)
@@ -36,7 +37,7 @@ class DMService:
         result = await self.handle_rank_response(message, programme_id)
 
         if result:
-            await self.db_conn.execute('UPDATE dms SET status = $1, done = $2 '
+            await self.db_conn.execute('UPDATE dms SET status = $1, done = $2, next_reminder = NULL '
                                        'WHERE id = $3', self.DmStatus.DONE, datetime.utcnow(), dm_row_id)
             await self.process_next_scheduled_dm(message.author)
 
@@ -127,8 +128,12 @@ class DMService:
         if not result:
             return
 
-        await self.db_conn.execute('UPDATE dms SET status = $1, sent = $2 '
-                                   'WHERE id = $3', self.DmStatus.SENT, datetime.utcnow(), dm_row_id)
+        await self.db_conn.execute('UPDATE dms SET status = $1, sent = $2, next_reminder = $3 '
+                                   'WHERE id = $4',
+                                   self.DmStatus.SENT,
+                                   datetime.utcnow(),
+                                   datetime.utcnow() + timedelta(days=7),
+                                   dm_row_id)
 
     class DmStatus(IntEnum):
         SCHEDULED = 0,
@@ -265,12 +270,14 @@ class DMService:
                     sent = await self.send_first_dm(member, programmes_helper.programmes[programme])
                     should_send = False
 
-                await self.db_conn.execute('INSERT INTO dms (user_id, programme, status, scheduled, sent) '
-                                           'VALUES ($1, $2, $3, $4, $5)',
+                await self.db_conn.execute('INSERT INTO dms '
+                                           '(user_id, programme, status, scheduled, sent, next_reminder) '
+                                           'VALUES ($1, $2, $3, $4, $5, $6)',
                                            user_id, programme,
                                            self.DmStatus.SENT if sent else self.DmStatus.SCHEDULED,
                                            sched_time,
-                                           datetime.utcnow() if sent else None)
+                                           datetime.utcnow() if sent else None,
+                                           datetime.utcnow() + timedelta(days=7) if sent else None)
 
         # Delete user lock
         async with user_lock_dict_lock:
@@ -324,3 +331,72 @@ class DMService:
         except Exception as e:
             print(f'failed to send message to {member.name}: {str(e)}')
             return False
+
+    async def send_reminder_dm(self, user: discord.User, programme: programmes_helper.Programme) -> bool:
+        message = '**Hello {0}!**\n' \
+                  'We\'d be very grateful if you could provide us with your **ranking number** and ' \
+                  '**the date when you received your offer on Studielink** for the **{1}** programme at {2} **{3}**. ' \
+                  'This information is of great use to other applicants who have not received an offer yet.\n' \
+                  'If you want to help, please reply to this message in the following format: `<rank> <day> ' \
+                  '<month>`.\n' \
+                  '_For example, if your ranking number is 100 and you received an offer on 15 April, ' \
+                  'please reply `100 15 April`._\n' \
+                  '**Thanks a lot!**\n' \
+                  '_Keep in mind that if you provide any information here, it will be anonymized and your ' \
+                  'username or precise ranking number will never be shared with other applicants._\n' \
+                  'If you haven\'t applied for the **{1}** programme at **{3}**, please type `wrong`.\n' \
+                  'If you don\'t want to share your ranking number, type `stop`.' \
+            .format(user.name, programme.display_name, programme.icon, programme.uni_name)
+
+        try:
+            dm_channel = await user.create_dm()
+            await dm_channel.send(message)
+            return True
+        except Exception as e:
+            print(f'failed to send reminder message to {user.name}: {str(e)}')
+            return False
+
+    async def send_all_reminder_dms(self, bot: Bot):
+        dm_rows = await self.db_conn.fetch('SELECT id, user_id, programme, num_reminders, next_reminder FROM dms '
+                                           'WHERE status = $1 AND next_reminder < $2',
+                                           self.DmStatus.SENT, datetime.utcnow())
+
+        for row_id, user_id, programme_id, num_reminders, sched_curr_reminder in dm_rows:
+            print(f'sending reminder to id = {user_id}, programme = {programme_id}, count = {num_reminders}')
+            try:
+                user = await bot.fetch_user(int(user_id))
+
+                if not user:
+                    print(f'unable to send reminder to {user_id}: cannot obtain user handle')
+                    await self.reschedule_reminder(sched_curr_reminder, timedelta(days=3), row_id)
+                    continue
+
+                result = await self.send_reminder_dm(user, programmes_helper.programmes[programme_id])
+                if not result:
+                    print(f'unable to send reminder to {user_id}: sending DM failed')
+                    await self.reschedule_reminder(sched_curr_reminder, timedelta(days=3), row_id)
+                    continue
+
+                new_time = self.reminder_build_new_datetime(sched_curr_reminder, timedelta(days=7))
+
+                await self.db_conn.execute('UPDATE dms SET next_reminder = $1, num_reminders = $2, reminder_sent = $3'
+                                           'WHERE id = $4',
+                                           new_time, num_reminders + 1, datetime.utcnow(), row_id)
+
+                print(f'sent reminder to {user_id}')
+
+            except Exception as e:
+                print(f'an error occurred while sending reminder message to {user_id}: {str(e)}')
+                await self.reschedule_reminder(timedelta(days=3), row_id)
+
+    def reminder_build_new_datetime(self, sched_curr_reminder: datetime, delta: timedelta) -> datetime:
+        new_date_curr_time = datetime.utcnow() + delta
+        new_time = datetime(new_date_curr_time.year, new_date_curr_time.month, new_date_curr_time.day,
+                            sched_curr_reminder.hour, sched_curr_reminder.minute, sched_curr_reminder.second)
+        return new_time
+
+    async def reschedule_reminder(self, sched_curr_reminder: datetime, delta: timedelta, row_id: int):
+        new_time = self.reminder_build_new_datetime(sched_curr_reminder, delta)
+        await self.db_conn.execute('UPDATE dms SET next_reminder = $1'
+                                   'WHERE id = $2',
+                                   new_time, row_id)
