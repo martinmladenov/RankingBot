@@ -1,8 +1,9 @@
 import discord
+from discord.ext.commands import Bot
 from enum import IntEnum, Enum
 from utils import offer_date_util
 from helpers import programmes_helper
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import re
 import constants
 from asyncio import Lock
@@ -27,7 +28,7 @@ class DMService:
         dm_row_id, programme_id = dm_row
 
         if message.content.lower() in ['wrong', 'stop']:
-            await self.db_conn.execute('UPDATE dms SET status = $1, done = $2 '
+            await self.db_conn.execute('UPDATE dms SET status = $1, done = $2, next_reminder = NULL '
                                        'WHERE id = $3', self.DmStatus.REFUSED, datetime.utcnow(), dm_row_id)
             await message.channel.send('Noted. Sorry for bothering you!')
             await self.process_next_scheduled_dm(message.author)
@@ -36,7 +37,7 @@ class DMService:
         result = await self.handle_rank_response(message, programme_id)
 
         if result:
-            await self.db_conn.execute('UPDATE dms SET status = $1, done = $2 '
+            await self.db_conn.execute('UPDATE dms SET status = $1, done = $2, next_reminder = NULL '
                                        'WHERE id = $3', self.DmStatus.DONE, datetime.utcnow(), dm_row_id)
             await self.process_next_scheduled_dm(message.author)
 
@@ -127,8 +128,12 @@ class DMService:
         if not result:
             return
 
-        await self.db_conn.execute('UPDATE dms SET status = $1, sent = $2 '
-                                   'WHERE id = $3', self.DmStatus.SENT, datetime.utcnow(), dm_row_id)
+        await self.db_conn.execute('UPDATE dms SET status = $1, sent = $2, next_reminder = $3 '
+                                   'WHERE id = $4',
+                                   self.DmStatus.SENT,
+                                   datetime.utcnow(),
+                                   datetime.utcnow() + timedelta(days=7),
+                                   dm_row_id)
 
     class DmStatus(IntEnum):
         SCHEDULED = 0,
@@ -265,12 +270,14 @@ class DMService:
                     sent = await self.send_first_dm(member, programmes_helper.programmes[programme])
                     should_send = False
 
-                await self.db_conn.execute('INSERT INTO dms (user_id, programme, status, scheduled, sent) '
-                                           'VALUES ($1, $2, $3, $4, $5)',
+                await self.db_conn.execute('INSERT INTO dms '
+                                           '(user_id, programme, status, scheduled, sent, next_reminder) '
+                                           'VALUES ($1, $2, $3, $4, $5, $6)',
                                            user_id, programme,
                                            self.DmStatus.SENT if sent else self.DmStatus.SCHEDULED,
                                            sched_time,
-                                           datetime.utcnow() if sent else None)
+                                           datetime.utcnow() if sent else None,
+                                           datetime.utcnow() + timedelta(days=7) if sent else None)
 
         # Delete user lock
         async with user_lock_dict_lock:
