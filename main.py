@@ -27,7 +27,7 @@ bot = commands.Bot(command_prefix='.', help_command=None)
 slash = SlashCommand(bot, sync_commands=True)
 
 if __name__ == '__main__':
-    dirs = ['commands', 'handlers']
+    dirs = ['commands', 'handlers', 'tasks']
     for cogs_dir in dirs:
         for extension in [f.replace('.py', '') for f in listdir(cogs_dir) if isfile(join(cogs_dir, f))]:
             try:
