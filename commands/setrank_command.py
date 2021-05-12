@@ -49,6 +49,38 @@ class SetrankCommand(commands.Cog):
             ranks = ranks_service.RanksService(connection)
             users = user_data_service.UserDataService(connection)
 
+            curr_rank_details = await ranks.get_rank_details_for_programme_and_user(programme, year, user_id)
+
+            if curr_rank_details:
+                curr_rank, curr_is_private = curr_rank_details
+                if rank == curr_rank:
+                    if not curr_is_private:
+                        await ctx.send(user.mention +
+                                       ' You have already set your ranking number. It can be seen via `/ranks`. '
+                                       'If you\'re trying to set an offer date, use `/setofferdate`.')
+                    else:
+                        await ranks.set_is_private_programme(user_id, False, programme, year)
+                        await ctx.send(user.mention +
+                                       ' You have already set your ranking number, but it was private (you\'ve likely '
+                                       'set it by replying to a direct message by the bot).\nIt has now been made '
+                                       'visible and you can see it via `/ranks`. '
+                                       'If you want to make it private again, you can use `/toggleprivaterank`.\n'
+                                       'If you\'re trying to set an offer date, you can use `/setofferdate`.')
+                else:
+                    if not curr_is_private:
+                        await ctx.send(user.mention +
+                                       f' You have already set a different ranking number (**{curr_rank}**). '
+                                       'To change it, first clear the old one using `/clearrank` and then try setting '
+                                       'the new one again.')
+                    else:
+                        await ctx.send(user.mention +
+                                       ' You have already set a different ranking number, but it is private (you\'ve '
+                                       'likely set it by replying to a direct message by the bot). '
+                                       'To change it, first clear the old one using `/clearrank` and then try setting '
+                                       'the new one again.')
+
+                return
+
             tr = connection.transaction()
             await tr.start()
 
@@ -72,7 +104,10 @@ class SetrankCommand(commands.Cog):
                 raise
 
             await tr.commit()
-        await ctx.send(user.mention + ' Rank set.')
+        await ctx.send(user.mention + ' Your ranking number was successfully added. It is now set as public and can be '
+                                      'seen via `/ranks`. If you want to make it private, you can use '
+                                      '`/toggleprivaterank.`\n'
+                                      'If you have received an offer, please use `/setofferdate` to set it.')
 
 
 def setup(bot):
