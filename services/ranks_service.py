@@ -10,6 +10,16 @@ class RanksService:
     def __init__(self, db_conn):
         self.db_conn = db_conn
 
+    async def get_rank_details_for_programme_and_user(self, programme: str, year: int, user_id: str):
+        if user_id is None:
+            raise ValueError
+
+        curr_rank = await self.db_conn.fetchrow('SELECT rank, is_private FROM ranks '
+                                                'WHERE user_id = $1 AND programme = $2 AND year = $3',
+                                                user_id, programme, year)
+
+        return curr_rank
+
     async def add_rank(self, rank: int, programme: str, year: int, user_id: str = None, offer_date: date = None,
                        source: str = None, is_private: bool = False):
         if rank <= 0 or rank >= 10000 or programme not in programmes_helper.programmes \
