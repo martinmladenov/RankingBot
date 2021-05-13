@@ -41,7 +41,7 @@ class UsernameUpdaterBackgroundTask(commands.Cog):
                 print(f'Updated username for user {user_id}: {stored_username} -> {actual_username}')
 
     @update_usernames.before_loop
-    async def before_printer(self):
+    async def before_update_usernames(self):
         await self.bot.wait_until_ready()
 
 

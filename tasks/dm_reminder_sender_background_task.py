@@ -14,7 +14,7 @@ class DmReminderSenderBackgroundTask(commands.Cog):
             await dm.send_all_reminder_dms(self.bot)
 
     @send_reminders.before_loop
-    async def before_printer(self):
+    async def before_send_reminders(self):
         await self.bot.wait_until_ready()
 
 
