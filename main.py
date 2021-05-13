@@ -23,7 +23,11 @@ if os.getenv('DATABASE_URL') is None:
 else:
     os.environ['DATABASE_URL'] = f"{os.environ['DATABASE_URL']}{SSLString}"
 
-bot = commands.Bot(command_prefix='.', help_command=None)
+intents = discord.Intents.default()
+if os.getenv('SERVER_ID'):
+    intents.members = True
+
+bot = commands.Bot(command_prefix='.', help_command=None, intents=intents)
 slash = SlashCommand(bot, sync_commands=True)
 
 if __name__ == '__main__':
