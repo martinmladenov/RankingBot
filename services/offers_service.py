@@ -56,7 +56,7 @@ class OffersService:
         bottom_limit = fill_between_end - (y_values[len(y_values) - 1] - fill_between_end) / 40
 
         bg_color = '#36393F'
-        fg_color = '#1f77b4'
+        fg_color = programme.graph_colour
 
         plt.rcParams['ytick.color'] = 'w'
         plt.rcParams['xtick.color'] = 'w'

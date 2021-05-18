@@ -2,13 +2,15 @@ from discord_slash.utils.manage_commands import create_choice
 
 
 class Programme:
-    def __init__(self, programme_id: str, display_name: str, uni_name: str, icon: str, places: dict, visa_cutoff):
+    def __init__(self, programme_id: str, display_name: str, uni_name: str, icon: str, places: dict, visa_cutoff,
+                 graph_colour: str):
         self.id = programme_id
         self.display_name = display_name
         self.uni_name = uni_name
         self.icon = icon
         self.places = places
         self.visa_cutoff = visa_cutoff
+        self.graph_colour = graph_colour
 
 
 programmes = {
@@ -18,7 +20,8 @@ programmes = {
         'TU Delft',
         '<:TUD:555817896203255824>',
         {2020: 500, 2021: 500},
-        (15, 6)
+        (15, 6),
+        '#1f77b4'
     ),
     'tud-ae': Programme(
         'tud-ae',
@@ -26,7 +29,8 @@ programmes = {
         'TU Delft',
         '<:TUD:555817896203255824>',
         {2020: 440, 2021: 440},
-        (15, 6)
+        (15, 6),
+        '#c9792f'
     ),
     'tue-cse': Programme(
         'tue-cse',
@@ -34,7 +38,8 @@ programmes = {
         'TU Eindhoven',
         '<:TuE:562730919815807003>',
         {2020: 325, 2021: 325},
-        None
+        None,
+        '#bb3e2e'
     ),
     'tud-nb': Programme(
         'tud-nb',
@@ -42,7 +47,8 @@ programmes = {
         'TU Delft',
         '<:TUD:555817896203255824>',
         {2020: 100, 2021: 120},
-        (15, 6)
+        (15, 6),
+        '#b03c56'
     ),
 }
 
