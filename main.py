@@ -13,8 +13,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # if its not present in the .env then it will load it from the environ, if not present it will be set to None
-SSLString = '?sslmode=require' if os.getenv(
-    'SSL_MODE') is None or os.getenv('SSL_MODE') == 'True' else ''
+SSLString = '?sslmode=require' if os.getenv('SSL_MODE') is None or os.getenv('SSL_MODE') == 'True' else ''
 
 if os.getenv('DATABASE_URL') is None:
     DB_USER = os.getenv('DB_USER')
@@ -24,12 +23,15 @@ if os.getenv('DATABASE_URL') is None:
 else:
     os.environ['DATABASE_URL'] = f"{os.environ['DATABASE_URL']}{SSLString}"
 
+intents = discord.Intents.default()
+if os.getenv('SERVER_ID'):
+    intents.members = True
 
-bot = commands.Bot(command_prefix='.', help_command=None)
+bot = commands.Bot(command_prefix='.', help_command=None, intents=intents)
 slash = SlashCommand(bot, sync_commands=True)
 
 if __name__ == '__main__':
-    dirs = ['commands', 'handlers']
+    dirs = ['commands', 'handlers', 'tasks']
     for cogs_dir in dirs:
         for extension in [f.replace('.py', '') for f in listdir(cogs_dir) if isfile(join(cogs_dir, f))]:
             try:
