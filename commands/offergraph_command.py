@@ -4,7 +4,7 @@ from discord_slash import SlashContext
 from discord_slash.cog_ext import cog_slash as slash
 from discord_slash.utils.manage_commands import create_option
 from utils import command_option_type
-from helpers import programmes_helper
+from helpers import programmes_helper, config_helper
 from services import offers_service
 import constants
 
@@ -36,7 +36,7 @@ class OffergraphCommand(commands.Cog):
                    option_type=command_option_type.BOOLEAN,
                    required=False
                )
-           ], guild_ids=programmes_helper.get_guild_ids())
+           ], guild_ids=config_helper.get_guild_ids())
     async def offergraph(self, ctx: SlashContext, programme_id: str, year: int = None, step: bool = False):
         if year is None:
             year = constants.current_year

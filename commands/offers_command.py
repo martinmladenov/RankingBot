@@ -5,7 +5,7 @@ from discord_slash.cog_ext import cog_slash as slash
 from discord_slash.utils.manage_commands import create_option
 from utils import command_option_type
 from utils import offer_date_util
-from helpers import programmes_helper
+from helpers import programmes_helper, config_helper
 from services import offers_service
 import constants
 
@@ -24,7 +24,7 @@ class OffersCommand(commands.Cog):
                    required=False,
                    choices=programmes_helper.get_year_choices()
                )
-           ], guild_ids=programmes_helper.get_guild_ids())
+           ], guild_ids=config_helper.get_guild_ids())
     async def offers(self, ctx: SlashContext, year: int = None):
         if year is None:
             year = constants.current_year

@@ -4,7 +4,7 @@ from discord_slash.cog_ext import cog_slash as slash
 from discord_slash.utils.manage_commands import create_option
 from utils import command_option_type
 
-from helpers import programmes_helper
+from helpers import programmes_helper, config_helper
 from services import ranks_service
 import constants
 
@@ -30,7 +30,7 @@ class ToggleprivaterankCommand(commands.Cog):
                    required=False,
                    choices=programmes_helper.get_year_choices()
                )
-           ], guild_ids=programmes_helper.get_guild_ids())
+           ], guild_ids=config_helper.get_guild_ids())
     async def toggleprivaterank(self, ctx: SlashContext, programme: str = None, year: int = None):
         user = ctx.author
         user_id = str(user.id)

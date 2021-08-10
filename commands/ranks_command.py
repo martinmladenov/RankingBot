@@ -4,7 +4,7 @@ from discord_slash import SlashContext
 from discord_slash.cog_ext import cog_slash as slash
 from discord_slash.utils.manage_commands import create_option
 from utils import command_option_type
-from helpers import programmes_helper
+from helpers import programmes_helper, config_helper
 from services import ranks_service
 from utils.response_building_util import build_embed_groups
 import constants
@@ -24,7 +24,7 @@ class RanksCommand(commands.Cog):
                    required=False,
                    choices=programmes_helper.get_year_choices()
                )
-           ], guild_ids=programmes_helper.get_guild_ids())
+           ], guild_ids=config_helper.get_guild_ids())
     async def ranks(self, ctx: SlashContext, year: int = None):
 
         if year is None:

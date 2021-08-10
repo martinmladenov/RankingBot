@@ -6,7 +6,7 @@ from utils import command_option_type
 
 from services import ranks_service, user_data_service
 from services.errors.entry_already_exists_error import EntryAlreadyExistsError
-from helpers import programmes_helper
+from helpers import programmes_helper, config_helper
 import constants
 
 
@@ -37,7 +37,7 @@ class SetrankCommand(commands.Cog):
                    required=False,
                    choices=programmes_helper.get_year_choices()
                )
-           ], guild_ids=programmes_helper.get_guild_ids())
+           ], guild_ids=config_helper.get_guild_ids())
     async def setrank(self, ctx: SlashContext, rank: int, programme: str, year: int = None):
         user = ctx.author
         user_id = str(user.id)
