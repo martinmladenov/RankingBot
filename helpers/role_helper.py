@@ -1,6 +1,61 @@
 from discord_slash.utils.manage_components import create_button, create_actionrow
 from discord_slash.model import ButtonStyle
 
+programme_roles_dict = {
+    'cse': 'Computer Science and Engineering',
+    'ae': 'Aerospace Engineering',
+    'mech': 'Mechanical Engineering',
+    'ee': 'Electrical Engineering',
+    'nb': 'Nanobiology',
+}
+
+programme_roles = set(programme_roles_dict.values())
+
+student_roles_dict = {
+    'tud': 'TU Delft Students',
+    'tue': 'TU Eindhoven Students',
+    'utwente': 'UTwente Students',
+}
+
+student_roles = set(student_roles_dict.values())
+
+applicant_roles_dict = {
+    'tud': 'TU Delft Applicants',
+    'tue': 'TU Eindhoven Applicants',
+    'utwente': 'UTwente Applicants',
+}
+
+applicant_roles = set(applicant_roles_dict.values())
+
+accepted_roles_dict = {
+    'tud': 'Accepted TU Delft',
+    'tue': 'Accepted TU Eindhoven',
+    'utwente': 'Accepted UTwente',
+}
+
+accepted_roles = set(accepted_roles_dict.values())
+
+
+def process_role_assignment_student(programme: str, uni: str, user_roles: set, guild_roles: list,
+                                    to_add: list, to_remove: list):
+    # Remove all other programme roles, remove all other student roles,
+    # remove all applicant and accepted roles,
+    # add correct student and programme roles (if necessary)
+
+    programme_role_name = programme_roles_dict[programme]
+    student_role_name = student_roles_dict[uni]
+    for role in user_roles:
+        role_name = role.name
+        if role_name in accepted_roles or role_name in applicant_roles or \
+                role_name in programme_roles and role_name != programme_role_name or \
+                role_name in student_roles and role_name != student_role_name:
+            to_remove.append(role)
+
+    if not any(student_role_name == r.name for r in user_roles):
+        to_add.append(next(r for r in guild_roles if r.name == student_role_name))
+    if not any(programme_role_name == r.name for r in user_roles):
+        to_add.append(next(r for r in guild_roles if r.name == programme_role_name))
+
 
 def generate_components(suffix: str, emojis: dict) -> list:
     prefix = 'role_'
