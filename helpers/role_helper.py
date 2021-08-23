@@ -57,6 +57,26 @@ def process_role_assignment_student(programme: str, uni: str, user_roles: set, g
         to_add.append(next(r for r in guild_roles if r.name == programme_role_name))
 
 
+def process_role_assignment_applicant(programme: str, uni: str, user_roles: set, guild_roles: list,
+                                      to_add: list, to_remove: list):
+    # Remove corresponding student and accepted roles,
+    # add  student and programme roles (if necessary)
+
+    programme_role_name = programme_roles_dict[programme]
+    applicant_role_name = applicant_roles_dict[uni]
+    accepted_role_name = accepted_roles_dict[uni]
+    student_role_name = student_roles_dict[uni]
+    for role in user_roles:
+        role_name = role.name
+        if role_name == student_role_name or role_name == accepted_role_name:
+            to_remove.append(role)
+
+    if not any(applicant_role_name == r.name for r in user_roles):
+        to_add.append(next(r for r in guild_roles if r.name == applicant_role_name))
+    if not any(programme_role_name == r.name for r in user_roles):
+        to_add.append(next(r for r in guild_roles if r.name == programme_role_name))
+
+
 def generate_components(suffix: str, emojis: dict) -> list:
     prefix = 'role_'
     components = [
