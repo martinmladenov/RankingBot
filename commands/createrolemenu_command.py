@@ -17,14 +17,14 @@ class CreaterolemenuCommand(commands.Cog):
             return
 
         if menu_type == 'student':
-            message = '**_Roles for students_**\n' \
+            message = '\U0001f393 **_Roles for students_**\n' \
                       '_Choose a role below if you are a current student or have been accepted._' \
-                      '\n\n**Please select your study programme by clicking the button below:**'
+                      '\n\n**Please select your study programme by clicking a button below:**'
             suffix = '-stud'
         elif menu_type == 'applicant':
-            message = '**_Roles for applicants_**\n' \
+            message = '\U0001f4a1 **_Roles for applicants_**\n' \
                       '_Choose a role below if you are an applicant._' \
-                      '\n\n**Please select your study programme by clicking the button below:**\n' \
+                      '\n\n**Please select your study programme by clicking a button below:**\n' \
                       '_(you can choose more than one programme by clicking on multiple buttons)_'
             suffix = '-app'
         else:
