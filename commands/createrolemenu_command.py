@@ -21,6 +21,12 @@ class CreaterolemenuCommand(commands.Cog):
                       '_Choose a role below if you are a current student or have been accepted._' \
                       '\n\n**Please select your study programme by clicking the button below:**'
             suffix = '-stud'
+        elif menu_type == 'applicant':
+            message = '**_Roles for applicants_**\n' \
+                      '_Choose a role below if you are an applicant._' \
+                      '\n\n**Please select your study programme by clicking the button below:**\n' \
+                      '_(you can choose more than one programme by clicking on multiple buttons)_'
+            suffix = '-app'
         else:
             raise commands.UserInputError
 
@@ -39,7 +45,7 @@ class CreaterolemenuCommand(commands.Cog):
     async def info_error(self, ctx, error):
         user = ctx.message.author
         if isinstance(error, commands.UserInputError):
-            await ctx.send(user.mention + ' Invalid arguments. Usage: `.createrolemenu <student>`')
+            await ctx.send(user.mention + ' Invalid arguments. Usage: `.createrolemenu <student/applicant>`')
         else:
             await ctx.send(user.mention + ' An unexpected error occurred')
             raise
