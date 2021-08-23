@@ -17,6 +17,7 @@ class RoleButtonHandler(commands.Cog):
             component_type = component_data = None
 
         if component_type == 'role':
+            await ctx.defer(hidden=True)
             uni, programme, student_type = component_data.split('-')
             to_add = []
             to_remove = []
