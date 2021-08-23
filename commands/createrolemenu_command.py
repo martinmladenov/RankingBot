@@ -32,9 +32,9 @@ class CreaterolemenuCommand(commands.Cog):
 
         guild_emojis = await ctx.guild.fetch_emojis()
         emoji_dict = {
-            'tud': next(e for e in guild_emojis if e.name == 'TUD'),
-            'tue': next(e for e in guild_emojis if e.name == 'TuE'),
-            'utwente': next(e for e in guild_emojis if e.name == 'UTWENTE')
+            'tud': next(e for e in guild_emojis if e.name == 'tudelft_white'),
+            'tue': next(e for e in guild_emojis if e.name == 'tueindhoven_white'),
+            'utwente': next(e for e in guild_emojis if e.name == 'utwente_white')
         }
 
         components = role_helper.generate_components(suffix, emoji_dict)
