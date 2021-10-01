@@ -3,7 +3,7 @@ from discord_slash import SlashContext
 from discord_slash.cog_ext import cog_slash as slash
 from discord_slash.utils.manage_commands import create_option, create_choice
 from utils import command_option_type
-from helpers import programmes_helper
+from helpers import programmes_helper, config_helper
 from services import ranks_service
 
 
@@ -20,7 +20,7 @@ class ClearrankCommand(commands.Cog):
                    option_type=command_option_type.STRING,
                    required=True,
                    choices=programmes_helper.get_programme_choices()
-                           + [create_choice(name='All programmes', value='all')]
+                   + [create_choice(name='All programmes', value='all')]
                ),
                create_option(
                    name='year',
@@ -29,7 +29,7 @@ class ClearrankCommand(commands.Cog):
                    required=True,
                    choices=programmes_helper.get_year_choices()
                )
-           ])
+           ], guild_ids=config_helper.get_guild_ids())
     async def clearrank(self, ctx: SlashContext, programme: str, year: int):
         user = ctx.author
 

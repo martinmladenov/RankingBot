@@ -4,7 +4,7 @@ from discord_slash.cog_ext import cog_slash as slash
 from discord_slash.utils.manage_commands import create_option, create_choice
 from utils import command_option_type
 from datetime import date
-from helpers import programmes_helper
+from helpers import programmes_helper, config_helper
 from services import ranks_service
 from services.errors.date_incorrect_error import DateIncorrectError
 import constants
@@ -63,7 +63,7 @@ class AddmanualdateCommand(commands.Cog):
                    required=False,
                    choices=programmes_helper.get_year_choices()
                )
-           ])
+           ], guild_ids=config_helper.get_guild_ids())
     async def addmanualdate(self, ctx: SlashContext, programme: str, rank: int, day: int, month: int,
                             source: str = None, year: int = None):
         user = ctx.author
