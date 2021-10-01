@@ -17,6 +17,10 @@ class UserDataService:
         users = await self.db_conn.fetch('SELECT user_id, username FROM user_data')
         return users
 
+    async def get_user_rank(self, user_id: str):
+        user = await self.db_conn.fetch('SELECT is_private, rank FROM ranks WHERE user_id = $1', user_id)
+        return user
+
     async def set_username(self, user_id: str, new_username: str):
         await self.db_conn.execute('UPDATE user_data SET username = $1 WHERE user_id = $2',
                                    new_username, user_id)
