@@ -30,9 +30,16 @@ class GetrankCommand(commands.Cog):
                    option_type=command_option_type.STRING,
                    required=False,
                    choices=programmes_helper.get_programme_choices()
+               ),
+               create_option(
+                   name='year',
+                   description='Application Year',
+                   option_type=command_option_type.INTEGER,
+                   required=False,
+                   choices=programmes_helper.get_year_choices()
                )
            ])
-    async def get_rank(self, ctx: SlashContext, user: str, programme: str = None):
+    async def get_rank(self, ctx: SlashContext, user: str, programme: str = None, year: int = constants.current_year):
         async with (await self.bot.get_db_conn()).acquire() as connection:
             user_id = re.sub(r"[<@!>]", "", user)
 
@@ -43,13 +50,25 @@ class GetrankCommand(commands.Cog):
             users = user_data_service.UserDataService(connection)
             res = await users.get_user_rank(user_id)
 
-            if res and res[0]:
-                is_private, rank = res[0]
+            if res:
+                # Filter by programme
+                if programme:
+                    res = filter(lambda x: True if x[3] == programme else False, res)
 
-                if is_private:
-                    await ctx.send(ctx.author.mention + f"User {user} has a private rank.")
+                # Filter by year
+                res = filter(lambda x: True if x[2] == year else False, res)
+                # Filter by is_private
+                res = list(filter(lambda x: True if not x[0] else False, res))
+
+                res.sort(key=lambda x: x[1])
+
+                res = "\n".join(map(lambda x: f"Rank: {x[1]} in {x[3]} {x[2]}", res))
+
+                if len(res) == 0:
+                    await ctx.send(ctx.author.mention + f" User {user} does not have recorded data that matches your filters")
                 else:
-                    await ctx.send(ctx.author.mention + f"User {user} is ranked {rank}.")
+                    await ctx.send(ctx.author.mention + f"User {user}: \n" + res)
+
             else:
                 await ctx.send(ctx.author.mention +
                                f"User {user} is either invalid or has not posted his ranking number.")
