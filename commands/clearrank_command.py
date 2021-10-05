@@ -7,11 +7,11 @@ from helpers import programmes_helper
 from services import ranks_service
 
 
-class ClearrankCommand(commands.Cog):
+class DeleteRankCommand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @slash(name='clearrank',
+    @slash(name='deleterank',
            description='Delete your ranking number and the corresponding offer date (if it exists) from the bot',
            options=[
                create_option(
@@ -30,7 +30,7 @@ class ClearrankCommand(commands.Cog):
                    choices=programmes_helper.get_year_choices()
                )
            ])
-    async def clearrank(self, ctx: SlashContext, programme: str, year: int):
+    async def deleterank(self, ctx: SlashContext, programme: str, year: int):
         user = ctx.author
 
         if programme == 'all':
@@ -41,8 +41,8 @@ class ClearrankCommand(commands.Cog):
 
             await ranks.delete_rank(str(user.id), programme, year)
 
-        await ctx.send(user.mention + ' Rank cleared.')
+        await ctx.send(user.mention + ' Rank deleted.')
 
 
 def setup(bot):
-    bot.add_cog(ClearrankCommand(bot))
+    bot.add_cog(DeleteRankCommand(bot))

@@ -70,13 +70,13 @@ class SetrankCommand(commands.Cog):
                     if not curr_is_private:
                         await ctx.send(user.mention +
                                        f' You have already set a different ranking number (**{curr_rank}**). '
-                                       'To change it, first clear the old one using `/clearrank` and then try setting '
+                                       'To change it, first delete the old one using `/deleterank` and then try setting '
                                        'the new one again.')
                     else:
                         await ctx.send(user.mention +
                                        ' You have already set a different ranking number, but it is private (you\'ve '
                                        'likely set it by replying to a direct message by the bot). '
-                                       'To change it, first clear the old one using `/clearrank` and then try setting '
+                                       'To change it, first delete the old one using `/deleterank` and then try setting '
                                        'the new one again.')
 
                 return
@@ -93,7 +93,7 @@ class SetrankCommand(commands.Cog):
                     return
                 except EntryAlreadyExistsError:
                     await ctx.send(user.mention + ' You have already set your ranking number. To set a different one, '
-                                                  'clear it using `/clearrank` and try setting it again.')
+                                                  'delete it using `/deleterank` and try setting it again.')
                     await tr.rollback()
                     return
 
