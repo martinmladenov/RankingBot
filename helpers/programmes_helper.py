@@ -41,15 +41,6 @@ programmes = {
         None,
         '#bb3e2e'
     ),
-    'tud-nb': Programme(
-        'tud-nb',
-        'Nanobiology',
-        'TU Delft',
-        '<:TUD:555817896203255824>',
-        {2020: 100, 2021: 120, 2022: 120},
-        (15, 6),
-        '#b03c56'
-    ),
     'ut-tcs': Programme(
         'ut-tcs',
         'Technical Computer Science',
@@ -57,6 +48,24 @@ programmes = {
         '<:UTWENTE:555817816918327296>',
         {2022: 400},
         (1, 6),
+        '#b03c56'
+    ),
+    'tue-me': Programme(
+        'tue-me',
+        'Mechanical Engineering',
+        'TU Eindhoven',
+        '<:TuE:562730919815807003>',
+        {2022: 360},
+        None,
+        '#c9792f'
+    ),
+    'tud-nb': Programme(
+        'tud-nb',
+        'Nanobiology',
+        'TU Delft',
+        '<:TUD:555817896203255824>',
+        {2020: 100, 2021: 120, 2022: 120},
+        (15, 6),
         '#b03c56'
     ),
 }
