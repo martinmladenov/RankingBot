@@ -41,8 +41,8 @@ programmes = {
         None,
         '#bb3e2e'
     ),
-    'ut-tcs': Programme(
-        'ut-tcs',
+    'utwente-cse': Programme(
+        'utwente-cse',
         'Technical Computer Science',
         'UTwente',
         '<:UTWENTE:555817816918327296>',
@@ -50,8 +50,8 @@ programmes = {
         (1, 6),
         '#b03c56'
     ),
-    'tue-me': Programme(
-        'tue-me',
+    'tue-mech': Programme(
+        'tue-mech',
         'Mechanical Engineering',
         'TU Eindhoven',
         '<:TuE:562730919815807003>',
