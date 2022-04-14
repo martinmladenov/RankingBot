@@ -1,5 +1,7 @@
+import discord.ext.commands
 from discord_slash.utils.manage_components import create_button, create_actionrow
 from discord_slash.model import ButtonStyle
+from services import dm_service
 
 programme_roles_dict = {
     'cse': 'Computer Science and Engineering',
@@ -57,10 +59,12 @@ def process_role_assignment_student(programme: str, uni: str, user_roles: set, g
         to_add.append(next(r for r in guild_roles if r.name == programme_role_name))
 
 
-def process_role_assignment_accepted(programme: str, uni: str, user_roles: set, guild_roles: list,
-                                     to_add: list, to_remove: list):
+async def process_role_assignment_accepted(programme: str, uni: str, user_roles: set, guild_roles: list,
+                                           to_add: list, to_remove: list,
+                                           bot: discord.ext.commands.Bot, user: discord.user.User):
     # Remove corresponding applicant role,
     # add correct student and programme roles (if necessary)
+    # Send DMs if programme is numerus fixus
 
     programme_role_name = programme_roles_dict[programme]
     student_role_name = applicant_roles_dict[uni]
@@ -75,6 +79,10 @@ def process_role_assignment_accepted(programme: str, uni: str, user_roles: set, 
         to_add.append(next(r for r in guild_roles if r.name == accepted_role_name))
     if not any(programme_role_name == r.name for r in user_roles):
         to_add.append(next(r for r in guild_roles if r.name == programme_role_name))
+
+    async with (await bot.get_db_conn()).acquire() as connection:
+        dm = dm_service.DMService(connection)
+        await dm.handle_assignment(user, f"{uni}-{programme}")
 
 
 def process_role_assignment_applicant(programme: str, uni: str, user_roles: set, guild_roles: list,
