@@ -26,6 +26,9 @@ class RoleButtonHandler(commands.Cog):
             if student_type == 'stud':
                 role_helper.process_role_assignment_student(programme, uni, user_roles, ctx.guild.roles,
                                                             to_add, to_remove)
+            if student_type == 'acc':
+                role_helper.process_role_assignment_accepted(programme, uni, user_roles, ctx.guild.roles,
+                                                             to_add, to_remove)
             elif student_type == 'app':
                 role_helper.process_role_assignment_applicant(programme, uni, user_roles, ctx.guild.roles,
                                                               to_add, to_remove)
