@@ -19,7 +19,7 @@ class OffersService:
     async def clean_up_file(self, filename: str):
         os.remove(filename)
 
-    async def generate_graph(self, programme: programmes_helper.Programme, step: bool, year: int):
+    async def generate_graph(self, programme: programmes_helper.Programme, step: bool, year: int) -> str:
         if year not in programme.places:
             raise ValueError
 
