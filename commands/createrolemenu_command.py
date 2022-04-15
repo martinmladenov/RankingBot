@@ -33,6 +33,10 @@ class CreaterolemenuCommand(commands.Cog):
                       '\n\n**Please select your study programme by clicking a button below:**\n' \
                       '_(you can choose more than one programme by clicking on multiple buttons)_'
             suffix = '-acc'
+        elif menu_type == 'remove':
+            components = role_helper.generate_components_remove_roles()
+            await ctx.send(components=components)
+            return
         else:
             raise commands.UserInputError
 

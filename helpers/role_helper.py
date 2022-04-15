@@ -156,3 +156,16 @@ def generate_components(suffix: str, emojis: dict) -> list:
     ]
 
     return components
+
+
+def generate_components_remove_roles() -> list:
+    prefix = 'role_'
+    components = [
+        create_actionrow(
+            create_button(style=ButtonStyle.gray, label="Did you get the wrong roles?", disabled=True),
+            create_button(style=ButtonStyle.gray, label="Remove roles",
+                          custom_id=prefix + 'remove-remove-remove'),
+        ),
+    ]
+
+    return components
