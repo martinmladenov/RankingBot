@@ -4,12 +4,9 @@ from discord_slash import SlashContext
 from discord_slash.cog_ext import cog_slash as slash
 from discord_slash.utils.manage_commands import create_option
 from utils import command_option_type
-import re
 
 from services import ranks_service, user_data_service
-from services.errors.entry_already_exists_error import EntryAlreadyExistsError
 from helpers import programmes_helper
-import constants
 
 
 class GetrankCommand(commands.Cog):
@@ -17,11 +14,11 @@ class GetrankCommand(commands.Cog):
         self.bot = bot
 
     @slash(name="getrank",
-           description="Get the ranking number of the specified user",
+           description="Look up all (public) ranking numbers of a user",
            options=[
                create_option(
                    name="user",
-                   description="The user",
+                   description="The user you are performing the lookup on",
                    option_type=command_option_type.USER,
                    required=True
                ),
@@ -34,7 +31,7 @@ class GetrankCommand(commands.Cog):
                ),
                create_option(
                    name='year',
-                   description='Application Year',
+                   description='Application year',
                    option_type=command_option_type.INTEGER,
                    required=False,
                    choices=programmes_helper.get_year_choices()
@@ -66,13 +63,10 @@ class GetrankCommand(commands.Cog):
 
             res = "\n".join(map(lambda x: f"Rank {x[1]} in {x[3]} {x[2]}", res))
 
-            if len(res) == 0:
-                await ctx.send(f"User {user} does not have recorded data that matches your filters")
-            else:
-                await ctx.send(f"User {user}:\n\n" + res)
-
+        if res:
+            await ctx.send(f"User {user}:\n\n" + res)
         else:
-            await ctx.send(f"User {user} has not posted their ranking number.")
+            await ctx.send(f"User {user} does not have recorded data that matches your filters")
 
 
 def setup(bot):
