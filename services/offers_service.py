@@ -4,8 +4,11 @@ from matplotlib.ticker import MaxNLocator
 from helpers import programmes_helper
 import uuid
 import os
+import io
+from PIL import Image
 
-filename_format = 'offers_%s.png'
+filename_format = '3TU_Discord_offers_%s.png'
+overlay_location = 'resources/3tu_offers_overlay.png'
 
 
 class OffersService:
@@ -111,10 +114,18 @@ class OffersService:
         for label in ax.get_xaxis().get_major_ticks()[1::2]:
             label.set_visible(False)
 
-        filename = filename_format % await self.generate_uuid()
+        plt.tight_layout(rect=[0, 0.05, 1, 1])
 
-        plt.savefig(filename, facecolor=bg_color, dpi=200)
+        plt_buffer = io.BytesIO()
+        plt.savefig(plt_buffer, facecolor=bg_color, dpi=200)
         plt.close()
+
+        graph_img = Image.open(plt_buffer)
+        overlay_img = Image.open(overlay_location)
+        graph_img.paste(overlay_img, (0, 0), overlay_img)
+
+        filename = filename_format % await self.generate_uuid()
+        graph_img.save(filename, "PNG")
 
         return filename
 
