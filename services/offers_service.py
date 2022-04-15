@@ -3,6 +3,7 @@ from matplotlib import pyplot as plt, dates as mdates
 from matplotlib.ticker import MaxNLocator
 from helpers import programmes_helper
 import uuid
+import os
 
 filename_format = 'offers_%s.png'
 
@@ -14,6 +15,9 @@ class OffersService:
     async def generate_uuid(self) -> str:
         # Generate a version 1 UUID containing the current date and time
         return str(uuid.uuid1(node=1))
+
+    async def clean_up_file(self, filename: str):
+        os.remove(filename)
 
     async def generate_graph(self, programme: programmes_helper.Programme, step: bool, year: int):
         if year not in programme.places:
