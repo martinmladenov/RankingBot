@@ -105,6 +105,15 @@ def process_role_assignment_applicant(programme: str, uni: str, user_roles: set,
         to_add.append(next(r for r in guild_roles if r.name == programme_role_name))
 
 
+def process_role_removal_all(user_roles: set, to_remove: list):
+    # Remove all roles
+    for role in user_roles:
+        role_name = role.name
+        if role_name in accepted_roles or role_name in applicant_roles or \
+                role_name in programme_roles or role_name in student_roles:
+            to_remove.append(role)
+
+
 def generate_components(suffix: str, emojis: dict) -> list:
     prefix = 'role_'
     components = [
