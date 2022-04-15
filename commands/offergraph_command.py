@@ -47,12 +47,13 @@ class OffergraphCommand(commands.Cog):
         async with (await self.bot.get_db_conn()).acquire() as connection:
             offers = offers_service.OffersService(connection)
             try:
-                await offers.generate_graph(programmes_helper.programmes[programme], not approx, year)
+                filename = await offers.generate_graph(programmes_helper.programmes[programme], not approx, year)
             except ValueError:
                 await ctx.send('This programme was not numerus fixus in ' + str(year))
                 return
-        image = discord.File(offers_service.filename)
+        image = discord.File(filename)
         await ctx.send(file=image)
+        await offers.clean_up_file(filename)
 
 
 def setup(bot):
