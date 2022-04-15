@@ -105,6 +105,15 @@ def process_role_assignment_applicant(programme: str, uni: str, user_roles: set,
         to_add.append(next(r for r in guild_roles if r.name == programme_role_name))
 
 
+def process_role_removal_all(user_roles: set, to_remove: list):
+    # Remove all roles
+    for role in user_roles:
+        role_name = role.name
+        if role_name in accepted_roles or role_name in applicant_roles or \
+                role_name in programme_roles or role_name in student_roles:
+            to_remove.append(role)
+
+
 def generate_components(suffix: str, emojis: dict) -> list:
     prefix = 'role_'
     components = [
@@ -152,6 +161,19 @@ def generate_components(suffix: str, emojis: dict) -> list:
                           emoji='\U0001f9ec', disabled=True),  # dna
             create_button(style=ButtonStyle.blue, label="TU Delft", emoji=emojis['tud'],
                           custom_id=prefix + 'tud-nb' + suffix),
+        ),
+    ]
+
+    return components
+
+
+def generate_components_remove_roles() -> list:
+    prefix = 'role_'
+    components = [
+        create_actionrow(
+            create_button(style=ButtonStyle.gray, label="Did you get the wrong roles?", disabled=True),
+            create_button(style=ButtonStyle.gray, label="Remove roles",
+                          custom_id=prefix + 'remove-remove-remove'),
         ),
     ]
 

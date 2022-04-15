@@ -32,6 +32,8 @@ class RoleButtonHandler(commands.Cog):
             elif student_type == 'app':
                 role_helper.process_role_assignment_applicant(programme, uni, user_roles, ctx.guild.roles,
                                                               to_add, to_remove)
+            elif student_type == 'remove':
+                role_helper.process_role_removal_all(user_roles, to_remove)
             else:
                 print('Unexpected student type: ' + ctx.component_id)
 
