@@ -6,7 +6,7 @@ class CommandMigrationNotification(commands.Cog):
         self.bot = bot
 
     @commands.command(aliases=['addmanualdate',
-                               'clearrank',
+                               'deleterank',
                                'offergraph',
                                'offers',
                                'ranks',

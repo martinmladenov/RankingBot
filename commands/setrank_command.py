@@ -56,27 +56,29 @@ class SetrankCommand(commands.Cog):
                 if rank == curr_rank:
                     if not curr_is_private:
                         await ctx.send(user.mention +
-                                       ' You have already set your ranking number. It can be seen via `/ranks`. '
-                                       'If you\'re trying to set an offer date, use `/setofferdate`.')
+                                       ' You have already set your ranking number. It can be seen via `/ranks`.' +
+                                       (' If you\'re trying to set an offer date, use `/setofferdate`.'
+                                        if programmes_helper.programmes[programme].places[year] < rank else ''))
                     else:
                         await ranks.set_is_private_programme(user_id, False, programme, year)
                         await ctx.send(user.mention +
                                        ' You have already set your ranking number, but it was private (you\'ve likely '
                                        'set it by replying to a direct message by the bot).\nIt has now been made '
                                        'visible and you can see it via `/ranks`. '
-                                       'If you want to make it private again, you can use `/toggleprivaterank`.\n'
-                                       'If you\'re trying to set an offer date, you can use `/setofferdate`.')
+                                       'If you want to make it private again, you can use `/toggleprivaterank`.' +
+                                       ('\nIf you\'re trying to set an offer date, you can use `/setofferdate`.'
+                                        if programmes_helper.programmes[programme].places[year] < rank else ''))
                 else:
                     if not curr_is_private:
                         await ctx.send(user.mention +
                                        f' You have already set a different ranking number (**{curr_rank}**). '
-                                       'To change it, first clear the old one using `/clearrank` and then try setting '
+                                       'To change it, first delete the old one using `/deleterank` and then try setting '
                                        'the new one again.')
                     else:
                         await ctx.send(user.mention +
                                        ' You have already set a different ranking number, but it is private (you\'ve '
                                        'likely set it by replying to a direct message by the bot). '
-                                       'To change it, first clear the old one using `/clearrank` and then try setting '
+                                       'To change it, first delete the old one using `/deleterank` and then try setting '
                                        'the new one again.')
 
                 return
@@ -93,7 +95,7 @@ class SetrankCommand(commands.Cog):
                     return
                 except EntryAlreadyExistsError:
                     await ctx.send(user.mention + ' You have already set your ranking number. To set a different one, '
-                                                  'clear it using `/clearrank` and try setting it again.')
+                                                  'delete it using `/deleterank` and try setting it again.')
                     await tr.rollback()
                     return
 
@@ -106,8 +108,9 @@ class SetrankCommand(commands.Cog):
             await tr.commit()
         await ctx.send(user.mention + ' Your ranking number was successfully added. It is now set as public and can be '
                                       'seen via `/ranks`. If you want to make it private, you can use '
-                                      '`/toggleprivaterank.`\n'
-                                      'If you have received an offer, please use `/setofferdate` to set it.')
+                                      '`/toggleprivaterank`.' +
+                       ('\nIf you have received an offer, please use `/setofferdate` to set it.'
+                        if programmes_helper.programmes[programme].places[year] < rank else ''))
 
 
 def setup(bot):
