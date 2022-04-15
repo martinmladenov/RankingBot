@@ -5,7 +5,7 @@ from helpers import programmes_helper
 import uuid
 import os
 
-filename_format = 'offers_%s.png'
+filename_format = '3TU_Discord_offers_%s.png'
 
 
 class OffersService:
