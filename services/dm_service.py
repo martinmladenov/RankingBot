@@ -79,7 +79,7 @@ class DMService:
                     await message.channel.send(f'It seems that you\'ve already set your ranking number '
                                                f'to **{rank}**. '
                                                f'If that\'s incorrect, please use '
-                                               f'`/clearrank` to clear it '
+                                               f'`/deleterank` to delete it '
                                                f'and reply with `{message.content}` again.')
                     return False
 
