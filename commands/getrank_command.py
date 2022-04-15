@@ -46,7 +46,7 @@ class GetrankCommand(commands.Cog):
 
         async with (await self.bot.get_db_conn()).acquire() as connection:
             users = user_data_service.UserDataService(connection)
-            res = await users.get_user_rank(user_id)
+            res = await users.get_user_ranks(user_id)
 
         if res:
             # Filter by is_private

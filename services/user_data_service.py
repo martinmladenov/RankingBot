@@ -17,7 +17,7 @@ class UserDataService:
         users = await self.db_conn.fetch('SELECT user_id, username FROM user_data')
         return users
 
-    async def get_user_rank(self, user_id: str):
+    async def get_user_ranks(self, user_id: str):
         user = await self.db_conn.fetch('SELECT is_private, rank, year, programme FROM ranks WHERE user_id = $1', user_id)
         return user
 
