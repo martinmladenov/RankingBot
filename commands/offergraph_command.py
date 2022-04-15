@@ -53,6 +53,7 @@ class OffergraphCommand(commands.Cog):
                 return
         image = discord.File(filename)
         await ctx.send(file=image)
+        await offers.clean_up_file(filename)
 
 
 def setup(bot):
