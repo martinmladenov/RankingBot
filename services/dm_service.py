@@ -141,92 +141,8 @@ class DMService:
         DONE = 2,
         REFUSED = 3
 
-    class University(Enum):
-        TUD = 0,
-        TUE = 1
-
-    class Programme(Enum):
-        CSE = 0,
-        AE = 1
-        NB = 2
-
-    async def get_member_programmes_by_uni(self, member: discord.Member, uni: University) -> list:
-        cse_role = 'Computer Science and Engineering'
-        ae_role = 'Aerospace Engineering'
-        nb_role = 'Nanobiology'
-
-        roles = list(map(lambda x: x.name, member.roles))
-
-        if any(map(lambda x: 'students' in x.lower() and x != 'IB Students', roles)):
-            return list()
-
-        programmes = list()
-        if uni == self.University.TUD:
-            if ae_role in roles:
-                programmes.append('tud-ae')
-            if cse_role in roles:
-                programmes.append('tud-cse')
-            if nb_role in roles:
-                programmes.append('tud-nb')
-        elif uni == self.University.TUE:
-            if cse_role in roles:
-                programmes.append('tue-cse')
-
-        return programmes
-
-    async def get_member_programmes_by_programme(self, member: discord.Member, programme: Programme) -> list:
-        tud_role = 'Accepted TU Delft'
-        tue_role = 'Accepted TU Eindhoven'
-
-        roles = list(map(lambda x: x.name, member.roles))
-
-        if any(map(lambda x: 'students' in x.lower() and x != 'IB Students', roles)):
-            return list()
-
-        unis = list()
-        if programme == self.Programme.CSE:
-            if tud_role in roles:
-                unis.append('tud-cse')
-            if tue_role in roles:
-                unis.append('tue-cse')
-        elif programme == self.Programme.AE:
-            if tud_role in roles:
-                unis.append('tud-ae')
-        elif programme == self.Programme.NB:
-            if tud_role in roles:
-                unis.append('tud-nb')
-
-        return unis
-
-    def get_uni_by_emoji(self, emoji: str) -> University or None:
-        if emoji == 'TUD':
-            return self.University.TUD
-        if emoji == 'TuE':
-            return self.University.TUE
-        return None
-
-    def get_programme_by_emoji(self, emoji: str) -> Programme or None:
-        if emoji == '\U0001f4bb':  # laptop
-            return self.Programme.CSE
-        if emoji == '\U0001f680':  # rocket
-            return self.Programme.AE
-        if emoji == '\U0001f9ec':  # dna
-            return self.Programme.NB
-        return None
-
-    async def handle_reaction(self, member: discord.Member, emoji: str):
-        uni = self.get_uni_by_emoji(emoji)
-        programme = self.get_programme_by_emoji(emoji)
-
-        if uni is not None:
-            programmes = await self.get_member_programmes_by_uni(member, uni)
-        elif programme is not None:
-            programmes = await self.get_member_programmes_by_programme(member, programme)
-        else:
-            # ding dong, your configuration is wrong
-            return
-
-        if not programmes:
+    async def handle_assignment(self, member: discord.Member, programme: str):
+        if programme not in programmes_helper.programmes:
             return
 
         user_id = str(member.id)
@@ -252,32 +168,29 @@ class DMService:
                                                        user_id, self.DmStatus.SENT, self.DmStatus.SCHEDULED)
 
             should_send = len(sent_programmes) == 0
-            for programme in programmes:
-                if any(programme == p[0] for p in sent_programmes):
-                    continue
 
+            if not any(programme == p[0] for p in sent_programmes):
                 rank_row = await self.db_conn.fetchrow(
                     'SELECT rank FROM ranks '
                     'WHERE user_id = $1 AND programme = $2 '
                     'AND offer_date IS NOT NULL AND year = $3',
                     user_id, programme, constants.current_year)
 
-                if rank_row is not None:
-                    continue
-                sched_time = datetime.utcnow()
-                sent = False
-                if should_send:
-                    sent = await self.send_first_dm(member, programmes_helper.programmes[programme])
-                    should_send = False
+                if rank_row is None:
+                    sched_time = datetime.utcnow()
+                    sent = False
+                    if should_send:
+                        sent = await self.send_first_dm(member, programmes_helper.programmes[programme])
+                        should_send = False
 
-                await self.db_conn.execute('INSERT INTO dms '
-                                           '(user_id, programme, status, scheduled, sent, next_reminder) '
-                                           'VALUES ($1, $2, $3, $4, $5, $6)',
-                                           user_id, programme,
-                                           self.DmStatus.SENT if sent else self.DmStatus.SCHEDULED,
-                                           sched_time,
-                                           datetime.utcnow() if sent else None,
-                                           datetime.utcnow() + timedelta(days=7) if sent else None)
+                    await self.db_conn.execute('INSERT INTO dms '
+                                               '(user_id, programme, status, scheduled, sent, next_reminder) '
+                                               'VALUES ($1, $2, $3, $4, $5, $6)',
+                                               user_id, programme,
+                                               self.DmStatus.SENT if sent else self.DmStatus.SCHEDULED,
+                                               sched_time,
+                                               datetime.utcnow() if sent else None,
+                                               datetime.utcnow() + timedelta(days=7) if sent else None)
 
         # Delete user lock
         async with user_lock_dict_lock:
