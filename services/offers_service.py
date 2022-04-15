@@ -2,13 +2,18 @@ from datetime import date, datetime, timedelta
 from matplotlib import pyplot as plt, dates as mdates
 from matplotlib.ticker import MaxNLocator
 from helpers import programmes_helper
+import uuid
 
-filename = 'offers.png'
+filename_format = 'offers_%s.png'
 
 
 class OffersService:
     def __init__(self, db_conn):
         self.db_conn = db_conn
+
+    async def generate_uuid(self) -> str:
+        # Generate a version 1 UUID containing the current date and time
+        return str(uuid.uuid1(node=1))
 
     async def generate_graph(self, programme: programmes_helper.Programme, step: bool, year: int):
         if year not in programme.places:
@@ -102,8 +107,12 @@ class OffersService:
         for label in ax.get_xaxis().get_major_ticks()[1::2]:
             label.set_visible(False)
 
+        filename = filename_format % await self.generate_uuid()
+
         plt.savefig(filename, facecolor=bg_color, dpi=200)
         plt.close()
+
+        return filename
 
     async def get_highest_ranks_with_offers(self, year):
         offers = await self.db_conn.fetch(
