@@ -111,6 +111,8 @@ class OffersService:
         for label in ax.get_xaxis().get_major_ticks()[1::2]:
             label.set_visible(False)
 
+        plt.tight_layout(rect=[0, 0.05, 1, 1])
+
         filename = filename_format % await self.generate_uuid()
 
         plt.savefig(filename, facecolor=bg_color, dpi=200)
