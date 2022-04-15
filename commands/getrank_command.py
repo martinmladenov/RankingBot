@@ -61,12 +61,15 @@ class GetrankCommand(commands.Cog):
 
             res.sort(key=lambda x: x[1])
 
-            res = "\n".join(map(lambda x: f"Rank {x[1]} in {x[3]} {x[2]}", res))
+            res = "\n".join(map(lambda x: f"Rank {x[1]} in "
+                                          f"{programmes_helper.programmes[x[3]].uni_name} "
+                                          f"{programmes_helper.programmes[x[3]].display_name} "
+                                          f"{x[2]}", res))
 
         if res:
-            await ctx.send(f"User {user}:\n\n" + res)
+            await ctx.send(f"User {user} has shared the following public ranking numbers:\n\n" + res)
         else:
-            await ctx.send(f"User {user} does not have recorded data that matches your filters")
+            await ctx.send(f"User {user} does not have public data that matches your filters")
 
 
 def setup(bot):
