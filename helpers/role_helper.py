@@ -2,6 +2,8 @@ import discord.ext.commands
 from discord_slash.utils.manage_components import create_button, create_actionrow
 from discord_slash.model import ButtonStyle
 from services import dm_service
+from asyncio import Lock
+import time
 
 programme_roles_dict = {
     'cse': 'Computer Science and Engineering',
@@ -12,6 +14,18 @@ programme_roles_dict = {
 }
 
 programme_roles = set(programme_roles_dict.values())
+programme_roles_all = programme_roles.union({
+    'Graduates',
+    'Applied Earth Science',
+    'Applied Physics',
+    'Architecture',
+    'Chemical Engineering',
+    'IDP',
+    'Life Science & Technology',
+    'Molecular Science & Technology',
+    'Mathematics',
+    'TPM (wannabe engineers)',
+})
 
 student_roles_dict = {
     'tud': 'TU Delft Students',
@@ -37,6 +51,23 @@ accepted_roles_dict = {
 
 accepted_roles = set(accepted_roles_dict.values())
 
+last_notification_dict_lock = Lock()
+last_notification = dict()
+
+
+async def should_be_notified(member: discord.Member) -> bool:
+    user_id = str(member.id)
+    user_roles = set(member.roles)
+    async with last_notification_dict_lock:
+        if not any(r.name in programme_roles_all for r in user_roles):
+            # user has no roles
+            curr_time = int(time.time())  # keeps track of time in seconds
+            if user_id not in last_notification or \
+                    curr_time - last_notification[user_id] >= 60 * 60:  # 1 hour
+                last_notification[user_id] = curr_time
+                return True
+    return False
+
 
 def process_role_assignment_student(programme: str, uni: str, user_roles: set, guild_roles: list,
                                     to_add: list, to_remove: list):
@@ -61,7 +92,7 @@ def process_role_assignment_student(programme: str, uni: str, user_roles: set, g
 
 async def process_role_assignment_accepted(programme: str, uni: str, user_roles: set, guild_roles: list,
                                            to_add: list, to_remove: list,
-                                           bot: discord.ext.commands.Bot, user: discord.user.User):
+                                           bot: discord.ext.commands.Bot, user: discord.User):
     # Remove corresponding applicant role,
     # add correct student and programme roles (if necessary)
     # Send DMs if programme is numerus fixus
