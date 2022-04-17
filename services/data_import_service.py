@@ -40,10 +40,11 @@ class DataImportService:
                 programme = programmes_helper.programmes[row[0]]
                 ranking_number = int(row[1])
                 offer_date_arr = row[2].split('/')
-                offer_date = offer_date_util.parse_offer_date(offer_date_arr[0], offer_date_arr[1])
                 year = int(row[3])
                 is_private = row[4].lower() == 'true'
-                discord_tag = row[5].split('#') if len(row[4]) > 0 else None
+                discord_tag = row[5].split('#') if len(row) >= 6 and len(row[5]) > 0 else None
+
+                offer_date = offer_date_util.parse_offer_date(offer_date_arr[0], offer_date_arr[1], year=year)
 
                 # If the ranking number is below the programme limit and discord_tag is null, do not import it
                 if ranking_number <= programme.places[year] and discord_tag is None:
