@@ -23,9 +23,15 @@ class RanksCommand(commands.Cog):
                    option_type=command_option_type.INTEGER,
                    required=False,
                    choices=programmes_helper.get_year_choices()
+               ),
+               create_option(
+                   name='public',
+                   description='Show the result of the command to everyone',
+                   option_type=command_option_type.BOOLEAN,
+                   required=False,
                )
            ])
-    async def ranks(self, ctx: SlashContext, year: int = None):
+    async def ranks(self, ctx: SlashContext, year: int = None, public: bool = False):
 
         if year is None:
             year = constants.current_year
@@ -35,6 +41,8 @@ class RanksCommand(commands.Cog):
             grouped_ranks = await ranks.get_top_ranks(year)
 
         is_bot_channel = not ctx.guild or 'bot' in ctx.channel.name
+        if (is_bot_channel):
+            public = True
 
         group_truncated = {}
 
@@ -76,7 +84,7 @@ class RanksCommand(commands.Cog):
                               ' represent performance at university_',
                         inline=False)
 
-        await ctx.send(embed=embed)
+        await ctx.send(embed=embed, hidden=not public)
 
 
 def setup(bot):

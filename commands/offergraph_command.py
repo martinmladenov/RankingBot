@@ -35,9 +35,15 @@ class OffergraphCommand(commands.Cog):
                    description='Show approximation line',
                    option_type=command_option_type.BOOLEAN,
                    required=False
+               ),
+               create_option(
+                   name='public',
+                   description='Show the result of the command to everyone',
+                   option_type=command_option_type.BOOLEAN,
+                   required=False,
                )
            ])
-    async def offergraph(self, ctx: SlashContext, programme: str, year: int = None, approx: bool = True):
+    async def offergraph(self, ctx: SlashContext, programme: str, year: int = None, approx: bool = True, public: bool = False):
         if year is None:
             year = constants.current_year
 
@@ -52,7 +58,7 @@ class OffergraphCommand(commands.Cog):
                 await ctx.send('This programme was not numerus fixus in ' + str(year))
                 return
         image = discord.File(filename)
-        await ctx.send(file=image)
+        await ctx.send(file=image, hidden=not public)
         await offers.clean_up_file(filename)
 
 

@@ -23,9 +23,15 @@ class OffersCommand(commands.Cog):
                    option_type=command_option_type.INTEGER,
                    required=False,
                    choices=programmes_helper.get_year_choices()
+               ),
+               create_option(
+                   name='public',
+                   description='Show the result of the command to everyone',
+                   option_type=command_option_type.BOOLEAN,
+                   required=False,
                )
            ])
-    async def offers(self, ctx: SlashContext, year: int = None):
+    async def offers(self, ctx: SlashContext, year: int = None, public: bool = False):
         if year is None:
             year = constants.current_year
 
@@ -58,7 +64,7 @@ class OffersCommand(commands.Cog):
                               'Then, to set the date you received an offer, use `/setofferdate`.',
                         inline=False)
 
-        await ctx.send(embed=embed)
+        await ctx.send(embed=embed, hidden=not public)
 
 
 def setup(bot):
