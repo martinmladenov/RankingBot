@@ -5,7 +5,7 @@ from services import dm_service
 from asyncio import Lock
 import time
 
-#TODO: emoji
+# TODO: emoji
 programme_roles_dict = {
     'cse': 'Computer Science and Engineering',
     'ae': 'Aerospace Engineering',
@@ -21,7 +21,7 @@ programme_roles_dict = {
     'mst': 'Molecular Science & Technology',
     'm': 'Mathematics',
     'tpm': 'TPM (wannabe engineers)',
-    #'ce': 'Civil Engineering'
+    # 'ce': 'Civil Engineering'
 }
 
 programme_roles_tud = ['cse', 'ae', 'mech', 'ee', 'nb', 'aes', 'ap', 'a', 'lst', 'mst', 'm', 'tpm']
@@ -157,43 +157,50 @@ def generate_components(suffix: str, emojis: dict) -> list:
         # create_actionrow(
         #     create_button(style=ButtonStyle.gray, label='='*15+' '+menu_type.upper()+' '+'='*15, disabled=True),
         # )""",
-
         create_actionrow(
-            #create_button(style=ButtonStyle.green, label="TU Delft:",
-            #              emoji=emojis['tud'], disabled=True),
+            create_button(style=ButtonStyle.blurple, label="TU Delft",
+                         emoji=emojis['tud'], disabled=True),
+        ),
+        create_actionrow(
             create_select(
                 custom_id='roleselect-tud',
-                options = [create_select_option(programme_roles_dict[key], value=prefix + 'tud-' + key + suffix)
-                    for key in programme_roles_tud],
-                placeholder="Choose your programme",
+                options=[create_select_option(programme_roles_dict[key], value=prefix + 'tud-' + key + suffix)
+                         for key in programme_roles_tud],
+                placeholder="Choose your programme(s) for TU Delft",
                 min_values=0,
                 max_values=len(programme_roles_tud),
             )
         ),
+
         create_actionrow(
-            #create_button(style=ButtonStyle.green, label="TU Eindhoven:",
-            #              emoji=emojis['tue'], disabled=True),
+            create_button(style=ButtonStyle.red, label="TU Eindhoven",
+                          emoji=emojis['tue'], disabled=True),
+        ),
+        create_actionrow(
             create_select(
                 custom_id='roleselect-tue',
-                options = [create_select_option(programme_roles_dict[key], value=prefix + 'tue-' + key + suffix)
-                    for key in programme_roles_tue],
-                placeholder="Choose your programme",
+                options=[create_select_option(programme_roles_dict[key], value=prefix + 'tue-' + key + suffix)
+                         for key in programme_roles_tue],
+                placeholder="Choose your programme(s) for TU Eindhoven",
                 min_values=0,
                 max_values=len(programme_roles_tue),
             )
         ),
         create_actionrow(
-            #create_button(style=ButtonStyle.green, label="UTwente",
-            #              emoji=emojis['utwente'], disabled=True),
-            create_select(custom_id='roleselect-utwente',
-                options = [create_select_option(programme_roles_dict[key], value=prefix + 'utwente-' + key + suffix)
-                    for key in programme_roles_utwente],
-                placeholder="Choose your programme",
+            create_button(style=ButtonStyle.grey, label="UTwente",
+                          emoji=emojis['utwente'], disabled=True),
+        ),
+        create_actionrow(
+            create_select(
+                custom_id='roleselect-utwente',
+                options=[create_select_option(programme_roles_dict[key], value=prefix + 'utwente-' + key + suffix)
+                         for key in programme_roles_utwente],
+                placeholder="Choose your programme(s) for UTwente",
                 min_values=0,
                 max_values=len(programme_roles_utwente),
-            )
+                )
         ),
-    ] #possibly could be even more generified but no
+    ]  # possibly could be even more generified but no
 
     return components
 
