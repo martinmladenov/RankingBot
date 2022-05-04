@@ -43,19 +43,20 @@ class OffergraphCommand(commands.Cog):
                    required=False,
                )
            ])
-    async def offergraph(self, ctx: SlashContext, programme: str, year: int = None, approx: bool = True, public: bool = False):
+    async def offergraph(self, ctx: SlashContext, programme: str, year: int = None,
+                         approx: bool = True, public: bool = False):
         if year is None:
             year = constants.current_year
 
         # Show "Bot is thinking" message
-        await ctx.defer()
+        await ctx.defer(hidden=not public)
 
         async with (await self.bot.get_db_conn()).acquire() as connection:
             offers = offers_service.OffersService(connection)
             try:
                 filename = await offers.generate_graph(programmes_helper.programmes[programme], not approx, year)
             except ValueError:
-                await ctx.send('This programme was not numerus fixus in ' + str(year))
+                await ctx.send('This programme was not numerus fixus in ' + str(year), hidden=not public)
                 return
         image = discord.File(filename)
         await ctx.send(file=image, hidden=not public)
