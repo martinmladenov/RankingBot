@@ -5,22 +5,21 @@ from services import dm_service
 from asyncio import Lock
 import time
 
-# TODO: emoji
 programme_roles_dict = {
-    'cse': 'Computer Science and Engineering',
-    'ae': 'Aerospace Engineering',
-    'mech': 'Mechanical Engineering',
-    'ee': 'Electrical Engineering',
-    'nb': 'Nanobiology',
-    'aes': 'Applied Earth Science',
-    'ap': 'Applied Physics',
-    'a': 'Architecture',
-    'che': 'Chemical Engineering',
-    'idp': 'IDP',
-    'lst': 'Life Science & Technology',
-    'mst': 'Molecular Science & Technology',
-    'm': 'Mathematics',
-    'tpm': 'TPM (wannabe engineers)',
+    'cse': ['Computer Science and Engineering', '\U0001F4BB'],  # laptop
+    'ae': ['Aerospace Engineering', '\U0001F680'],  # rocket
+    'mech': ['Mechanical Engineering', '\U0001F527'],  # wrench
+    'ee': ['Electrical Engineering', '\U0001F39B'],  # control knobs
+    'nb': ['Nanobiology', '\U0001F9EC'],  # dna
+    'aes': ['Applied Earth Science', '\U0001FAA8'],  # rock
+    'ap': ['Applied Physics', '\U0000269B'],  # atom
+    'a': ['Architecture', '\U0001F3DB'],  # classical building
+    'che': ['Chemical Engineering', '\U0001F9EA'],  # test tube
+    'idp': ['IDP', '\U0001F615'],  # confused face no idea what idp is
+    'lst': ['Life Science & Technology', '\U0001F9EB'],  # petri dish
+    'mst': ['Molecular Science & Technology', '\U00002697'],  # alembic
+    'm': ['Mathematics', '\U0001F9EE'],  # abacus
+    'tpm': ['TPM (wannabe engineers)', '\U0001F9D1']  # factory worker
     # 'ce': 'Civil Engineering'
 }
 
@@ -28,7 +27,7 @@ programme_roles_tud = ['cse', 'ae', 'mech', 'ee', 'nb', 'aes', 'ap', 'a', 'lst',
 programme_roles_tue = ['cse', 'mech', 'ee', 'ap', 'a', 'che', 'm']
 programme_roles_utwente = ['cse', 'mech', 'ee', 'ap', 'che', 'm']
 
-programme_roles = set(programme_roles_dict.values())
+programme_roles = set([item[0] for item in programme_roles_dict.values()])
 programme_roles_all = programme_roles.union({
     'Graduates',
 })
@@ -81,7 +80,7 @@ def process_role_assignment_student(programme: str, uni: str, user_roles: set, g
     # remove all applicant and accepted roles,
     # add correct student and programme roles (if necessary)
 
-    programme_role_name = programme_roles_dict[programme]
+    programme_role_name = programme_roles_dict[programme][0]
     student_role_name = student_roles_dict[uni]
     for role in user_roles:
         role_name = role.name
@@ -103,7 +102,7 @@ async def process_role_assignment_accepted(programme: str, uni: str, user_roles:
     # add correct student and programme roles (if necessary)
     # Send DMs if programme is numerus fixus
 
-    programme_role_name = programme_roles_dict[programme]
+    programme_role_name = programme_roles_dict[programme][0]
     student_role_name = applicant_roles_dict[uni]
     applicant_role_name = applicant_roles_dict[uni]
     accepted_role_name = accepted_roles_dict[uni]
@@ -127,7 +126,7 @@ def process_role_assignment_applicant(programme: str, uni: str, user_roles: set,
     # Remove corresponding student and accepted roles,
     # add student and programme roles (if necessary)
 
-    programme_role_name = programme_roles_dict[programme]
+    programme_role_name = programme_roles_dict[programme][0]
     applicant_role_name = applicant_roles_dict[uni]
     accepted_role_name = accepted_roles_dict[uni]
     student_role_name = student_roles_dict[uni]
@@ -159,13 +158,13 @@ def generate_components(suffix: str, emojis: dict) -> list:
         # )""",
         create_actionrow(
             create_button(style=ButtonStyle.blurple, label="TU Delft",
-                         emoji=emojis['tud'], disabled=True),
+                          emoji=emojis['tud'], disabled=True),
         ),
         create_actionrow(
             create_select(
                 custom_id='roleselect-tud',
-                options=[create_select_option(programme_roles_dict[key], value=prefix + 'tud-' + key + suffix)
-                         for key in programme_roles_tud],
+                options=[create_select_option(programme_roles_dict[key][0], value=prefix + 'tud-' + key + suffix,
+                                              emoji=programme_roles_dict[key][1]) for key in programme_roles_tud],
                 placeholder="Choose your programme(s) for TU Delft",
                 min_values=0,
                 max_values=len(programme_roles_tud),
@@ -179,8 +178,8 @@ def generate_components(suffix: str, emojis: dict) -> list:
         create_actionrow(
             create_select(
                 custom_id='roleselect-tue',
-                options=[create_select_option(programme_roles_dict[key], value=prefix + 'tue-' + key + suffix)
-                         for key in programme_roles_tue],
+                options=[create_select_option(programme_roles_dict[key][0], value=prefix + 'tue-' + key + suffix,
+                                              emoji=programme_roles_dict[key][1]) for key in programme_roles_tue],
                 placeholder="Choose your programme(s) for TU Eindhoven",
                 min_values=0,
                 max_values=len(programme_roles_tue),
@@ -193,12 +192,12 @@ def generate_components(suffix: str, emojis: dict) -> list:
         create_actionrow(
             create_select(
                 custom_id='roleselect-utwente',
-                options=[create_select_option(programme_roles_dict[key], value=prefix + 'utwente-' + key + suffix)
-                         for key in programme_roles_utwente],
+                options=[create_select_option(programme_roles_dict[key][0], value=prefix + 'utwente-' + key + suffix,
+                                              emoji=programme_roles_dict[key][1]) for key in programme_roles_utwente],
                 placeholder="Choose your programme(s) for UTwente",
                 min_values=0,
                 max_values=len(programme_roles_utwente),
-                )
+            )
         ),
     ]  # possibly could be even more generified but no
 
