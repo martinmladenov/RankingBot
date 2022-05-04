@@ -1,30 +1,36 @@
 import discord.ext.commands
-from discord_slash.utils.manage_components import create_button, create_actionrow
+from discord_slash.utils.manage_components import create_button, create_actionrow, create_select, create_select_option
 from discord_slash.model import ButtonStyle
 from services import dm_service
 from asyncio import Lock
 import time
 
+#TODO: emoji
 programme_roles_dict = {
     'cse': 'Computer Science and Engineering',
     'ae': 'Aerospace Engineering',
     'mech': 'Mechanical Engineering',
     'ee': 'Electrical Engineering',
     'nb': 'Nanobiology',
+    'aes': 'Applied Earth Science',
+    'ap': 'Applied Physics',
+    'a': 'Architecture',
+    'che': 'Chemical Engineering',
+    'idp': 'IDP',
+    'lst': 'Life Science & Technology',
+    'mst': 'Molecular Science & Technology',
+    'm': 'Mathematics',
+    'tpm': 'TPM (wannabe engineers)',
+    #'ce': 'Civil Engineering'
 }
+
+programme_roles_tud = ['cse', 'ae', 'mech', 'ee', 'nb', 'aes', 'ap', 'a', 'lst', 'mst', 'm', 'tpm']
+programme_roles_tue = ['cse', 'mech', 'ee', 'ap', 'a', 'che', 'm']
+programme_roles_utwente = ['cse', 'mech', 'ee', 'ap', 'che', 'm']
 
 programme_roles = set(programme_roles_dict.values())
 programme_roles_all = programme_roles.union({
     'Graduates',
-    'Applied Earth Science',
-    'Applied Physics',
-    'Architecture',
-    'Chemical Engineering',
-    'IDP',
-    'Life Science & Technology',
-    'Molecular Science & Technology',
-    'Mathematics',
-    'TPM (wannabe engineers)',
 })
 
 student_roles_dict = {
@@ -150,50 +156,44 @@ def generate_components(suffix: str, emojis: dict) -> list:
     components = [
         # create_actionrow(
         #     create_button(style=ButtonStyle.gray, label='='*15+' '+menu_type.upper()+' '+'='*15, disabled=True),
-        # ),
+        # )""",
+
         create_actionrow(
-            create_button(style=ButtonStyle.green, label="Computer Science and Engineering:",
-                          emoji='\U0001f4bb', disabled=True),  # laptop
-            create_button(style=ButtonStyle.blue, label="TU Delft", emoji=emojis['tud'],
-                          custom_id=prefix + 'tud-cse' + suffix),
-            create_button(style=ButtonStyle.red, label="TU Eindhoven", emoji=emojis['tue'],
-                          custom_id=prefix + 'tue-cse' + suffix),
-            create_button(style=ButtonStyle.gray, label="UTwente", emoji=emojis['utwente'],
-                          custom_id=prefix + 'utwente-cse' + suffix),
+            #create_button(style=ButtonStyle.green, label="TU Delft:",
+            #              emoji=emojis['tud'], disabled=True),
+            create_select(
+                custom_id='roleselect-tud',
+                options = [create_select_option(programme_roles_dict[key], value=prefix + 'tud-' + key + suffix)
+                    for key in programme_roles_tud],
+                placeholder="Choose your programme",
+                min_values=0,
+                max_values=len(programme_roles_tud),
+            )
         ),
         create_actionrow(
-            create_button(style=ButtonStyle.green, label="Aerospace Engineering:",
-                          emoji='\U0001f680', disabled=True),  # rocket
-            create_button(style=ButtonStyle.blue, label="TU Delft", emoji=emojis['tud'],
-                          custom_id=prefix + 'tud-ae' + suffix),
+            #create_button(style=ButtonStyle.green, label="TU Eindhoven:",
+            #              emoji=emojis['tue'], disabled=True),
+            create_select(
+                custom_id='roleselect-tue',
+                options = [create_select_option(programme_roles_dict[key], value=prefix + 'tue-' + key + suffix)
+                    for key in programme_roles_tue],
+                placeholder="Choose your programme",
+                min_values=0,
+                max_values=len(programme_roles_tue),
+            )
         ),
         create_actionrow(
-            create_button(style=ButtonStyle.green, label="Mechanical Engineering:",
-                          emoji='\U0001f527', disabled=True),  # wrench
-            create_button(style=ButtonStyle.blue, label="TU Delft", emoji=emojis['tud'],
-                          custom_id=prefix + 'tud-mech' + suffix),
-            create_button(style=ButtonStyle.red, label="TU Eindhoven", emoji=emojis['tue'],
-                          custom_id=prefix + 'tue-mech' + suffix),
-            create_button(style=ButtonStyle.gray, label="UTwente", emoji=emojis['utwente'],
-                          custom_id=prefix + 'utwente-mech' + suffix),
+            #create_button(style=ButtonStyle.green, label="UTwente",
+            #              emoji=emojis['utwente'], disabled=True),
+            create_select(custom_id='roleselect-utwente',
+                options = [create_select_option(programme_roles_dict[key], value=prefix + 'utwente-' + key + suffix)
+                    for key in programme_roles_utwente],
+                placeholder="Choose your programme",
+                min_values=0,
+                max_values=len(programme_roles_utwente),
+            )
         ),
-        create_actionrow(
-            create_button(style=ButtonStyle.green, label="Electrical Engineering:",
-                          emoji='\U0001f39b', disabled=True),  # control knobs
-            create_button(style=ButtonStyle.blue, label="TU Delft", emoji=emojis['tud'],
-                          custom_id=prefix + 'tud-ee' + suffix),
-            create_button(style=ButtonStyle.red, label="TU Eindhoven", emoji=emojis['tue'],
-                          custom_id=prefix + 'tue-ee' + suffix),
-            create_button(style=ButtonStyle.gray, label="UTwente", emoji=emojis['utwente'],
-                          custom_id=prefix + 'utwente-ee' + suffix),
-        ),
-        create_actionrow(
-            create_button(style=ButtonStyle.green, label="Nanobiology:",
-                          emoji='\U0001f9ec', disabled=True),  # dna
-            create_button(style=ButtonStyle.blue, label="TU Delft", emoji=emojis['tud'],
-                          custom_id=prefix + 'tud-nb' + suffix),
-        ),
-    ]
+    ] #possibly could be even more generified but no
 
     return components
 
