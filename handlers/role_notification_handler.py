@@ -1,8 +1,7 @@
 import discord
 from discord.ext import commands
 from helpers import role_helper
-import time
-
+import asyncio
 
 class RoleNotificationHandler(commands.Cog):
     def __init__(self, bot):
@@ -18,7 +17,7 @@ class RoleNotificationHandler(commands.Cog):
                                                          'related to your university and programme, so you should get '
                                                          'them by going to the <#879407265336152104> channel '
                                                          'and clicking the corresponding buttons._')
-            time.sleep(60)
+            await asyncio.sleep(60)
             await msg.delete()
 
 def setup(bot):
