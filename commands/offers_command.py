@@ -39,6 +39,9 @@ class OffersCommand(commands.Cog):
             offers_svc = offers_service.OffersService(connection)
             offers = await offers_svc.get_highest_ranks_with_offers(year)
 
+        if not ctx.guild or 'bot' in ctx.channel.name:
+            public = True
+
         embed = discord.Embed(title=f"Highest known ranks with offers ({year})", color=0x36bee6)
 
         for offer in offers:

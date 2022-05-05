@@ -41,7 +41,7 @@ class RanksCommand(commands.Cog):
             grouped_ranks = await ranks.get_top_ranks(year)
 
         is_bot_channel = not ctx.guild or 'bot' in ctx.channel.name
-        if (is_bot_channel):
+        if is_bot_channel:
             public = True
 
         group_truncated = {}

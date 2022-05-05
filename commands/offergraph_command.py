@@ -48,6 +48,9 @@ class OffergraphCommand(commands.Cog):
         if year is None:
             year = constants.current_year
 
+        if not ctx.guild or 'bot' in ctx.channel.name:
+            public = True
+
         # Show "Bot is thinking" message
         await ctx.defer(hidden=not public)
 
