@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from helpers import role_helper
-
+import asyncio
 
 class RoleNotificationHandler(commands.Cog):
     def __init__(self, bot):
@@ -13,11 +13,12 @@ class RoleNotificationHandler(commands.Cog):
             return
 
         if await role_helper.should_be_notified(message.author):
-            await message.reply(message.author.mention + ' _You don\'t have roles! Roles unlock hidden channels '
+            msg = await message.reply(message.author.mention + ' _You don\'t have roles! Roles unlock hidden channels '
                                                          'related to your university and programme, so you should get '
                                                          'them by going to the <#879407265336152104> channel '
                                                          'and clicking the corresponding buttons._')
-
+            await asyncio.sleep(60)
+            await msg.delete()
 
 def setup(bot):
     bot.add_cog(RoleNotificationHandler(bot))

@@ -23,15 +23,24 @@ class OffersCommand(commands.Cog):
                    option_type=command_option_type.INTEGER,
                    required=False,
                    choices=programmes_helper.get_year_choices()
+               ),
+               create_option(
+                   name='public',
+                   description='Show the result of the command to everyone',
+                   option_type=command_option_type.BOOLEAN,
+                   required=False,
                )
            ])
-    async def offers(self, ctx: SlashContext, year: int = None):
+    async def offers(self, ctx: SlashContext, year: int = None, public: bool = False):
         if year is None:
             year = constants.current_year
 
         async with (await self.bot.get_db_conn()).acquire() as connection:
             offers_svc = offers_service.OffersService(connection)
             offers = await offers_svc.get_highest_ranks_with_offers(year)
+
+        if not ctx.guild or 'bot' in ctx.channel.name:
+            public = True
 
         embed = discord.Embed(title=f"Highest known ranks with offers ({year})", color=0x36bee6)
 
@@ -58,7 +67,7 @@ class OffersCommand(commands.Cog):
                               'Then, to set the date you received an offer, use `/setofferdate`.',
                         inline=False)
 
-        await ctx.send(embed=embed)
+        await ctx.send(embed=embed, hidden=not public)
 
 
 def setup(bot):
