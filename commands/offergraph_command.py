@@ -17,7 +17,7 @@ class OffergraphCommand(commands.Cog):
            description='Show a graph of ranking numbers and the dates when they received offers',
            options=[
                create_option(
-                   name='programme_id',
+                   name='programme',
                    description='Study programme',
                    option_type=command_option_type.STRING,
                    required=True,
@@ -31,24 +31,39 @@ class OffergraphCommand(commands.Cog):
                    choices=programmes_helper.get_year_choices()
                ),
                create_option(
-                   name='step',
-                   description='Show only step graph',
+                   name='approx',
+                   description='Show approximation line',
                    option_type=command_option_type.BOOLEAN,
                    required=False
+               ),
+               create_option(
+                   name='public',
+                   description='Show the result of the command to everyone',
+                   option_type=command_option_type.BOOLEAN,
+                   required=False,
                )
            ])
-    async def offergraph(self, ctx: SlashContext, programme_id: str, year: int = None, step: bool = False):
+    async def offergraph(self, ctx: SlashContext, programme: str, year: int = None,
+                         approx: bool = True, public: bool = False):
         if year is None:
             year = constants.current_year
 
+        if not ctx.guild or 'bot' in ctx.channel.name:
+            public = True
+
         # Show "Bot is thinking" message
-        await ctx.defer()
+        await ctx.defer(hidden=not public)
 
         async with (await self.bot.get_db_conn()).acquire() as connection:
             offers = offers_service.OffersService(connection)
-            await offers.generate_graph(programmes_helper.programmes[programme_id], step, year)
-        image = discord.File(offers_service.filename)
-        await ctx.send(file=image)
+            try:
+                filename = await offers.generate_graph(programmes_helper.programmes[programme], not approx, year)
+            except ValueError:
+                await ctx.send('This programme was not numerus fixus in ' + str(year), hidden=not public)
+                return
+        image = discord.File(filename)
+        await ctx.send(file=image, hidden=not public)
+        await offers.clean_up_file(filename)
 
 
 def setup(bot):

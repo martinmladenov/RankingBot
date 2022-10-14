@@ -57,7 +57,7 @@ class ToggleprivaterankCommand(commands.Cog):
 
                 await ranks.set_is_private_programme(user_id, not is_private, programme, year)
 
-            await ctx.send(user.mention + f' Your rank is {"no longer" if is_private else "now"} hidden from `.ranks`')
+            await ctx.send(user.mention + f' Your rank is {"no longer" if is_private else "now"} hidden from `/ranks`')
 
 
 def setup(bot):

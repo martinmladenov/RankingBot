@@ -1,5 +1,9 @@
+import discord.ext.commands
 from discord_slash.utils.manage_components import create_button, create_actionrow
 from discord_slash.model import ButtonStyle
+from services import dm_service
+from asyncio import Lock
+import time
 
 programme_roles_dict = {
     'cse': 'Computer Science and Engineering',
@@ -10,6 +14,18 @@ programme_roles_dict = {
 }
 
 programme_roles = set(programme_roles_dict.values())
+programme_roles_all = programme_roles.union({
+    'Graduates',
+    'Applied Earth Science',
+    'Applied Physics',
+    'Architecture',
+    'Chemical Engineering',
+    'IDP',
+    'Life Science & Technology',
+    'Molecular Science & Technology',
+    'Mathematics',
+    'TPM (wannabe engineers)',
+})
 
 student_roles_dict = {
     'tud': 'TU Delft Students',
@@ -35,6 +51,23 @@ accepted_roles_dict = {
 
 accepted_roles = set(accepted_roles_dict.values())
 
+last_notification_dict_lock = Lock()
+last_notification = dict()
+
+
+async def should_be_notified(member: discord.Member) -> bool:
+    user_id = str(member.id)
+    user_roles = set(member.roles)
+    async with last_notification_dict_lock:
+        if not any(r.name in programme_roles_all for r in user_roles):
+            # user has no roles
+            curr_time = int(time.time())  # keeps track of time in seconds
+            if user_id not in last_notification or \
+                    curr_time - last_notification[user_id] >= 60 * 60:  # 1 hour
+                last_notification[user_id] = curr_time
+                return True
+    return False
+
 
 def process_role_assignment_student(programme: str, uni: str, user_roles: set, guild_roles: list,
                                     to_add: list, to_remove: list):
@@ -57,10 +90,36 @@ def process_role_assignment_student(programme: str, uni: str, user_roles: set, g
         to_add.append(next(r for r in guild_roles if r.name == programme_role_name))
 
 
+async def process_role_assignment_accepted(programme: str, uni: str, user_roles: set, guild_roles: list,
+                                           to_add: list, to_remove: list,
+                                           bot: discord.ext.commands.Bot, user: discord.User):
+    # Remove corresponding applicant role,
+    # add correct student and programme roles (if necessary)
+    # Send DMs if programme is numerus fixus
+
+    programme_role_name = programme_roles_dict[programme]
+    student_role_name = applicant_roles_dict[uni]
+    applicant_role_name = applicant_roles_dict[uni]
+    accepted_role_name = accepted_roles_dict[uni]
+    for role in user_roles:
+        role_name = role.name
+        if role_name == applicant_role_name or role_name == student_role_name:
+            to_remove.append(role)
+
+    if not any(accepted_role_name == r.name for r in user_roles):
+        to_add.append(next(r for r in guild_roles if r.name == accepted_role_name))
+    if not any(programme_role_name == r.name for r in user_roles):
+        to_add.append(next(r for r in guild_roles if r.name == programme_role_name))
+
+    async with (await bot.get_db_conn()).acquire() as connection:
+        dm = dm_service.DMService(connection)
+        await dm.handle_assignment(user, f"{uni}-{programme}")
+
+
 def process_role_assignment_applicant(programme: str, uni: str, user_roles: set, guild_roles: list,
                                       to_add: list, to_remove: list):
     # Remove corresponding student and accepted roles,
-    # add  student and programme roles (if necessary)
+    # add student and programme roles (if necessary)
 
     programme_role_name = programme_roles_dict[programme]
     applicant_role_name = applicant_roles_dict[uni]
@@ -75,6 +134,15 @@ def process_role_assignment_applicant(programme: str, uni: str, user_roles: set,
         to_add.append(next(r for r in guild_roles if r.name == applicant_role_name))
     if not any(programme_role_name == r.name for r in user_roles):
         to_add.append(next(r for r in guild_roles if r.name == programme_role_name))
+
+
+def process_role_removal_all(user_roles: set, to_remove: list):
+    # Remove all roles
+    for role in user_roles:
+        role_name = role.name
+        if role_name in accepted_roles or role_name in applicant_roles or \
+                role_name in programme_roles or role_name in student_roles:
+            to_remove.append(role)
 
 
 def generate_components(suffix: str, emojis: dict) -> list:
@@ -124,6 +192,19 @@ def generate_components(suffix: str, emojis: dict) -> list:
                           emoji='\U0001f9ec', disabled=True),  # dna
             create_button(style=ButtonStyle.blue, label="TU Delft", emoji=emojis['tud'],
                           custom_id=prefix + 'tud-nb' + suffix),
+        ),
+    ]
+
+    return components
+
+
+def generate_components_remove_roles() -> list:
+    prefix = 'role_'
+    components = [
+        create_actionrow(
+            create_button(style=ButtonStyle.gray, label="Did you get the wrong roles?", disabled=True),
+            create_button(style=ButtonStyle.gray, label="Remove roles",
+                          custom_id=prefix + 'remove-remove-remove'),
         ),
     ]
 
