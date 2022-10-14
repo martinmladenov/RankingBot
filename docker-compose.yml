@@ -1,0 +1,33 @@
+version: "3"
+services:
+  app:
+    network_mode: host
+    container_name: bot
+    build: .
+    environment:
+      DB_USER: test
+      DB_PASSWORD: test
+      DB_NAME: test
+      SSL_MODE: false
+      DISCORD_SECRET: ${DISCORD_SECRET}
+      GUILD_IDS: ${GUILD_IDS}
+    depends_on: 
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    container_name: postgres
+    build:
+      context: .
+      dockerfile: Dockerfile.pg
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: test
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
