@@ -44,14 +44,6 @@ class RanksCommand(commands.Cog):
         if is_bot_channel:
             public = True
 
-        group_truncated = {}
-
-        if not is_bot_channel:
-            for i in range(len(grouped_ranks)):
-                group_name = grouped_ranks[i][0]
-                truncated_list = grouped_ranks[i][1][:10]
-                group_truncated[group_name] = len(grouped_ranks[i][1]) - 10
-                grouped_ranks[i] = (group_name, truncated_list)
 
         embed_dict = dict()
 
@@ -60,8 +52,6 @@ class RanksCommand(commands.Cog):
             group_name = f'**{programme.icon} {programme.uni_name}\n{programme.display_name.ljust(33, " ")}**'
             group_list = list(('`' + (' ' * (3 - len(str(x[1])))) + str(x[1]) + f' {x[0]}`')
                               for x in group[1])
-            if not is_bot_channel and group_truncated[group[0]] > 0:
-                group_list.append(f'\n**_+ {group_truncated[group[0]]} more..._**')
 
             embed_dict[group_name] = group_list
 
@@ -73,11 +63,6 @@ class RanksCommand(commands.Cog):
 
         build_embed_groups(embed, embed_dict)
 
-        if any(x > 0 for x in group_truncated.values()):
-            embed.add_field(name='**_List is truncated_**',
-                            value='To view the full list, please use this command in a bot channel, such as '
-                                  '<#556533405794172939>\n',
-                            inline=False)
 
         embed.add_field(name='To set your ranking number, use `/setrank`.',
                         value='_Please note: This command is purely for fun, the ranking numbers do not'
