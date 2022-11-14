@@ -4,7 +4,7 @@ services:
     container_name: bot
     build: .
     environment:
-      DATABASE_URL: "postgres://test:test@postgres:5432/test"
+      DATABASE_URL: "postgres://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}"
       SSL_MODE: false
       DISCORD_SECRET: ${DISCORD_SECRET}
       GUILD_IDS: ${GUILD_IDS}
@@ -18,9 +18,9 @@ services:
       context: .
       dockerfile: Dockerfile.pg
     environment:
-      POSTGRES_USER: test
-      POSTGRES_PASSWORD: test
-      POSTGRES_DB: test
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
       interval: 10s
