@@ -7,7 +7,7 @@ services:
       DATABASE_URL: "postgres://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}"
       SSL_MODE: false
       DISCORD_SECRET: ${DISCORD_SECRET}
-      GUILD_IDS: ${GUILD_IDS}
+      SERVER_ID: ${SERVER_ID}
     depends_on: 
       postgres:
         condition: service_healthy
