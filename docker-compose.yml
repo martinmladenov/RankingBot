@@ -1,13 +1,10 @@
 version: "3"
 services:
   app:
-    network_mode: host
     container_name: bot
     build: .
     environment:
-      DB_USER: test
-      DB_PASSWORD: test
-      DB_NAME: test
+      DATABASE_URL: "postgres://test:test@postgres:5432/test"
       SSL_MODE: false
       DISCORD_SECRET: ${DISCORD_SECRET}
       GUILD_IDS: ${GUILD_IDS}
@@ -24,8 +21,6 @@ services:
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
       POSTGRES_DB: test
-    ports:
-      - 5432:5432
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
       interval: 10s
