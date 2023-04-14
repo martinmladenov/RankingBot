@@ -142,7 +142,8 @@ class DMService:
         REFUSED = 3
 
     async def handle_assignment(self, member: discord.Member, programme: str):
-        if programme not in programmes_helper.programmes:
+        if programme not in programmes_helper.programmes \
+                or constants.current_year not in programmes_helper.programmes[programme].places:
             return
 
         user_id = str(member.id)

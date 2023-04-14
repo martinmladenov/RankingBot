@@ -19,7 +19,7 @@ programmes = {
         'Computer Science and Engineering',
         'TU Delft',
         '<:TUD:555817896203255824>',
-        {2020: 500, 2021: 500, 2022: 500},
+        {2020: 500, 2021: 500, 2022: 500, 2023: 550},
         (15, 6),
         '#1f77b4'
     ),
@@ -28,7 +28,7 @@ programmes = {
         'Aerospace Engineering',
         'TU Delft',
         '<:TUD:555817896203255824>',
-        {2020: 440, 2021: 440, 2022: 440},
+        {2020: 440, 2021: 440, 2022: 440, 2023: 440},
         (15, 6),
         '#c9792f'
     ),
@@ -37,7 +37,7 @@ programmes = {
         'Computer Science and Engineering',
         'TU Eindhoven',
         '<:TuE:562730919815807003>',
-        {2020: 325, 2021: 325, 2022: 325},
+        {2020: 325, 2021: 325, 2022: 325, 2023: 375},
         None,
         '#bb3e2e'
     ),
@@ -55,7 +55,7 @@ programmes = {
         'Mechanical Engineering',
         'TU Eindhoven',
         '<:TuE:562730919815807003>',
-        {2022: 360},
+        {2022: 360, 2023: 500},
         None,
         '#c9792f'
     ),
@@ -64,7 +64,7 @@ programmes = {
         'Nanobiology',
         'TU Delft',
         '<:TUD:555817896203255824>',
-        {2020: 100, 2021: 120, 2022: 120},
+        {2020: 100, 2021: 120, 2022: 120, 2023: 120},
         (15, 6),
         '#b03c56'
     ),
@@ -85,4 +85,4 @@ def get_programme_choices():
 
 
 def get_year_choices():
-    return list(create_choice(name=str(year), value=year) for year in [2022, 2021, 2020])
+    return list(create_choice(name=str(year), value=year) for year in [2023, 2022, 2021, 2020])
