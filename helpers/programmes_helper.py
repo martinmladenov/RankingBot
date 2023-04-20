@@ -68,6 +68,15 @@ programmes = {
         (15, 6),
         '#b03c56'
     ),
+    'tud-bk': Programme(
+        'tud-bk',
+        'Bouwkunde (Architecture)',
+        'TU Delft',
+        '<:TUD:555817896203255824>',
+        {2023: 450},
+        (15, 6),
+        '#888a85'
+    ),
 }
 
 
