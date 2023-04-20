@@ -38,7 +38,7 @@ programmes = {
         'TU Eindhoven',
         '<:TuE:562730919815807003>',
         {2020: 325, 2021: 325, 2022: 325, 2023: 375},
-        None,
+        (1, 6),
         '#bb3e2e'
     ),
     'utwente-cse': Programme(
@@ -56,7 +56,7 @@ programmes = {
         'TU Eindhoven',
         '<:TuE:562730919815807003>',
         {2022: 360, 2023: 500},
-        None,
+        (1, 6),
         '#c9792f'
     ),
     'tud-nb': Programme(
@@ -67,6 +67,15 @@ programmes = {
         {2020: 100, 2021: 120, 2022: 120, 2023: 120},
         (15, 6),
         '#b03c56'
+    ),
+    'tud-bk': Programme(
+        'tud-bk',
+        'Bouwkunde (Architecture)',
+        'TU Delft',
+        '<:TUD:555817896203255824>',
+        {2023: 450},
+        (15, 6),
+        '#888a85'
     ),
 }
 
