@@ -38,7 +38,7 @@ programmes = {
         'TU Eindhoven',
         '<:TuE:562730919815807003>',
         {2020: 325, 2021: 325, 2022: 325, 2023: 375},
-        None,
+        (1, 6),
         '#bb3e2e'
     ),
     'utwente-cse': Programme(
@@ -56,7 +56,7 @@ programmes = {
         'TU Eindhoven',
         '<:TuE:562730919815807003>',
         {2022: 360, 2023: 500},
-        None,
+        (1, 6),
         '#c9792f'
     ),
     'tud-nb': Programme(
