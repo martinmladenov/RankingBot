@@ -291,7 +291,8 @@ class DMService:
                     await self.reschedule_reminder(sched_curr_reminder, timedelta(days=3), row_id)
                     continue
 
-                new_time = self.reminder_build_new_datetime(sched_curr_reminder, timedelta(days=7))
+                days = 7 * (1 if num_reminders <= 2 else num_reminders)
+                new_time = self.reminder_build_new_datetime(sched_curr_reminder, timedelta(days=days))
 
                 await self.db_conn.execute('UPDATE dms SET next_reminder = $1, num_reminders = $2, reminder_sent = $3'
                                            'WHERE id = $4',
@@ -301,7 +302,7 @@ class DMService:
 
             except Exception as e:
                 print(f'an error occurred while sending reminder message to {user_id}: {str(e)}')
-                await self.reschedule_reminder(timedelta(days=3), row_id)
+                await self.reschedule_reminder(sched_curr_reminder, timedelta(days=3), row_id)
 
     def reminder_build_new_datetime(self, sched_curr_reminder: datetime, delta: timedelta) -> datetime:
         new_date_curr_time = datetime.utcnow() + delta
