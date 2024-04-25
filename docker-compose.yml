@@ -8,9 +8,10 @@ services:
       SSL_MODE: false
       DISCORD_SECRET: ${DISCORD_SECRET}
       SERVER_ID: ${SERVER_ID}
-    depends_on: 
+    depends_on:
       postgres:
         condition: service_healthy
+    restart: unless-stopped
 
   postgres:
     container_name: postgres
@@ -26,3 +27,4 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
