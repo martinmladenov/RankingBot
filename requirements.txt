@@ -3,4 +3,4 @@ asyncpg==0.28.0
 matplotlib==3.8.4
 discord-py-slash-command==3.0.1
 python-dotenv==1.0.1
-pillow==10.3.0
+pillow==12.2.0
