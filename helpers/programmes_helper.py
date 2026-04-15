@@ -16,10 +16,28 @@ class Programme:
 programmes = {
     'tud-cse': Programme(
         'tud-cse',
-        'Computer Science and Engineering',
+        'Computer Science and Engineering (Pre-2026)',
         'TU Delft',
         '<:TUD:555817896203255824>',
         {2020: 500, 2021: 500, 2022: 500, 2023: 550, 2024: 550, 2025: 550},
+        (15, 6),
+        '#1f77b4'
+    ),
+    'tud-cse-en': Programme(
+        'tud-cse-en',
+        'Computer Science and Engineering (English Track)',
+        'TU Delft',
+        '<:TUD:555817896203255824>',
+        {2026: 345},
+        (15, 6),
+        '#1f77b4'
+    ),
+    'tud-cse-bi': Programme(
+        'tud-cse-bi',
+        'Computer Science and Engineering (Bilingual Track)',
+        'TU Delft',
+        '<:TUD:555817896203255824>',
+        {2026: 245},
         (15, 6),
         '#1f77b4'
     ),
@@ -28,7 +46,7 @@ programmes = {
         'Aerospace Engineering',
         'TU Delft',
         '<:TUD:555817896203255824>',
-        {2020: 440, 2021: 440, 2022: 440, 2023: 440, 2024: 440, 2025: 440},
+        {2020: 440, 2021: 440, 2022: 440, 2023: 440, 2024: 440, 2025: 440, 2026: 440},
         (15, 6),
         '#c9792f'
     ),
@@ -37,7 +55,7 @@ programmes = {
         'Computer Science and Engineering',
         'TU Eindhoven',
         '<:TuE:562730919815807003>',
-        {2020: 325, 2021: 325, 2022: 325, 2023: 375, 2024: 375, 2025: 375},
+        {2020: 325, 2021: 325, 2022: 325, 2023: 375, 2024: 375, 2025: 375, 2026: 375},
         (30, 6),
         '#bb3e2e'
     ),
@@ -55,7 +73,7 @@ programmes = {
         'Mechanical Engineering',
         'TU Eindhoven',
         '<:TuE:562730919815807003>',
-        {2022: 360, 2023: 500, 2024: 500, 2025: 500},
+        {2022: 360, 2023: 500, 2024: 500, 2025: 500, 2026: 500},
         (30, 6),
         '#c9792f'
     ),
@@ -64,7 +82,7 @@ programmes = {
         'Nanobiology',
         'TU Delft',
         '<:TUD:555817896203255824>',
-        {2020: 100, 2021: 120, 2022: 120, 2023: 120, 2024: 150, 2025: 150},
+        {2020: 100, 2021: 120, 2022: 120, 2023: 120, 2024: 150, 2025: 150, 2026: 150},
         (15, 6),
         '#b03c56'
     ),
@@ -73,7 +91,7 @@ programmes = {
         'Bouwkunde (Architecture)',
         'TU Delft',
         '<:TUD:555817896203255824>',
-        {2023: 450, 2024: 450, 2025: 450},
+        {2023: 450, 2024: 450, 2025: 450, 2026: 450},
         (15, 6),
         '#888a85'
     ),
