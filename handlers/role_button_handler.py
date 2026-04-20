@@ -10,7 +10,11 @@ class RoleButtonHandler(commands.Cog):
 
     @commands.Cog.listener()
     async def on_component(self, ctx: ComponentContext):
-        component_elements = ctx.component_id.split('_')
+        for i in ctx.data['values']:
+            await self.handle_component(i, ctx)
+
+    async def handle_component(self, ctx_id, ctx: ComponentContext):
+        component_elements = ctx_id.split('_')
         if len(component_elements) == 2:
             component_type, component_data = component_elements
         else:
